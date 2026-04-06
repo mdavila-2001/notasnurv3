@@ -1,0 +1,11 @@
+<button
+  class="btn"
+  [ngClass]="'btn btn-' + variant()"
+  type="button"
+  title="Boton"
+  aria-label="Boton"
+  [disabled]="disabled()"
+  (click)="handleClick($event)"
+>
+    <ng-content></ng-content>
+</button>

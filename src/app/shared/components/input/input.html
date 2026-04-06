@@ -1,0 +1,36 @@
+<div class="input-group" [class.has-error]="errorMessage()">
+    @if (label()) {
+    <label class="input-label">{{ label() }}</label>
+    }
+
+    @if (type() === 'select') {
+    <select
+        class="input-control"
+        title="{{ label() || 'Selector' }}"
+        aria-label="{{ label() || placeholder() || 'Seleccione una opción' }}"
+        [disabled]="disabled()"
+        [value]="value()"
+        (change)="onChange($event)">
+        <option value="" disabled>{{ placeholder() || 'Seleccione una opción' }}</option>
+        
+        @for (opt of options(); track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+        }
+    </select>
+    } @else {
+    <input
+        class="input-control"
+        [type]="type()"
+        placeholder="{{ placeholder() || '' }}"
+        title="{{ label() || 'Campo de entrada' }}"
+        aria-label="{{ label() || placeholder() || 'Campo de entrada' }}"
+        [value]="value()"
+        [disabled]="disabled()"
+        (input)="onChange($event)"
+    />
+    }
+
+    @if (errorMessage()) {
+    <span class="error-text">{{ errorMessage() }}</span>
+    }
+</div>

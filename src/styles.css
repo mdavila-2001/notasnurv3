@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+  --primary-color: #1976D3;
+  --secondary-color: #10455B;
+  --tertiary-color: #E4A530;
+  --neutral-color: #F8F9FA;
+
+  --font-family: 'Inter', sans-serif;
+
+  --border-radius: 8px;
+  --spacing-sm: 8px;
+  --spacing-normal: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--neutral-color);
+  color: var(--secondary-color);
+  margin: 0;
+  padding: 0;
+}
