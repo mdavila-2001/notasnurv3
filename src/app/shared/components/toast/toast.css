@@ -44,25 +44,27 @@
 }
 
 .toast-info {
-  background-color: var(--primary-color);
+  background-color: var(--info);
   color: #FFFFFF;
+  border-left: 4px solid var(--info-border);
 }
 
 .toast-success {
-  background-color: #E8F5E9;
-  color: var(--secondary-color);
-  border-left: 4px solid var(--primary-color);
+  background-color: var(--success);
+  color: #FFFFFF;
+  border-left: 4px solid var(--success-border);
 }
 
 .toast-warning {
-  background-color: var(--tertiary-color);
-  color: var(--secondary-color);
+  background-color: var(--warning);
+  color: #FFFFFF;
+  border-left: 4px solid var(--warning-border);
 }
 
 .toast-error {
-  background-color: #FEECEB;
-  color: #D32F2F;
-  border-left: 4px solid #D32F2F;
+  background-color: var(--error);
+  color: #FFFFFF;
+  border-left: 4px solid var(--error-border);
 }
 
 @keyframes slideIn {

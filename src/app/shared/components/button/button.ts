@@ -11,5 +11,14 @@ import { CommonModule } from '@angular/common';
 export class Button {
   variant = input<'primary' | 'secondary' | 'tertiary'>('primary');
   disabled = input<boolean>(false);
+  type = input<'button' | 'submit' | 'reset'>('button');
   clicked = output<MouseEvent>();
+
+  handleClick(event: MouseEvent) {
+    if (this.disabled()) {
+      return;
+    }
+
+    this.clicked.emit(event);
+  }
 }

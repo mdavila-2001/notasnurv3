@@ -1,0 +1,30 @@
+<output
+	class="loader"
+	[class.loader--centered]="centered()"
+	aria-live="polite"
+	[attr.aria-label]="label()">
+	@if (variant() === 'spinner') {
+		<span
+			class="loader-spinner"
+			[class.loader-spinner--sm]="size() === 'sm'"
+			[class.loader-spinner--md]="size() === 'md'"
+			[class.loader-spinner--lg]="size() === 'lg'">
+		</span>
+	} @else {
+		<span
+			class="loader-dots"
+			[class.loader-dots--sm]="size() === 'sm'"
+			[class.loader-dots--md]="size() === 'md'"
+			[class.loader-dots--lg]="size() === 'lg'">
+			<span class="loader-dot"></span>
+			<span class="loader-dot"></span>
+			<span class="loader-dot"></span>
+		</span>
+	}
+
+	@if (showLabel()) {
+		<span class="loader-text">{{ label() }}</span>
+	} @else {
+		<span class="sr-only">{{ label() }}</span>
+	}
+</output>

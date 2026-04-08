@@ -1,0 +1,23 @@
+@if (isOpen()) {
+    <div class="modal-overlay" (click)="closeOnBackdrop($event)">
+    
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        
+        <div class="modal-header">
+        <h3 id="modal-title" class="modal-title">{{ title() }}</h3>
+        <button class="modal-close" (click)="onClose()" aria-label="Cerrar modal">
+            &times;
+        </button>
+        </div>
+        
+        <div class="modal-body">
+        <ng-content></ng-content>
+        </div>
+        
+        <div class="modal-footer">
+        <ng-content select="[modal-actions]"></ng-content>
+        </div>
+        
+    </div>
+    </div>
+}

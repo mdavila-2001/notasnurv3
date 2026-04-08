@@ -1,0 +1,87 @@
+<main class="login-layout">
+  
+  <section class="visual-anchor">
+    <div class="image-overlay">
+      <img src="https://www.nur.edu/wp-content/uploads/2020/05/EDIFICIO.jpg" alt="University Library" class="bg-image"/>
+    </div>
+    <div class="gradient-overlay"></div>
+    
+    <div class="visual-content">
+      <div class="brand-header">
+        <div class="logo-box">
+          <span class="material-symbols-outlined">school</span>
+        </div>
+        <span class="portal-text">Universidad NUR</span>
+      </div>
+      
+      <div class="hero-text">
+        <h1>Elevando el estándar de la <strong>excelencia académica</strong></h1>
+        <p>
+          Bienvenido al núcleo digital de NUR. Acceda a sus recursos educativos, gestión de cursos y herramientas administrativas en un solo lugar.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="interaction-area">
+    <div class="form-container">
+      
+      <div class="form-header">
+        <h2>Notas NUR</h2>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-banner">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        
+        <app-input
+          type="text"
+          label="Correo Institucional o CI"
+          placeholder="usuario@nur.edu o 88997766"
+          [value]="idControl?.value || ''"
+          (valueChange)="idControl?.setValue($event.toString())"
+          [disabled]="isLoading()">
+        </app-input>
+
+        <app-input
+          type="password"
+          label="Contraseña"
+          placeholder="••••••••"
+          [value]="passwordControl?.value || ''"
+          (valueChange)="passwordControl?.setValue($event.toString())"
+          [disabled]="isLoading()">
+        </app-input>
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" formControlName="rememberMe" [disabled]="isLoading()"/>
+            <span>Recordarme</span>
+          </label>
+        </div>
+
+        <div class="submit-container">
+          <app-button 
+            variant="primary" 
+            [disabled]="isLoading() || loginForm.invalid"
+            type="submit">
+            @if (isLoading()) {
+              <span class="button-content">
+                <span class="material-symbols-outlined spin-icon">sync</span>
+                Autenticando...
+              </span>
+            } @else {
+              <span class="button-content">
+                Iniciar Sesión <span class="material-symbols-outlined">arrow_forward</span>
+              </span>
+              }
+          </app-button>
+        </div>
+      </form>
+
+    </div>
+  </section>
+</main>

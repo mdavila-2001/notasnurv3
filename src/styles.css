@@ -7,11 +7,23 @@
   --tertiary-color: #E4A530;
   --neutral-color: #F8F9FA;
 
+  --info: #2196F3;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --error: #F44336;
+
+  --success-border: #317433;
+  --info-border: #1569AD;
+  --warning-border: #AC6801;
+  --error-border: #D32F2F;
+
   --font-family: 'Inter', sans-serif;
 
   --border-radius: 8px;
+  --spacing-small: 4px;
   --spacing-sm: 8px;
   --spacing-normal: 16px;
+  --spacing-lg: 24px;
 }
 
 body {

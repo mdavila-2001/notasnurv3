@@ -38,7 +38,8 @@
 }
 
 .has-error .input-control {
-  border-color: #d32f2f;
+  border-color: var(--error-border);
+  background-color: #fff8f8;
 }
 
 .has-error .input-control:focus {
@@ -46,8 +47,37 @@
 }
 
 .error-text {
-  color: #d32f2f;
+  color: var(--error-border);
   font-size: 0.75rem;
   font-weight: 600;
   margin-top: 2px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: 100%;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
+}
+
+.input-wrapper:has(.password-toggle) .input-control {
+  padding-right: 40px;
 }
