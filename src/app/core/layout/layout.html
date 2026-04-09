@@ -1,0 +1,80 @@
+<div class="layout-wrapper">
+  
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="brand-title">Notas Nur 3.0</h1>
+      <p class="brand-subtitle">{{ getRoleDisplayName() }}</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of menuItems(); track item.path) {
+        <a [routerLink]="item.path" 
+           routerLinkActive="active-nav-link" 
+           class="nav-link">
+          <span class="material-symbols-outlined nav-icon">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="profile-card">
+        <div class="avatar-placeholder">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <div class="profile-info">
+          <p class="profile-name">{{ userName() }}</p>
+          <p class="profile-role">{{ userRoleDisplay() }}</p>
+        </div>
+      </div>
+      
+      <button class="logout-btn sidebar-logout" (click)="openLogoutModal()">
+        <span class="material-symbols-outlined">logout</span>
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="welcome-text">
+        <span class="welcome-greeting">Bienvenido de nuevo,</span>
+        <h2 class="welcome-name">{{ userName() }}</h2>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" aria-label="Notificaciones">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="badge-dot"></span>
+      </button>
+      
+      <button class="icon-btn" aria-label="Ayuda">
+        <span class="material-symbols-outlined">help_outline</span>
+      </button>
+      
+      <div class="divider"></div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Modal de Cierre de Sesión -->
+  <app-modal 
+    [isOpen]="isLogoutModalOpen()" 
+    title="Cerrar Sesión" 
+    (closed)="closeLogoutModal()">
+    
+    <p style="margin: 0; color: var(--text-secondary); line-height: 1.5;">
+      ¿Estás seguro que deseas cerrar sesión? Tendrás que volver a ingresar tus credenciales para acceder al portal.
+    </p>
+
+    <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+      <app-button variant="secondary" (clicked)="closeLogoutModal()">Cancelar</app-button>
+      <app-button variant="primary" (clicked)="confirmLogout()">Sí, cerrar sesión</app-button>
+    </div>
+  </app-modal>
+
+</div>

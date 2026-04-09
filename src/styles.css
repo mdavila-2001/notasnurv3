@@ -1,29 +1,60 @@
-/* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 :root {
-  --primary-color: #1976D3;
-  --secondary-color: #10455B;
+  box-sizing: border-box;
+
+  --brand-navy: #002131;
+  --brand-cyan: #00AEEF;
+  --brand-cyan-soft: #82cfff;
+  --brand-midnight: #00374f;
+
+  --primary-color: var(--brand-cyan);
+  --secondary-color: var(--brand-navy);
   --tertiary-color: #E4A530;
-  --neutral-color: #F8F9FA;
+  --neutral-color: #f8fafc;
 
-  --info: #2196F3;
-  --success: #4CAF50;
-  --warning: #FF9800;
-  --error: #F44336;
+  --bg-sidebar: var(--brand-navy);
+  --bg-sidebar-active: var(--brand-midnight);
+  --bg-sidebar-hover: rgba(0, 55, 79, 0.5);
+  --bg-topbar: rgba(255, 255, 255, 0.7);
+  --bg-profile-card: rgba(0, 55, 79, 0.3);
 
-  --success-border: #317433;
-  --info-border: #1569AD;
-  --warning-border: #AC6801;
-  --error-border: #D32F2F;
+  --info: #0ea5e9;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --success-light: #dcfce7;
+  --warning-light: #fef3c7;
+  --info-light: #e0f2fe;
 
-  --font-family: 'Inter', sans-serif;
+  --border-glass: rgba(255, 255, 255, 0.05);
+  --border-light: rgba(195, 198, 209, 0.3);
 
-  --border-radius: 8px;
+  --text-on-dark: #ffffff;
+  --text-muted-dark: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-accent: var(--brand-cyan);
+  --text-error: #b91c1c;
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
   --spacing-small: 4px;
   --spacing-sm: 8px;
   --spacing-normal: 16px;
   --spacing-lg: 24px;
+
+  --border-radius: 8px; 
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --border-radius-sm: 4px;
+  --error-border: var(--error);
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 33, 49, 0.06);
+  --shadow-sidebar: 0 20px 25px -5px rgba(0, 33, 49, 0.2);
 }
 
 body {
@@ -32,4 +63,46 @@ body {
   color: var(--secondary-color);
   margin: 0;
   padding: 0;
+}
+
+.page-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.page-content {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

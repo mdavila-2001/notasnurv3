@@ -8,10 +8,7 @@
     
     <div class="visual-content">
       <div class="brand-header">
-        <div class="logo-box">
-          <span class="material-symbols-outlined">school</span>
-        </div>
-        <span class="portal-text">Universidad NUR</span>
+        <img src="/logo.png" alt="Universidad NUR Logo" class="brand-logo" />
       </div>
       
       <div class="hero-text">
@@ -41,7 +38,7 @@
         <app-input
           type="text"
           label="Correo Institucional o CI"
-          placeholder="usuario@nur.edu o 88997766"
+          placeholder="Inserte su credencial de acceso"
           [value]="idControl?.value || ''"
           (valueChange)="idControl?.setValue($event.toString())"
           [disabled]="isLoading()">
@@ -56,12 +53,12 @@
           [disabled]="isLoading()">
         </app-input>
 
-        <div class="form-options">
+        <!-- <div class="form-options">
           <label class="checkbox-container">
             <input type="checkbox" formControlName="rememberMe" [disabled]="isLoading()"/>
             <span>Recordarme</span>
           </label>
-        </div>
+        </div> -->
 
         <div class="submit-container">
           <app-button 
