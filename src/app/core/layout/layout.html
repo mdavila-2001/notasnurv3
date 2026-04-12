@@ -8,9 +8,9 @@
 
     <nav class="sidebar-nav">
       @for (item of menuItems(); track item.path) {
-        <a [routerLink]="item.path" 
-           routerLinkActive="active-nav-link" 
-           class="nav-link">
+        <a [routerLink]="[item.path]" 
+          routerLinkActive="active-nav-link" 
+          class="nav-link">
           <span class="material-symbols-outlined nav-icon">{{ item.icon }}</span>
           {{ item.label }}
         </a>
@@ -61,7 +61,6 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Modal de Cierre de Sesión -->
   <app-modal 
     [isOpen]="isLogoutModalOpen()" 
     title="Cerrar Sesión" 
