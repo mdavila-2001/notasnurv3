@@ -7,10 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class User {
   private http = inject(HttpClient);
-  
-  private apiUrl = 'http://localhost:8080/api/users'; 
 
-  
+  private apiUrl = 'http://localhost:8081/api/users';
+
   getUsersByRole(role: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/role/${role}`);
   }

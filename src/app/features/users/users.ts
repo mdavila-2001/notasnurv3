@@ -99,7 +99,8 @@ export class Users implements OnInit {
       },
       error: (err) => {
         console.error("Error en la operación:", err);
-        alert("Error: No se pudo procesar la solicitud. Verifica que el CI o Email no estén duplicados.");
+        const backendMessage = err?.error?.message;
+        alert(backendMessage ? `Error: ${backendMessage}` : "Error: No se pudo procesar la solicitud. Verifica conexión con backend y datos enviados.");
       }
     });
   }

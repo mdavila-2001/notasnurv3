@@ -1,0 +1,24 @@
+<form class="management-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <app-input
+    type="number"
+    label="Anio"
+    placeholder="Ej: 2026"
+    [value]="yearControl.value ?? ''"
+    [required]="true"
+    [min]="minYear"
+    [max]="maxYear"
+    [showErrors]="yearControl.touched"
+    [errorMessage]="yearErrorMessage"
+    (valueChange)="onYearChange($event)">
+  </app-input>
+
+  <div class="form-actions">
+    <app-button variant="secondary" type="button" (clicked)="onCancel()">
+      Cancelar
+    </app-button>
+
+    <app-button variant="primary" type="submit">
+      Guardar
+    </app-button>
+  </div>
+</form>

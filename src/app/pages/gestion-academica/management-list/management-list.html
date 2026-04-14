@@ -1,0 +1,50 @@
+<section class="management-list-page">
+  <header class="page-header">
+    <h1>Gestiones Academicas</h1>
+    <app-button variant="primary" (clicked)="openNewModal()">
+      Nueva Gestion
+    </app-button>
+  </header>
+
+  @if (isLoading()) {
+    <p class="loading">Cargando gestiones...</p>
+  }
+
+  <app-table
+    [columns]="columns"
+    [data]="tableRows()"
+    [showActions]="true"
+    (editClicked)="openEditModal($event)"
+    (deleteClicked)="askDelete($event)">
+  </app-table>
+</section>
+
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selectedManagement() ? 'Editar Gestion' : 'Nueva Gestion'"
+  (closed)="closeFormModal()">
+
+  <app-management-form
+    [management]="selectedManagement()"
+    [existingYears]="existingYears"
+    (save)="onSave($event)"
+    (cancel)="closeFormModal()">
+  </app-management-form>
+</app-modal>
+
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar eliminacion"
+  (closed)="cancelDelete()">
+
+  <p>Esta accion eliminara la gestion seleccionada. ¿Deseas continuar?</p>
+
+  <div modal-actions class="actions-row">
+    <app-button variant="secondary" (clicked)="cancelDelete()">
+      Cancelar
+    </app-button>
+    <app-button variant="tertiary" (clicked)="confirmDelete()">
+      Eliminar
+    </app-button>
+  </div>
+</app-modal>
