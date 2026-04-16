@@ -1,0 +1,226 @@
+<div class="users-container">
+
+  <header class="page-header">
+    <div class="header-title-row">
+      <h1 class="page-title">Gestión de Usuarios</h1>
+      <div class="header-actions">
+        <button class="btn-carga-masiva">
+          <span class="material-symbols-outlined btn-icon-left">description</span>
+          Carga Masiva
+        </button>
+        <button class="btn-registrar" (click)="openRegisterModal()">
+          <span class="material-symbols-outlined btn-icon-left">add</span>
+          Registrar Nuevo {{ selectedTab() === 'Docente' ? 'Docente' : 'Estudiante' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="tabs-row">
+      <button class="tab-btn" 
+              [class.tab-active]="selectedTab() === 'Docente'" 
+              (click)="setTab('Docente')">
+        Docentes
+      </button>
+      <button class="tab-btn" 
+              [class.tab-active]="selectedTab() === 'Estudiante'" 
+              (click)="setTab('Estudiante')">
+        Estudiantes
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-dark">
+      <div class="stat-body">
+        <p class="stat-label">TOTAL {{ selectedTab() | uppercase }}S</p>
+        <span class="stat-number">{{ totalUsersCount() }}</span>
+      </div>
+      <span class="material-symbols-outlined stat-watermark">group</span>
+    </div>
+
+    <div class="stat-card stat-white">
+      <div class="stat-body">
+        <p class="stat-label stat-label-gray">ACTIVOS</p>
+        <div class="stat-number-row">
+          <span class="stat-number stat-number-dark">{{ activeUsersCount() }}</span>
+          <span class="stat-trend">↑4%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card stat-gradient">
+      <div class="stat-body">
+        <p class="stat-eval-label">Próxima Evaluación de Desempeño</p>
+        <span class="stat-eval-date">Lunes, 15 Octubre</span>
+        <p class="stat-eval-sub">85% de las plazas han sido notificadas.</p>
+      </div>
+      <div class="stat-chevron">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-panel">
+    <div class="filters-row">
+      <div class="filter-col">
+        <label class="filter-label-text">BUSCAR POR NOMBRE O CORREO</label>
+        <div class="select-wrap">
+          <input type="text" 
+                 class="custom-select" 
+                 placeholder="Ej: Ricardo Almagro..." 
+                 (input)="onSearch($event)">
+        </div>
+      </div>
+
+      <div class="filter-col">
+        <label class="filter-label-text">FILTRAR POR CARRERA / FACULTAD</label>
+        <div class="select-wrap">
+          <select class="custom-select" (change)="onFacultadChange($event)">
+            <option value="Todas las Facultades">Todas las Facultades</option>
+            <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+            <option value="Ciencias Sociales">Ciencias Sociales</option>
+            <option value="Economía">Economía</option>
+          </select>
+          <span class="material-symbols-outlined select-chevron">expand_more</span>
+        </div>
+      </div>
+
+      <div class="filter-icons-group">
+        <button class="filter-icon-btn"><span class="material-symbols-outlined">tune</span></button>
+        <button class="filter-icon-btn filter-icon-active"><span class="material-symbols-outlined">grid_view</span></button>
+      </div>
+    </div>
+
+    <div class="docentes-table-wrap">
+      <table class="docentes-table">
+        <thead>
+          <tr>
+            <th class="th-identity">IDENTIDAD DEL USUARIO</th>
+            <th class="th-contact">CONTACTO</th>
+            <th class="th-facultad">FACULTAD / CARRERA</th>
+            <th class="th-estado">ESTADO</th>
+            <th class="th-acciones">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of filteredUsers(); track user.id) {
+            <tr class="docente-row" [class.row-inactive]="user.status === 'INACTIVE'">
+              <td class="td-identity">
+                <div class="avatar-wrap" [ngClass]="{
+                  'avatar-teal': user.status === 'ACTIVE' && (user.facultad === 'Ingeniería de Sistemas' || !user.facultad),
+                  'avatar-slate': user.status === 'ACTIVE' && user.facultad !== 'Ingeniería de Sistemas',
+                  'avatar-inactive': user.status === 'INACTIVE'
+                }">
+                  <span class="material-symbols-outlined avatar-icon">person</span>
+                </div>
+                <div class="docente-info">
+                  <span class="docente-name" [class.name-inactive]="user.status === 'INACTIVE'">
+                    {{ user.name }} {{ user.lastName }}
+                  </span>
+                  <span class="docente-id">ID: {{ user.id.substring(0,8) }}...</span>
+                </div>
+              </td>
+              
+              <td class="td-contact" [class.td-contact-inactive]="user.status === 'INACTIVE'">
+                <div class="contact-line">
+                  <span class="material-symbols-outlined contact-icon">mail</span>
+                  {{ user.email }}
+                </div>
+                <div class="contact-line contact-phone">
+                  <span class="material-symbols-outlined contact-icon">badge</span>
+                  {{ user.ci || 'Sin CI registrado' }}
+                </div>
+              </td>
+
+              <td class="td-facultad">
+                <span class="badge" [ngClass]="getBadgeClass(user.facultad)">
+                  {{ user.facultad || 'Ingeniería de Sistemas' }}
+                </span>
+              </td>
+
+              <td class="td-estado">
+                <div class="estado-wrap">
+                  <label class="toggle-switch">
+                    <input type="checkbox" 
+                           [checked]="user.status === 'ACTIVE'" 
+                           (change)="toggleEstado(user)">
+                    <span class="toggle-track"></span>
+                  </label>
+                  <span class="estado-text">{{ user.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</span>
+                </div>
+              </td>
+
+              <td class="td-acciones">
+                <button class="action-icon-btn" title="Historial"><span class="material-symbols-outlined">history</span></button>
+                <button class="action-icon-btn" title="Editar" (click)="onEdit(user)"><span class="material-symbols-outlined">edit</span></button>
+                <button class="action-icon-btn" title="Eliminar" (click)="onDelete(user)"><span class="material-symbols-outlined">delete</span></button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                No se encontraron {{ selectedTab() }}s registrados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-row">
+      <span class="pagination-info">
+        Mostrando <strong>{{ filteredUsers().length }}</strong> registros de <strong>{{ totalUsersCount() }}</strong> encontrados.
+      </span>
+    </div>
+  </div>
+
+  <app-modal 
+    [isOpen]="isRegisterModalOpen()" 
+    [title]="newUser.id ? 'Editar Perfil de Usuario' : 'Registrar Nuevo ' + selectedTab()" 
+    (closed)="closeRegisterModal()">
+    
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="label-text">NOMBRE(S)</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.name" placeholder="Ej: Juan">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">APELLIDOS</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" placeholder="Ej: Perez">
+      </div>
+
+      <div class="form-group full-width">
+        <label class="label-text">CORREO INSTITUCIONAL</label>
+        <input type="email" class="custom-select" [(ngModel)]="newUser.email" placeholder="usuario@nur.edu.bo">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">CI / DOCUMENTO</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.ci" placeholder="1234567">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">CONTRASEÑA</label>
+        <input type="password" class="custom-select" [(ngModel)]="newUser.password" placeholder="Mínimo 8 caracteres">
+      </div>
+
+      <div class="form-group full-width">
+        <label class="label-text">FACULTAD / CARRERA</label>
+        <select class="custom-select" [(ngModel)]="newUser.facultad">
+          <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+          <option value="Ciencias Sociales">Ciencias Sociales</option>
+          <option value="Economía">Economía</option>
+        </select>
+      </div>
+    </div>
+
+    <div modal-actions class="modal-actions">
+      <app-button variant="secondary" (clicked)="closeRegisterModal()">Cancelar</app-button>
+      <app-button variant="primary" (clicked)="saveUser()">
+        <span class="material-symbols-outlined btn-icon-left">save</span>
+        {{ newUser.id ? 'Actualizar Cambios' : 'Guardar en Base de Datos' }}
+      </app-button>
+    </div>
+  </app-modal>
+</div>

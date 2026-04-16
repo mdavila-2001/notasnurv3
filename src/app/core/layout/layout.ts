@@ -50,13 +50,16 @@ export class Layout implements OnInit {
       this.menuItems.set([
         { path: '/admin/dashboard', icon: 'dashboard', label: 'Gestión Académica' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
-        { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
+        
+        { path: '/admin/usuarios', icon: 'manage_accounts', label: 'Directorio Usuarios' },
+        
         { path: '/admin/enrollments', icon: 'school', label:'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
     } else if (role === 'TEACHER') {
       this.menuItems.set([
+        { path: '/teacher/dashboard', icon: 'dashboard', label: 'Inicio' }, // Agregado por seguridad
         { path: '/teacher/subjects', icon: 'class', label: 'Mis Materias' },
         { path: '/teacher/attendance', icon: 'assignment_late', label: 'Reportes de Faltas' },
         { path: '/teacher/actas', icon: 'task_alt', label: 'Cierre de Actas' },
@@ -72,7 +75,6 @@ export class Layout implements OnInit {
       ]);
     }
   }
-
   getRoleDisplayName(): string {
     const roleMap: Record<string, string> = {
       'ADMIN': 'Portal Administrador',
