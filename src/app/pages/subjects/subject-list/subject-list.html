@@ -1,0 +1,44 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-title-row">
+      <h1 class="page-title">Catálogo de Materias</h1>
+      <app-button variant="primary" (clicked)="openFormModal()">
+        <span class="material-symbols-outlined btn-icon-left">add</span>
+        Nueva Materia
+      </app-button>
+    </div>
+    <p class="page-subtitle">Gestiona las materias, semestres y docentes asignados en la plataforma.</p>
+  </header>
+
+  <div class="card-panel">
+    <app-table
+      [columns]="columns"
+      [data]="tableRows()"
+      [showActions]="true"
+      (editClicked)="openFormModal($event)"
+      (deleteClicked)="onDelete($event)">
+    </app-table>
+  </div>
+</div>
+
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selectedSubject() ? 'Editar Materia' : 'Nueva Materia'"
+  (closed)="closeFormModal()">
+  <app-subject-form
+    [subject]="selectedSubject()"
+    [semesterOptions]="semesterOptions()"
+    [teacherOptions]="teacherOptions()"
+    (save)="onSave($event)"
+    (cancel)="closeFormModal()">
+  </app-subject-form>
+</app-modal>
+
+@if (showToast()) {
+  <app-toast
+    [type]="toastType()"
+    [message]="toastMessage()"
+    (closed)="onToastClosed()">
+  </app-toast>
+}
+

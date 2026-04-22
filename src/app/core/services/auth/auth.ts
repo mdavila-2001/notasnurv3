@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable, tap, finalize } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 
 export interface LoginRequest {
@@ -25,9 +25,9 @@ export interface ApiResponse<T> {
   providedIn: 'root',
 })
 export class Auth {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  private apiUrl = environment.apiBaseUrl + '/auth';
+  private readonly apiUrl = environment.apiBaseUrl + '/auth';
 
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, credentials)

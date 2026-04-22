@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   ChangeDetectionStrategy,
-  ViewEncapsulation,
   inject,
   signal,
   computed
@@ -11,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
-import { User as UserService } from '../../core/services/user';
+import { User as UserService } from '../../core/services/user/user';
 
 @Component({
   selector: 'app-users',
@@ -19,11 +18,10 @@ import { User as UserService } from '../../core/services/user';
   imports: [CommonModule, FormsModule, Button, Modal],
   templateUrl: './users.html',
   styleUrl: './users.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.Emulated
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Users implements OnInit {
-  private userService = inject(UserService);
+  private readonly userService = inject(UserService);
   allUsers = signal<any[]>([]);
   selectedTab = signal<'Docente' | 'Estudiante'>('Docente');
   searchQuery = signal('');

@@ -1,0 +1,17 @@
+.form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-icon-left {
+  margin-right: 0.5rem;
+  font-size: 20px;
+}

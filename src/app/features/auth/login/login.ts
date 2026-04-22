@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth } from '../../../core/services/auth';
+import { Auth } from '../../../core/services/auth/auth';
 import { Input } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
 
@@ -72,7 +72,7 @@ export class Login {
         if (err.status === 400) {
           this.errorMessage.set(
             err.error?.message ||
-              'Credenciales inválidas. Si eres estudiante usa CI; si eres docente/administrativo usa correo institucional.'
+            'Credenciales inválidas. Si eres estudiante usa CI; si eres docente/administrativo usa correo institucional.'
           );
           return;
         }

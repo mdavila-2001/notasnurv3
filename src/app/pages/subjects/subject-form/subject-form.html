@@ -1,0 +1,66 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-layout">
+  <app-input
+    label="Código de Materia"
+    placeholder="Ej: SIS-101"
+    [value]="codeControl.value"
+    (valueChange)="onCodeChange($event)"
+    [required]="true"
+    [showErrors]="codeControl.invalid && (codeControl.dirty || codeControl.touched)"
+    [errorMessage]="codeControl.hasError('required') && (codeControl.dirty || codeControl.touched) ? 'El código es obligatorio.' : ''">
+  </app-input>
+
+  <app-input
+    label="Nombre de Materia"
+    placeholder="Ej: Introducción a la Programación"
+    [value]="nameControl.value"
+    (valueChange)="onNameChange($event)"
+    [required]="true"
+    [showErrors]="nameControl.invalid && (nameControl.dirty || nameControl.touched)"
+    [errorMessage]="nameControl.hasError('required') && (nameControl.dirty || nameControl.touched) ? 'El nombre es obligatorio.' : ''">
+  </app-input>
+
+  <app-input
+    type="select"
+    label="Modalidad"
+    placeholder="Seleccione modalidad"
+    [options]="modalityOptions"
+    [value]="modalityControl.value"
+    (valueChange)="onModalityChange($event)"
+    [required]="true"
+    [showErrors]="modalityControl.invalid && (modalityControl.dirty || modalityControl.touched)"
+    [errorMessage]="modalityControl.hasError('required') && (modalityControl.dirty || modalityControl.touched) ? 'La modalidad es obligatoria.' : ''">
+  </app-input>
+
+  <app-input
+    type="select"
+    label="Semestre"
+    placeholder="Seleccione un semestre"
+    [options]="semesterOptions()"
+    [value]="semesterIdControl.value"
+    (valueChange)="onSemesterChange($event)"
+    [required]="true"
+    [showErrors]="semesterIdControl.invalid && (semesterIdControl.dirty || semesterIdControl.touched)"
+    [errorMessage]="semesterIdControl.hasError('required') && (semesterIdControl.dirty || semesterIdControl.touched) ? 'El semestre es obligatorio.' : ''">
+  </app-input>
+
+  <app-input
+    type="select"
+    label="Docente"
+    placeholder="Seleccione un docente"
+    [options]="teacherOptions()"
+    [value]="teacherIdControl.value"
+    (valueChange)="onTeacherChange($event)"
+    [required]="true"
+    [showErrors]="teacherIdControl.invalid && (teacherIdControl.dirty || teacherIdControl.touched)"
+    [errorMessage]="teacherIdControl.hasError('required') && (teacherIdControl.dirty || teacherIdControl.touched) ? 'El docente es obligatorio.' : ''">
+  </app-input>
+
+  <div class="form-actions">
+    <app-button variant="secondary" (clicked)="onCancel()">Cancelar</app-button>
+    <app-button variant="primary" type="submit">
+      <span class="material-symbols-outlined btn-icon-left">save</span>
+      Guardar Materia
+    </app-button>
+  </div>
+</form>
+

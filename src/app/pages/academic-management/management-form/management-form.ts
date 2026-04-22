@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Button } from '../../../shared/components/button/button';
 import { Input } from '../../../shared/components/input/input';
-import { Management, ManagementRequest } from '../../../core/models/gestion-academica.model';
+import { Management, ManagementRequest } from '../../../core/models/academic-management.model';
 
 @Component({
   selector: 'app-management-form',

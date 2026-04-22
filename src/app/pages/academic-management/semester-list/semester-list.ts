@@ -1,12 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GestionAcademicaService } from '../../../core/services/gestion-academica.service';
+import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import {
   ApiError,
   Management,
   Semester,
   SemesterRequest,
-} from '../../../core/models/gestion-academica.model';
+} from '../../../core/models/academic-management.model';
 import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
@@ -38,12 +38,25 @@ const SEMESTER_COLUMNS: TableColumn[] = [
   styleUrl: './semester-list.css',
 })
 export class SemesterListComponent {
-  private readonly gestionAcademicaService = inject(GestionAcademicaService);
+  private readonly academicManagementService = inject(AcademicManagementService);
 
   readonly columns = SEMESTER_COLUMNS;
   readonly semesters = signal<Semester[]>([]);
-  readonly tableRows = signal<SemesterTableRow[]>([]);
   readonly managements = signal<Management[]>([]);
+
+  readonly tableRows = computed<SemesterTableRow[]>(() => {
+    const semesters = this.semesters();
+    const managements = this.managements();
+
+    return semesters.map((item) => ({
+      id: item.id,
+      number: item.number,
+      startDate: this.formatDate(item.startDate),
+      endDate: this.formatDate(item.endDate),
+      managementYear: item.management?.year ?? managements.find((m) => m.id === item.managementId)?.year ?? '-',
+      raw: item,
+    }));
+  });
   readonly filterManagementId = signal<string>('all');
   readonly isLoading = signal(false);
 
@@ -75,22 +88,12 @@ export class SemesterListComponent {
     const selectedManagement = this.filterManagementId();
     const request$ =
       selectedManagement === 'all'
-        ? this.gestionAcademicaService.getSemesters()
-        : this.gestionAcademicaService.getSemestersByManagement(selectedManagement);
+        ? this.academicManagementService.getSemesters()
+        : this.academicManagementService.getSemestersByManagement(selectedManagement);
 
     request$.subscribe({
       next: (data) => {
         this.semesters.set(data);
-        this.tableRows.set(
-          data.map((item) => ({
-            id: item.id,
-            number: item.number,
-            startDate: this.formatDate(item.startDate),
-            endDate: this.formatDate(item.endDate),
-            managementYear: item.management?.year ?? this.findManagementYear(item.managementId),
-            raw: item,
-          }))
-        );
         this.isLoading.set(false);
       },
       error: (error: ApiError) => {
@@ -119,8 +122,8 @@ export class SemesterListComponent {
     const editing = this.selectedSemester();
 
     const action$ = editing
-      ? this.gestionAcademicaService.updateSemester(editing.id, payload)
-      : this.gestionAcademicaService.createSemester(payload);
+      ? this.academicManagementService.updateSemester(editing.id, payload)
+      : this.academicManagementService.createSemester(payload);
 
     action$.subscribe({
       next: () => {
@@ -153,7 +156,7 @@ export class SemesterListComponent {
       return;
     }
 
-    this.gestionAcademicaService.deleteSemester(selected.id).subscribe({
+    this.academicManagementService.deleteSemester(selected.id).subscribe({
       next: () => {
         this.cancelDelete();
         this.refreshSemesters();
@@ -167,7 +170,7 @@ export class SemesterListComponent {
   }
 
   private loadManagements() {
-    this.gestionAcademicaService.getManagements().subscribe({
+    this.academicManagementService.getManagements().subscribe({
       next: (data) => {
         this.managements.set(data);
         this.refreshSemesters();
@@ -178,9 +181,6 @@ export class SemesterListComponent {
     });
   }
 
-  private findManagementYear(managementId: string) {
-    return this.managements().find((item) => item.id === managementId)?.year ?? '-';
-  }
 
   private formatDate(value?: string) {
     if (!value) {

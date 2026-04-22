@@ -8,12 +8,12 @@ import {
   ManagementRequest,
   Semester,
   SemesterRequest,
-} from '../models/gestion-academica.model';
+} from '../models/academic-management.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GestionAcademicaService {
+export class AcademicManagementService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiBaseUrl;
 
