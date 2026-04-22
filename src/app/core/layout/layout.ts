@@ -48,7 +48,9 @@ export class Layout implements OnInit {
   private buildMenu(role: string) {
     if (role === 'ADMIN') {
       this.menuItems.set([
-        { path: '/admin/dashboard', icon: 'dashboard', label: 'Gestión Académica' },
+        { path: '/admin/dashboard', icon: 'dashboard', label: 'Panel' },
+        { path: '/admin/gestiones', icon: 'calendar_month', label: 'Gestiones' },
+        { path: '/admin/semestres', icon: 'date_range', label: 'Semestres' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
         
         { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
