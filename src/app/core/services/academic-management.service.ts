@@ -15,7 +15,7 @@ import {
 })
 export class AcademicManagementService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl = environment.apiBaseUrl;
 
   private unwrapResponse<T>(response: unknown): T {
     if (response && typeof response === 'object' && 'data' in response) {

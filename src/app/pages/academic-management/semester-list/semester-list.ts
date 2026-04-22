@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AcademicManagementService } from '../../../core/services/academic-management.service';
 import {
@@ -42,8 +42,21 @@ export class SemesterListComponent {
 
   readonly columns = SEMESTER_COLUMNS;
   readonly semesters = signal<Semester[]>([]);
-  readonly tableRows = signal<SemesterTableRow[]>([]);
   readonly managements = signal<Management[]>([]);
+
+  readonly tableRows = computed<SemesterTableRow[]>(() => {
+    const semesters = this.semesters();
+    const managements = this.managements();
+
+    return semesters.map((item) => ({
+      id: item.id,
+      number: item.number,
+      startDate: this.formatDate(item.startDate),
+      endDate: this.formatDate(item.endDate),
+      managementYear: item.management?.year ?? managements.find((m) => m.id === item.managementId)?.year ?? '-',
+      raw: item,
+    }));
+  });
   readonly filterManagementId = signal<string>('all');
   readonly isLoading = signal(false);
 
@@ -81,16 +94,6 @@ export class SemesterListComponent {
     request$.subscribe({
       next: (data) => {
         this.semesters.set(data);
-        this.tableRows.set(
-          data.map((item) => ({
-            id: item.id,
-            number: item.number,
-            startDate: this.formatDate(item.startDate),
-            endDate: this.formatDate(item.endDate),
-            managementYear: item.management?.year ?? this.findManagementYear(item.managementId),
-            raw: item,
-          }))
-        );
         this.isLoading.set(false);
       },
       error: (error: ApiError) => {
@@ -178,9 +181,6 @@ export class SemesterListComponent {
     });
   }
 
-  private findManagementYear(managementId: string) {
-    return this.managements().find((item) => item.id === managementId)?.year ?? '-';
-  }
 
   private formatDate(value?: string) {
     if (!value) {

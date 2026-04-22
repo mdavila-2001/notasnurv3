@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   ChangeDetectionStrategy,
-  ViewEncapsulation,
   inject,
   signal,
   computed
@@ -19,8 +18,7 @@ import { User as UserService } from '../../core/services/user';
   imports: [CommonModule, FormsModule, Button, Modal],
   templateUrl: './users.html',
   styleUrl: './users.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.Emulated
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Users implements OnInit {
   private userService = inject(UserService);
