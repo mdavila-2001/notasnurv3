@@ -1,4 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { SubjectService } from '../../../core/services/subject/subject.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
@@ -81,23 +83,21 @@ export class SubjectListComponent implements OnInit {
 
   loadData() {
     this.isLoading.set(true);
-    
-    this.subjectService.getSubjects().subscribe({
-      next: (data) => {
-        this.subjects.set(Array.isArray(data) ? data : []);
-      },
-      error: () => this.displayToast('Error al cargar materias', 'error')
-    });
 
-    this.academicService.getSemesters().subscribe({
-      next: (data) => this.semesters.set(data),
-      error: () => this.displayToast('Error al cargar semestres', 'error')
-    });
-
-    this.userService.getUsersByRole('TEACHER').subscribe({
-      next: (data) => this.teachers.set(data),
-      error: () => this.displayToast('Error al cargar docentes', 'error')
-    });
+    forkJoin({
+      subjects: this.subjectService.getSubjects(),
+      semesters: this.academicService.getSemesters(),
+      teachers: this.userService.getUsersByRole('TEACHER'),
+    })
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: ({ subjects, semesters, teachers }) => {
+          this.subjects.set(Array.isArray(subjects) ? subjects : []);
+          this.semesters.set(semesters);
+          this.teachers.set(teachers);
+        },
+        error: () => this.displayToast('Error al cargar los datos', 'error'),
+      });
   }
 
   openFormModal(subject: Subject | null = null) {
