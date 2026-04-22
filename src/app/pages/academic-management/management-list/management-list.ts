@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GestionAcademicaService } from '../../../core/services/gestion-academica.service';
+import { AcademicManagementService } from '../../../core/services/academic-management.service';
 import {
   ApiError,
   Management,
   ManagementRequest,
-} from '../../../core/models/gestion-academica.model';
+} from '../../../core/models/academic-management.model';
 import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
@@ -32,7 +32,7 @@ const MANAGEMENT_COLUMNS: TableColumn[] = [
   styleUrl: './management-list.css',
 })
 export class ManagementListComponent {
-  private readonly gestionAcademicaService = inject(GestionAcademicaService);
+  private readonly academicManagementService = inject(AcademicManagementService);
 
   readonly columns = MANAGEMENT_COLUMNS;
   readonly managements = signal<Management[]>([]);
@@ -55,7 +55,7 @@ export class ManagementListComponent {
 
   refreshList() {
     this.isLoading.set(true);
-    this.gestionAcademicaService.getManagements().subscribe({
+    this.academicManagementService.getManagements().subscribe({
       next: (data) => {
         this.managements.set(data);
         this.tableRows.set(
@@ -94,8 +94,8 @@ export class ManagementListComponent {
     const editing = this.selectedManagement();
 
     const action$ = editing
-      ? this.gestionAcademicaService.updateManagement(editing.id, payload)
-      : this.gestionAcademicaService.createManagement(payload);
+      ? this.academicManagementService.updateManagement(editing.id, payload)
+      : this.academicManagementService.createManagement(payload);
 
     action$.subscribe({
       next: () => {
@@ -133,7 +133,7 @@ export class ManagementListComponent {
       return;
     }
 
-    this.gestionAcademicaService.deleteManagement(selected.id).subscribe({
+    this.academicManagementService.deleteManagement(selected.id).subscribe({
       next: () => {
         this.cancelDelete();
         this.refreshList();

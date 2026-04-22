@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { Management, Semester, SemesterRequest } from '../../../core/models/gestion-academica.model';
+import { Management, Semester, SemesterRequest } from '../../../core/models/academic-management.model';
 
 const endDateAfterStartDateValidator: ValidatorFn = (control): ValidationErrors | null => {
   const startDate = control.get('startDate')?.value;
