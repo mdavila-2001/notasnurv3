@@ -37,8 +37,10 @@
 .btn-carga-masiva {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.55rem 1.1rem;
+  padding: 0 1.1rem;
+  height: 42px;
   background: #ffffff;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
@@ -55,8 +57,10 @@
 .btn-registrar {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.55rem 1.25rem;
+  padding: 0 1.25rem;
+  height: 42px;
   background: #0ea5e9;
   border: none;
   border-radius: 8px;

@@ -16,7 +16,7 @@ export const routes: Routes = [
             { path: 'admin/dashboard', component: Dashboard },
             { path: 'teacher/dashboard', component: Dashboard },
             { path: 'student/dashboard', component: Dashboard },
-            { path: 'admin/usuarios', component: Users }
+            { path: 'admin/users', component: Users }
         ]
     },
 

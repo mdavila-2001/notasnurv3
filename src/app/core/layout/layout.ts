@@ -51,7 +51,7 @@ export class Layout implements OnInit {
         { path: '/admin/dashboard', icon: 'dashboard', label: 'Gestión Académica' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
         
-        { path: '/admin/usuarios', icon: 'manage_accounts', label: 'Directorio Usuarios' },
+        { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
         
         { path: '/admin/enrollments', icon: 'school', label:'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
