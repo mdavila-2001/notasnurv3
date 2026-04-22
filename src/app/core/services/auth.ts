@@ -27,8 +27,7 @@ export interface ApiResponse<T> {
 export class Auth {
   private http = inject(HttpClient);
 
-
-  private apiUrl = environment.apiUrl + '/auth';
+  private apiUrl = environment.apiBaseUrl + '/auth';
 
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, credentials)
