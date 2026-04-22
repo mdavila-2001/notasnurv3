@@ -1,25 +1,25 @@
 <form class="semester-form" [formGroup]="form" (ngSubmit)="onSubmit()">
   <app-input
     type="select"
-    label="Gestion"
-    placeholder="Selecciona una gestion"
+    label="Gestión"
+    placeholder="Selecciona una gestión"
     [value]="managementIdControl.value || ''"
     [required]="true"
     [showErrors]="managementIdControl.touched"
     [options]="managementOptions()"
-    [errorMessage]="getRequiredMessage(managementIdControl, 'La gestion')"
+    [errorMessage]="getRequiredMessage(managementIdControl, 'La gestión')"
     (valueChange)="onManagementChange($event)">
   </app-input>
 
   <app-input
     type="select"
-    label="Numero"
-    placeholder="Selecciona un numero"
+    label="Número"
+    placeholder="Selecciona un número"
     [value]="numberControl.value ?? ''"
     [required]="true"
     [showErrors]="numberControl.touched"
     [options]="numberOptions"
-    [errorMessage]="getRequiredMessage(numberControl, 'El numero')"
+    [errorMessage]="getRequiredMessage(numberControl, 'El número')"
     (valueChange)="onNumberChange($event)">
   </app-input>
 

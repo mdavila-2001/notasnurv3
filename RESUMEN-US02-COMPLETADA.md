@@ -15,29 +15,29 @@ Se ha implementado el **CRUD completo de Gestión Académica** (Gestiones y Seme
   - Inyección de HttpClient
 
 ### Componentes Management
-- ✅ `src/app/features/gestion-academica/management/management-list.component.ts|html|css`
+- ✅ `src/app/pages/gestion-academica/management-list/management-list.ts|html|css`
   - Listado con tabla, filtrado, acciones
   - Modal para crear/editar
   - Confirmación de eliminación
   
-- ✅ `src/app/features/gestion-academica/management/management-form.component.ts|html|css`
+- ✅ `src/app/pages/gestion-academica/management-form/management-form.ts|html|css`
   - Formulario reactivo con validación
-  - Campo año (validación: 2000 - +5 años)
+  - Campo año (validación: 2000 - +10 años)
   - Manejo de errores específicos
 
 ### Componentes Semester
-- ✅ `src/app/features/gestion-academica/semester/semester-list.component.ts|html|css`
+- ✅ `src/app/pages/gestion-academica/semester-list/semester-list.ts|html|css`
   - Listado con tabla y filtro por gestión
   - Carga dinámica de semestres
   - Modal para formulario
   
-- ✅ `src/app/features/gestion-academica/semester/semester-form.component.ts|html|css`
+- ✅ `src/app/pages/gestion-academica/semester-form/semester-form.ts|html|css`
   - Formulario con 4 campos (gestión, número, fechas)
   - Validación de rango de fechas
   - Selector de gestiones dinámico
 
 ### Documentación
-- ✅ `src/app/features/gestion-academica/README.md` - Documentación técnica completa
+- ✅ `src/app/pages/gestion-academica/README.md` - Documentación técnica completa
 - ✅ `GUIA-INTEGRACION-US02.md` - Guía de uso y casos de prueba
 - ✅ `app.routes.ts` - Rutas agregadas
 - ✅ `layout.ts` - Enlaces en menú del admin
@@ -259,7 +259,7 @@ Ejecuta estos pasos para verificar que todo funciona:
 
 ¿Preguntas? Revisa:
 1. `GUIA-INTEGRACION-US02.md` - Guía de uso
-2. `src/app/features/gestion-academica/README.md` - Documentación técnica
+2. `src/app/pages/gestion-academica/README.md` - Documentación técnica
 3. Code comments en los archivos
 
 ---

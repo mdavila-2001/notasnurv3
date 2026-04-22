@@ -9,26 +9,18 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Table, TableColumn } from '../../shared/components/table/table';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
 import { User as UserService } from '../../core/services/user';
 
-const COLUMNS: TableColumn[] = [
-  { key: 'name', label: 'Nombre' },
-  { key: 'lastName', label: 'Apellido' },
-  { key: 'email', label: 'Correo Electrónico' },
-  { key: 'status', label: 'Estado' }
-];
-
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, Table, Button, Modal],
+  imports: [CommonModule, FormsModule, Button, Modal],
   templateUrl: './users.html',
   styleUrl: './users.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class Users implements OnInit {
   private userService = inject(UserService);
@@ -38,7 +30,6 @@ export class Users implements OnInit {
   selectedFacultad = signal('Todas las Facultades');
   isRegisterModalOpen = signal(false);
 
-  userColumns = COLUMNS;
   newUser: any = this.getEmptyUserStructure();
 
   ngOnInit() {
@@ -74,8 +65,14 @@ export class Users implements OnInit {
 
   saveUser() {
     const isEditing = !!this.newUser.id;
+    const password = this.newUser.password?.trim() || '';
+
+    if (!isEditing && !password) {
+      alert('Debes ingresar una contraseña para crear el usuario.');
+      return;
+    }
     
-    const payload = {
+    const payload: any = {
       ...(isEditing && { id: this.newUser.id }),
       name: this.newUser.name?.trim() || '',
       middleName: this.newUser.middleName?.trim() || '',
@@ -83,10 +80,14 @@ export class Users implements OnInit {
       motherLastName: this.newUser.motherLastName?.trim() || '',
       ci: this.newUser.ci ? String(this.newUser.ci) : '0',
       email: this.newUser.email?.trim() || '',
-      password: this.newUser.password || '123456',
       role: this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT',
       status: this.newUser.status || 'ACTIVE'
     };
+
+    if (password) {
+      payload.password = password;
+    }
+
     const action$ = isEditing
       ? this.userService.update(this.newUser.id, payload)
       : this.userService.create(payload);

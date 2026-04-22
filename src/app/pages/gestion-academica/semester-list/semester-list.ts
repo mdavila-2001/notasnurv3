@@ -24,10 +24,10 @@ interface SemesterTableRow {
 
 const SEMESTER_COLUMNS: TableColumn[] = [
   { key: 'id', label: 'ID' },
-  { key: 'number', label: 'Numero' },
+  { key: 'number', label: 'Número' },
   { key: 'startDate', label: 'Fecha inicio' },
   { key: 'endDate', label: 'Fecha fin' },
-  { key: 'managementYear', label: 'Gestion (anio)' },
+  { key: 'managementYear', label: 'Gestión (año)' },
 ];
 
 @Component({
@@ -55,7 +55,6 @@ export class SemesterListComponent {
 
   constructor() {
     this.loadManagements();
-    this.refreshSemesters();
   }
 
   get managementFilterOptions(): SelectOption[] {
@@ -171,6 +170,7 @@ export class SemesterListComponent {
     this.gestionAcademicaService.getManagements().subscribe({
       next: (data) => {
         this.managements.set(data);
+        this.refreshSemesters();
       },
       error: (error: ApiError) => {
         this.showError(error, 'No se pudieron cargar las gestiones para el filtro.');

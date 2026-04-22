@@ -19,7 +19,8 @@ notasnurv3/
 │  │  ├─ auth/ (existente)
 │  │  ├─ dashboard/ (existente)
 │  │  ├─ users/ (existente)
-│  │  │
+│  │
+│  ├─ pages/
 │  │  └─ ✨ gestion-academica/ (NUEVO MÓDULO)
 │  │     ├─ README.md (documentación técnica)
 │  │     │

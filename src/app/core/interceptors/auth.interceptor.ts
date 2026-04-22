@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 const TOKEN_STORAGE_KEYS = ['token', 'access_token'] as const;
 
@@ -40,14 +41,18 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     });
   }
 
-  console.log('[AuthInterceptor] URL:', request.url);
-  console.log('[AuthInterceptor] Token encontrado:', Boolean(token));
-  console.log('[AuthInterceptor] Authorization agregado:', shouldAttachToken);
+  if (!environment.production) {
+    console.log('[AuthInterceptor] URL:', request.url);
+    console.log('[AuthInterceptor] Token encontrado:', Boolean(token));
+    console.log('[AuthInterceptor] Authorization agregado:', shouldAttachToken);
+  }
 
   return next(requestToSend).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        console.warn('[AuthInterceptor] 401 detectado. Redirigiendo a login.');
+        if (!environment.production) {
+          console.warn('[AuthInterceptor] 401 detectado. Redirigiendo a login.');
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('access_token');
         localStorage.removeItem('role');

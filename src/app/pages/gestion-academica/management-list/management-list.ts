@@ -20,8 +20,8 @@ interface ManagementTableRow {
 
 const MANAGEMENT_COLUMNS: TableColumn[] = [
   { key: 'id', label: 'ID' },
-  { key: 'year', label: 'Anio' },
-  { key: 'createdAt', label: 'Fecha de creacion' },
+  { key: 'year', label: 'Año' },
+  { key: 'createdAt', label: 'Fecha de creación' },
 ];
 
 @Component({
@@ -101,17 +101,17 @@ export class ManagementListComponent {
       next: () => {
         this.closeFormModal();
         this.refreshList();
-        alert(editing ? 'Gestion actualizada correctamente.' : 'Gestion creada correctamente.');
+        alert(editing ? 'Gestión actualizada correctamente.' : 'Gestión creada correctamente.');
       },
       error: (error: ApiError) => {
         if (error.status === 409) {
-          alert('Ya existe una gestion con ese anio.');
+          alert('Ya existe una gestión con ese año.');
           return;
         }
 
         this.showError(
           error,
-          editing ? 'No se pudo actualizar la gestion.' : 'No se pudo crear la gestion.'
+          editing ? 'No se pudo actualizar la gestión.' : 'No se pudo crear la gestión.'
         );
       },
     });
@@ -137,11 +137,11 @@ export class ManagementListComponent {
       next: () => {
         this.cancelDelete();
         this.refreshList();
-        alert('Gestion eliminada correctamente.');
+        alert('Gestión eliminada correctamente.');
       },
       error: (error: ApiError) => {
         this.cancelDelete();
-        this.showError(error, 'No se pudo eliminar la gestion.');
+        this.showError(error, 'No se pudo eliminar la gestión.');
       },
     });
   }

@@ -1,8 +1,8 @@
 <section class="management-list-page">
   <header class="page-header">
-    <h1>Gestiones Academicas</h1>
+    <h1>Gestiones Académicas</h1>
     <app-button variant="primary" (clicked)="openNewModal()">
-      Nueva Gestion
+      Nueva Gestión
     </app-button>
   </header>
 
@@ -21,7 +21,7 @@
 
 <app-modal
   [isOpen]="isFormModalOpen()"
-  [title]="selectedManagement() ? 'Editar Gestion' : 'Nueva Gestion'"
+  [title]="selectedManagement() ? 'Editar Gestión' : 'Nueva Gestión'"
   (closed)="closeFormModal()">
 
   <app-management-form
@@ -34,10 +34,10 @@
 
 <app-modal
   [isOpen]="isDeleteModalOpen()"
-  title="Confirmar eliminacion"
+  title="Confirmar eliminación"
   (closed)="cancelDelete()">
 
-  <p>Esta accion eliminara la gestion seleccionada. ¿Deseas continuar?</p>
+  <p>Esta acción eliminará la gestión seleccionada. ¿Deseas continuar?</p>
 
   <div modal-actions class="actions-row">
     <app-button variant="secondary" (clicked)="cancelDelete()">

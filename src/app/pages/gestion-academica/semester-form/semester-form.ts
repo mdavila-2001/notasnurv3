@@ -97,7 +97,7 @@ export class SemesterFormComponent {
       return '';
     }
 
-    return 'La fecha fin debe ser posterior a la fecha inicio.';
+    return 'La fecha fin debe ser posterior a la fecha de inicio.';
   }
 
   getRequiredMessage(control: FormControl<any>, label: string) {

@@ -33,12 +33,26 @@ export class Login {
       return;
     }
 
+    const id = this.loginForm.value.id?.trim() ?? '';
+    const password = this.loginForm.value.password?.trim() ?? '';
+
+    if (!id || !password) {
+      this.errorMessage.set('El identificador y la contraseña son obligatorios.');
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
+    // Evita arrastrar sesión anterior mientras se intenta una nueva autenticación.
+    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('fullName');
+
     const credentials = {
-      id: this.loginForm.value.id!,
-      password: this.loginForm.value.password!
+      id,
+      password
     };
 
     this.authService.login(credentials).subscribe({
@@ -55,7 +69,19 @@ export class Login {
       },
       error: (err) => {
         this.isLoading.set(false);
-        // Atrapamos el error que lanza el GlobalExceptionHandler de tu Spring Boot
+        if (err.status === 400) {
+          this.errorMessage.set(
+            err.error?.message ||
+              'Credenciales inválidas. Si eres estudiante usa CI; si eres docente/administrativo usa correo institucional.'
+          );
+          return;
+        }
+
+        if (err.status === 500) {
+          this.errorMessage.set('Error interno del servidor. Revisa el backend y su conexión a base de datos.');
+          return;
+        }
+
         this.errorMessage.set(err.error?.message || 'Error al conectar con el servidor.');
       }
     });

@@ -60,7 +60,7 @@ export class ManagementFormComponent {
 
   get yearErrorMessage() {
     if (this.duplicateError()) {
-      return 'Ya existe una gestion para ese anio.';
+      return 'Ya existe una gestión para ese año.';
     }
 
     if (!this.yearControl.touched && !this.yearControl.dirty) {
@@ -68,15 +68,15 @@ export class ManagementFormComponent {
     }
 
     if (this.yearControl.hasError('required')) {
-      return 'El anio es obligatorio.';
+      return 'El año es obligatorio.';
     }
 
     if (this.yearControl.hasError('min')) {
-      return `El anio minimo es ${this.minYear}.`;
+      return `El año mínimo es ${this.minYear}.`;
     }
 
     if (this.yearControl.hasError('max')) {
-      return `El anio maximo es ${this.maxYear}.`;
+      return `El año máximo es ${this.maxYear}.`;
     }
 
     return '';

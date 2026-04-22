@@ -117,7 +117,7 @@ DELETE http://localhost:8081/api/semesters/{id}
 
 - ✅ Año obligatorio
 - ✅ Año >= 2000
-- ✅ Año <= 5 años en el futuro
+- ✅ Año <= 10 años en el futuro
 - ✅ No se puede crear año duplicado
 - ✅ Error 400: No se puede eliminar si tiene semestres
 
@@ -300,8 +300,9 @@ La interfaz muestra error y el usuario puede reintentar.
 **¿Puedo eliminar un semestre?**
 Sí, sin restricciones (a diferencia de gestiones).
 
-**¿Cómo cambio el URL base de la API?**
-En `gestion-academica.service.ts`, línea: `private apiUrl = 'http://localhost:8081/api';`
+**¿Cómo cambio la URL base de la API?**
+Se gestiona con `environment.apiBaseUrl` y el archivo `proxy.conf.json`.
+En desarrollo, usa `apiBaseUrl: '/api'` y el proxy apunta a `http://localhost:8081`.
 
 ## 🎓 Próximos Pasos
 
