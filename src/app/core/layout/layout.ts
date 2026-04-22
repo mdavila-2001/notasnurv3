@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Auth } from "../services/auth";
+import { Auth } from "../services/auth/auth";
 import { Modal } from "../../shared/components/modal/modal";
 import { Button } from "../../shared/components/button/button";
 
@@ -23,7 +23,7 @@ export class Layout implements OnInit {
 
   userRole = signal<string>('');
   userName = signal<string>('Usuario');
-  
+
   userRoleDisplay = computed(() => {
     const roleMap: Record<string, string> = {
       'ADMIN': 'Administrador',
@@ -52,10 +52,10 @@ export class Layout implements OnInit {
         { path: '/admin/managements', icon: 'calendar_month', label: 'Gestiones' },
         { path: '/admin/semesters', icon: 'date_range', label: 'Semestres' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
-        
+
         { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
-        
-        { path: '/admin/enrollments', icon: 'school', label:'Matrículas' },
+
+        { path: '/admin/enrollments', icon: 'school', label: 'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);

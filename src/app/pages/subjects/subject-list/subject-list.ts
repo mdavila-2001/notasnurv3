@@ -1,8 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SubjectService } from '../../../core/services/subject.service';
-import { AcademicManagementService } from '../../../core/services/academic-management.service';
-import { User as UserService } from '../../../core/services/user';
+import { SubjectService } from '../../../core/services/subject/subject.service';
+import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
+import { User as UserService } from '../../../core/services/user/user';
 import { Subject, SubjectRequest } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
 import { SubjectFormComponent } from '../subject-form/subject-form';

@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
-import { User as UserService } from '../../core/services/user';
+import { User as UserService } from '../../core/services/user/user';
 
 @Component({
   selector: 'app-users',
