@@ -6,6 +6,7 @@ import { Layout } from './core/layout/layout';
 import { Users } from './features/users/users';
 import { ManagementListComponent } from './pages/academic-management/management-list/management-list';
 import { SemesterListComponent } from './pages/academic-management/semester-list/semester-list';
+import { SubjectListComponent } from './pages/subjects/subject-list/subject-list';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -20,7 +21,8 @@ export const routes: Routes = [
             { path: 'admin/semesters', component: SemesterListComponent },
             { path: 'teacher/dashboard', component: Dashboard },
             { path: 'student/dashboard', component: Dashboard },
-            { path: 'admin/users', component: Users }
+            { path: 'admin/users', component: Users },
+            { path: 'admin/subjects', component: SubjectListComponent }
         ]
     },
 

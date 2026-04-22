@@ -21,7 +21,7 @@ import { User as UserService } from '../../core/services/user';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Users implements OnInit {
-  private userService = inject(UserService);
+  private readonly userService = inject(UserService);
   allUsers = signal<any[]>([]);
   selectedTab = signal<'Docente' | 'Estudiante'>('Docente');
   searchQuery = signal('');
