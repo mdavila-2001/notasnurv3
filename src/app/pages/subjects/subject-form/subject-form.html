@@ -32,6 +32,24 @@
   </app-input>
 
   <app-input
+    type="number"
+    label="Capacidad (cupos)"
+    placeholder="Ej: 30"
+    [value]="capacityControl.value ?? ''"
+    (valueChange)="onCapacityChange($event)"
+    [required]="true"
+    [showErrors]="capacityControl.invalid && (capacityControl.dirty || capacityControl.touched)"
+    [errorMessage]="capacityControl.hasError('required') ? 'La capacidad es obligatoria.' : capacityControl.hasError('min') ? 'Debe ser al menos 1.' : ''">
+  </app-input>
+
+  @if (isEditing) {
+    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 4px;">
+      <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">info</span>
+      En edición, re-selecciona el semestre y docente para confirmar.
+    </p>
+  }
+
+  <app-input
     type="select"
     label="Semestre"
     placeholder="Seleccione un semestre"

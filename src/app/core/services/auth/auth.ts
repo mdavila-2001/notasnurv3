@@ -3,7 +3,6 @@ import { HttpClient } from "@angular/common/http";
 import { Observable, tap, finalize } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-
 export interface LoginRequest {
   id: string;
   password: string;
@@ -13,6 +12,15 @@ export interface AuthResponse {
   token: string;
   fullName: string;
   role: string;
+}
+
+export interface UserProfileResponse {
+  id: string;
+  ci: string;
+  fullName: string;
+  email: string;
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT';
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ApiResponse<T> {
@@ -26,7 +34,6 @@ export interface ApiResponse<T> {
 })
 export class Auth {
   private readonly http = inject(HttpClient);
-
   private readonly apiUrl = environment.apiBaseUrl + '/auth';
 
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
@@ -42,17 +49,17 @@ export class Auth {
       );
   }
 
-  logout(): Observable<ApiResponse<string>> {
-    const token = localStorage.getItem('token');
-    let headers = {};
-    if (token) {
-      headers = { Authorization: `Bearer ${token}` };
-    }
+  /** Obtiene el perfil actualizado del usuario autenticado desde el servidor */
+  getMe(): Observable<ApiResponse<UserProfileResponse>> {
+    return this.http.get<ApiResponse<UserProfileResponse>>(`${this.apiUrl}/me`);
+  }
 
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/logout`, {}, { headers })
+  logout(): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/logout`, {})
       .pipe(
         finalize(() => {
           localStorage.removeItem('token');
+          localStorage.removeItem('access_token');
           localStorage.removeItem('role');
           localStorage.removeItem('fullName');
         })

@@ -14,11 +14,11 @@ import { Input, SelectOption } from '../../../shared/components/input/input';
 import { SemesterFormComponent } from '../semester-form/semester-form';
 
 interface SemesterTableRow {
-  id: string;
+  id: number;
   number: 1 | 2;
   startDate: string;
   endDate: string;
-  managementYear: number | string;
+  managementYear: number;
   raw: Semester;
 }
 
@@ -45,15 +45,12 @@ export class SemesterListComponent {
   readonly managements = signal<Management[]>([]);
 
   readonly tableRows = computed<SemesterTableRow[]>(() => {
-    const semesters = this.semesters();
-    const managements = this.managements();
-
-    return semesters.map((item) => ({
+    return this.semesters().map((item) => ({
       id: item.id,
       number: item.number,
       startDate: this.formatDate(item.startDate),
       endDate: this.formatDate(item.endDate),
-      managementYear: item.management?.year ?? managements.find((m) => m.id === item.managementId)?.year ?? '-',
+      managementYear: item.managementYear, // ya viene directo del backend
       raw: item,
     }));
   });
@@ -73,7 +70,7 @@ export class SemesterListComponent {
   get managementFilterOptions(): SelectOption[] {
     return [
       { label: 'Todas', value: 'all' },
-      ...this.managements().map((item) => ({ label: String(item.year), value: item.id })),
+      ...this.managements().map((item) => ({ label: String(item.year), value: String(item.id) })),
     ];
   }
 
@@ -89,7 +86,7 @@ export class SemesterListComponent {
     const request$ =
       selectedManagement === 'all'
         ? this.academicManagementService.getSemesters()
-        : this.academicManagementService.getSemestersByManagement(selectedManagement);
+        : this.academicManagementService.getSemestersByManagement(Number(selectedManagement));
 
     request$.subscribe({
       next: (data) => {

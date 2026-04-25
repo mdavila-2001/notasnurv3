@@ -1,0 +1,54 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Mis Materias</h1>
+    <p class="page-subtitle">Materias en las que estás matriculado este semestre</p>
+  </div>
+
+  <div class="page-content">
+
+    @if (isLoading()) {
+      <div class="loading-state">
+        <span class="material-symbols-outlined spinning">progress_activity</span>
+        <p>Cargando tus materias...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-state">
+        <span class="material-symbols-outlined">error_outline</span>
+        <p>{{ errorMessage() }}</p>
+        <button class="btn-retry" (click)="loadMySubjects()">Reintentar</button>
+      </div>
+    } @else if (mySubjects().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-outlined">menu_book</span>
+        <p>No tienes materias matriculadas en este momento.</p>
+      </div>
+    } @else {
+      <div class="subjects-grid">
+        @for (subject of mySubjects(); track subject.subjectCode) {
+          <div class="subject-card">
+            <div class="subject-card-header">
+              <span class="subject-code-badge">{{ subject.subjectCode }}</span>
+            </div>
+            <div class="subject-card-body">
+              <h3 class="subject-card-name">{{ subject.subjectName }}</h3>
+              <div class="subject-card-meta">
+                <div class="meta-row">
+                  <span class="material-symbols-outlined meta-icon">person</span>
+                  <span>{{ subject.teacherName }}</span>
+                </div>
+                @if (subject.degreeName) {
+                  <div class="meta-row">
+                    <span class="material-symbols-outlined meta-icon">school</span>
+                    <span>{{ subject.degreeName }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      <p class="total-count">{{ mySubjects().length }} materia(s) matriculada(s)</p>
+    }
+
+  </div>
+</div>

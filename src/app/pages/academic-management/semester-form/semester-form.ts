@@ -34,7 +34,7 @@ export class SemesterFormComponent {
 
   form = new FormGroup(
     {
-      managementId: new FormControl('', {
+      managementId: new FormControl<number | ''>('', {
         nonNullable: true,
         validators: [Validators.required],
       }),
@@ -109,7 +109,7 @@ export class SemesterFormComponent {
   }
 
   onManagementChange(value: string | number) {
-    this.managementIdControl.setValue(String(value));
+    this.managementIdControl.setValue(Number(value));
     this.managementIdControl.markAsTouched();
   }
 
@@ -151,7 +151,7 @@ export class SemesterFormComponent {
     }
 
     this.save.emit({
-      managementId: value.managementId,
+      managementId: Number(value.managementId),
       number: value.number,
       startDate: value.startDate,
       endDate: value.endDate,

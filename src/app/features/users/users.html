@@ -73,13 +73,12 @@
       </div>
 
       <div class="filter-col">
-        <label class="filter-label-text">FILTRAR POR CARRERA / FACULTAD</label>
+        <label class="filter-label-text">ESTADO</label>
         <div class="select-wrap">
-          <select class="custom-select" (change)="onFacultadChange($event)">
-            <option value="Todas las Facultades">Todas las Facultades</option>
-            <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
-            <option value="Ciencias Sociales">Ciencias Sociales</option>
-            <option value="Economía">Economía</option>
+          <select class="custom-select">
+            <option value="todos">Todos los Estados</option>
+            <option value="ACTIVE">Activos</option>
+            <option value="INACTIVE">Inactivos</option>
           </select>
           <span class="material-symbols-outlined select-chevron">expand_more</span>
         </div>
@@ -97,7 +96,7 @@
           <tr>
             <th class="th-identity">IDENTIDAD DEL USUARIO</th>
             <th class="th-contact">CONTACTO</th>
-            <th class="th-facultad">FACULTAD / CARRERA</th>
+            <th class="th-rol">ROL</th>
             <th class="th-estado">ESTADO</th>
             <th class="th-acciones">ACCIONES</th>
           </tr>
@@ -107,8 +106,7 @@
             <tr class="docente-row" [class.row-inactive]="user.status === 'INACTIVE'">
               <td class="td-identity">
                 <div class="avatar-wrap" [ngClass]="{
-                  'avatar-teal': user.status === 'ACTIVE' && (user.facultad === 'Ingeniería de Sistemas' || !user.facultad),
-                  'avatar-slate': user.status === 'ACTIVE' && user.facultad !== 'Ingeniería de Sistemas',
+                  'avatar-teal': user.status === 'ACTIVE',
                   'avatar-inactive': user.status === 'INACTIVE'
                 }">
                   <span class="material-symbols-outlined avatar-icon">person</span>
@@ -132,9 +130,9 @@
                 </div>
               </td>
 
-              <td class="td-facultad">
-                <span class="badge" [ngClass]="getBadgeClass(user.facultad)">
-                  {{ user.facultad || 'Ingeniería de Sistemas' }}
+              <td class="td-rol">
+                <span class="badge badge-rol">
+                  {{ user.role }}
                 </span>
               </td>
 
@@ -206,12 +204,8 @@
       </div>
 
       <div class="form-group full-width">
-        <label class="label-text">FACULTAD / CARRERA</label>
-        <select class="custom-select" [(ngModel)]="newUser.facultad">
-          <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
-          <option value="Ciencias Sociales">Ciencias Sociales</option>
-          <option value="Economía">Economía</option>
-        </select>
+        <label class="label-text">ROL SELECCIONADO</label>
+        <input type="text" class="custom-select" [value]="selectedTab()" readonly disabled>
       </div>
     </div>
 

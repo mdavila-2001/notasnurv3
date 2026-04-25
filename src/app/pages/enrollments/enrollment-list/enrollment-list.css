@@ -1,0 +1,255 @@
+.enrollments-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--spacing-large, 24px);
+  height: calc(100vh - 200px);
+  min-height: 500px;
+}
+
+/* ---- Paneles ---- */
+.subjects-panel,
+.students-panel {
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0;
+}
+
+.panel-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 4px 0 0;
+}
+
+/* ---- Lista de Materias ---- */
+.subjects-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.subject-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.subject-item:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.subject-item.selected {
+  background: rgba(99, 102, 241, 0.15);
+  border-left: 3px solid var(--primary, #6366f1);
+}
+
+.subject-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.subject-code {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary, #6366f1);
+  letter-spacing: 0.05em;
+}
+
+.subject-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.subject-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.cupos-badge {
+  background: rgba(34,197,94,0.15);
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* ---- Tabla de alumnos ---- */
+.students-table-wrapper {
+  overflow: auto;
+  flex: 1;
+  padding: 0 24px 24px;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-top: 8px;
+}
+
+.students-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-secondary, #94a3b8);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  position: sticky;
+  top: 0;
+  background: var(--surface, #1e1e2e);
+}
+
+.students-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.04));
+  color: var(--text-primary, #e2e8f0);
+}
+
+.students-table tr:last-child td {
+  border-bottom: none;
+}
+
+.btn-withdraw {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.08);
+  color: #f87171;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-withdraw:hover {
+  background: rgba(239,68,68,0.18);
+  border-color: rgba(239,68,68,0.5);
+}
+
+.btn-withdraw .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+/* ---- Estados vacíos y carga ---- */
+.empty-state,
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+  flex: 1;
+}
+
+.empty-state .material-symbols-outlined,
+.loading-state .material-symbols-outlined {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.empty-state p,
+.loading-state p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Formulario modal ---- */
+.enroll-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.form-input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  background: var(--surface-raised, #2a2a3e);
+  color: var(--text-primary, #e2e8f0);
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 0;
+}
+
+.enroll-summary {
+  padding: 12px 16px;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.enroll-summary p {
+  margin: 4px 0;
+}

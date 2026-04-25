@@ -1,0 +1,214 @@
+.teacher-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--spacing-large, 24px);
+  height: calc(100vh - 200px);
+  min-height: 500px;
+}
+
+.subjects-panel,
+.students-panel {
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0;
+}
+
+.panel-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary, #94a3b8);
+  margin: 4px 0 0;
+}
+
+.cupos-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+  white-space: nowrap;
+  padding: 6px 12px;
+  background: rgba(99,102,241,0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+
+.cupos-info .material-symbols-outlined {
+  font-size: 1rem;
+  color: #a5b4fc;
+}
+
+/* ---- Subjects List ---- */
+.subjects-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.subject-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.05));
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.subject-item:hover { background: rgba(255,255,255,0.04); }
+
+.subject-item.selected {
+  background: rgba(99,102,241,0.12);
+  border-left: 3px solid var(--primary, #6366f1);
+}
+
+.subject-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.subject-code {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary, #6366f1);
+  letter-spacing: 0.06em;
+}
+
+.subject-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.subject-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(148,163,184,0.15);
+  color: #94a3b8;
+}
+
+.status-badge.active {
+  background: rgba(34,197,94,0.15);
+  color: #4ade80;
+}
+
+/* ---- Students Table ---- */
+.students-table-wrapper {
+  overflow: auto;
+  flex: 1;
+  padding: 0 24px 16px;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-top: 8px;
+}
+
+.students-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  position: sticky;
+  top: 0;
+  background: var(--surface, #1e1e2e);
+}
+
+.students-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.04));
+  color: var(--text-primary, #e2e8f0);
+}
+
+.students-table tr:last-child td { border-bottom: none; }
+
+.row-number {
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.8rem;
+  width: 36px;
+}
+
+.student-name { font-weight: 500; }
+
+.students-count {
+  padding: 12px 24px;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #94a3b8);
+  border-top: 1px solid var(--border, rgba(255,255,255,0.06));
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* ---- Estados ---- */
+.empty-state,
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--text-secondary, #94a3b8);
+  text-align: center;
+  flex: 1;
+}
+
+.empty-state .material-symbols-outlined,
+.loading-state .material-symbols-outlined { font-size: 2.5rem; opacity: 0.4; }
+.error-state .material-symbols-outlined { font-size: 2.5rem; color: #f87171; }
+.empty-state p, .loading-state p { font-size: 0.875rem; margin: 0; }
+.error-state p { font-size: 0.875rem; margin: 0; color: #fca5a5; }
+
+.btn-retry {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  background: transparent;
+  color: var(--text-primary, #e2e8f0);
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: background 0.15s;
+}
+.btn-retry:hover { background: rgba(255,255,255,0.06); }
+
+.centered { min-height: 300px; }
+
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

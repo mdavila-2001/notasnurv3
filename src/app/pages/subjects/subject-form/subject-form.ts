@@ -24,7 +24,13 @@ export class SubjectFormComponent {
   form = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    modality: new FormControl<'PRESENCIAL' | 'SEMI_PRESENCIAL' | ''>('', { nonNullable: true, validators: [Validators.required] }),
+    modality: new FormControl<'PRESENCIAL' | 'SEMI_PRESENCIAL' | ''>('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    capacity: new FormControl<number | null>(null, {
+      validators: [Validators.required, Validators.min(1)],
+    }),
     semesterId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teacherId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
@@ -37,19 +43,30 @@ export class SubjectFormComponent {
   constructor() {
     effect(() => {
       const current = this.subject();
+      // En edición: código y nombre se pre-llenan; semestre/docente se dejan vacíos
+      // porque el SubjectResponse no devuelve sus IDs (solo texto)
       this.form.reset({
         code: current?.code ?? '',
         name: current?.name ?? '',
-        modality: current?.modality ?? '',
-        semesterId: current?.semesterId ?? '',
-        teacherId: current?.teacherId ?? '',
+        modality: (current?.modality as 'PRESENCIAL' | 'SEMI_PRESENCIAL' | '') ?? '',
+        capacity: current?.capacity ?? null,
+        semesterId: '',
+        teacherId: '',
       });
+      // En modo edición, el código no debe cambiarse
+      if (current) {
+        this.form.controls.code.disable();
+      } else {
+        this.form.controls.code.enable();
+      }
     });
   }
 
+  get isEditing() { return this.subject() !== null; }
   get codeControl() { return this.form.controls.code; }
   get nameControl() { return this.form.controls.name; }
   get modalityControl() { return this.form.controls.modality; }
+  get capacityControl() { return this.form.controls.capacity; }
   get semesterIdControl() { return this.form.controls.semesterId; }
   get teacherIdControl() { return this.form.controls.teacherId; }
 
@@ -68,6 +85,12 @@ export class SubjectFormComponent {
     this.modalityControl.markAsTouched();
   }
 
+  onCapacityChange(value: string | number) {
+    const num = Number(value);
+    this.capacityControl.setValue(isNaN(num) ? null : num);
+    this.capacityControl.markAsTouched();
+  }
+
   onSemesterChange(value: string | number) {
     this.semesterIdControl.setValue(String(value));
     this.semesterIdControl.markAsTouched();
@@ -83,13 +106,14 @@ export class SubjectFormComponent {
     if (this.form.invalid) return;
 
     const value = this.form.getRawValue();
-    if (!value.modality) return;
+    if (!value.modality || value.capacity === null) return;
 
     this.save.emit({
       code: value.code,
       name: value.name,
       modality: value.modality as 'PRESENCIAL' | 'SEMI_PRESENCIAL',
-      semesterId: value.semesterId,
+      capacity: value.capacity,
+      semesterId: Number(value.semesterId),
       teacherId: value.teacherId,
     });
   }
@@ -98,4 +122,3 @@ export class SubjectFormComponent {
     this.cancel.emit();
   }
 }
-
