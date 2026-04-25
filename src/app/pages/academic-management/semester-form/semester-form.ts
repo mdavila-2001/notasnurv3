@@ -109,6 +109,12 @@ export class SemesterFormComponent {
   }
 
   onManagementChange(value: string | number) {
+    if (value === '') {
+      this.managementIdControl.setValue('');
+      this.managementIdControl.markAsTouched();
+      return;
+    }
+
     this.managementIdControl.setValue(Number(value));
     this.managementIdControl.markAsTouched();
   }
