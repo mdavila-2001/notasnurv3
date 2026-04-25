@@ -1,14 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import {
   ApiError,
   Management,
   ManagementRequest,
   Semester,
   SemesterRequest,
-} from '../models/academic-management.model';
+} from '../../models/academic-management.model';
 
 @Injectable({
   providedIn: 'root',
