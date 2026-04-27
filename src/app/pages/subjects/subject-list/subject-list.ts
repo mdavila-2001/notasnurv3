@@ -109,7 +109,7 @@ export class SubjectListComponent implements OnInit {
 
   onSave(payload: SubjectRequest) {
     const current = this.selectedSubject();
-    const request$: import('rxjs').Observable<any> = current
+    const request$ = current
       ? this.subjectService.updateSubject(current.id, payload)
       : this.subjectService.createSubject(payload);
 
