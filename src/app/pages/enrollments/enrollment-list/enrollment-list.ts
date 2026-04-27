@@ -103,7 +103,7 @@ export class EnrollmentListComponent implements OnInit {
 
   confirmEnroll() {
     const subject = this.selectedSubject();
-    if (!subject || !this.userDegreeId) {
+    if (!subject || !this.selectedStudentId || !this.userDegreeId) {
       this.displayToast('Selecciona un alumno e ingresa el ID de expediente', 'error');
       return;
     }
