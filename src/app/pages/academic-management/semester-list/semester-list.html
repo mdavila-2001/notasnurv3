@@ -1,0 +1,61 @@
+<section class="semester-list-page">
+  <header class="page-header">
+    <h1>Semestres Académicos</h1>
+    <app-button variant="primary" (clicked)="openNewModal()">
+      Nuevo Semestre
+    </app-button>
+  </header>
+
+  <div class="filter-row">
+    <app-input
+      type="select"
+      label="Filtrar por gestión"
+      placeholder="Selecciona una gestión"
+      [value]="filterManagementId()"
+      [options]="managementFilterOptions"
+      (valueChange)="onFilterChange($event)">
+    </app-input>
+  </div>
+
+  @if (isLoading()) {
+    <p class="loading">Cargando semestres...</p>
+  }
+
+  <app-table
+    [columns]="columns"
+    [data]="tableRows()"
+    [showActions]="true"
+    (editClicked)="openEditModal($event)"
+    (deleteClicked)="askDelete($event)">
+  </app-table>
+</section>
+
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selectedSemester() ? 'Editar Semestre' : 'Nuevo Semestre'"
+  (closed)="closeFormModal()">
+
+  <app-semester-form
+    [semester]="selectedSemester()"
+    [managements]="managements()"
+    (save)="onSave($event)"
+    (cancel)="closeFormModal()">
+  </app-semester-form>
+</app-modal>
+
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar eliminación"
+  (closed)="cancelDelete()">
+
+  <p>Esta acción eliminará el semestre seleccionado. ¿Deseas continuar?</p>
+
+  <div modal-actions class="actions-row">
+    <app-button variant="secondary" (clicked)="cancelDelete()">
+      Cancelar
+    </app-button>
+    <app-button variant="tertiary" (clicked)="confirmDelete()">
+      Eliminar
+    </app-button>
+  </div>
+</app-modal>

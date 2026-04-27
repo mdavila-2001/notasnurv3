@@ -1,0 +1,64 @@
+<div class="input-group" [class.has-error]="hasError()">
+    @if (label()) {
+    <label class="input-label" [for]="controlId">{{ label() }}</label>
+    }
+
+    @if (type() === 'select') {
+    <select
+        [id]="controlId"
+        class="input-control"
+        title="{{ label() || 'Selector' }}"
+        [attr.aria-label]="label() || null"
+        [attr.aria-invalid]="hasError()"
+        [attr.aria-required]="required()"
+        [attr.aria-describedby]="hasError() ? errorId : null"
+        [attr.required]="required() ? '' : null"
+        [disabled]="disabled()"
+        [value]="value()"
+        (change)="onChange($event)"
+        (blur)="onBlur()">
+        <option value="" disabled>{{ placeholder() || 'Seleccione una opción' }}</option>
+        
+        @for (opt of options(); track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+        }
+    </select>
+    } @else {
+    <div class="input-wrapper">
+      <input
+          [id]="controlId"
+          class="input-control"
+          [type]="effectiveType()"
+          placeholder="{{ placeholder() || '' }}"
+          title="{{ label() || 'Campo de entrada' }}"
+          [attr.aria-label]="label() || null"
+          [attr.aria-invalid]="hasError()"
+          [attr.aria-required]="required()"
+          [attr.aria-describedby]="hasError() ? errorId : null"
+          [attr.required]="required() ? '' : null"
+          [attr.min]="type() === 'number' && min() !== null ? min() : null"
+          [attr.max]="type() === 'number' && max() !== null ? max() : null"
+          [attr.minlength]="supportsLengthValidation() && minLength() !== null ? minLength() : null"
+          [attr.maxlength]="supportsLengthValidation() && maxLength() !== null ? maxLength() : null"
+          [attr.pattern]="pattern() || null"
+          [value]="value()"
+          [disabled]="disabled()"
+          (input)="onChange($event)"
+          (blur)="onBlur()"
+      />
+      @if (type() === 'password') {
+        <button type="button" class="password-toggle" (click)="togglePassword()" aria-label="Alternar visibilidad de contraseña">
+          @if (!showPassword()) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          }
+        </button>
+      }
+    </div>
+    }
+
+    @if (displayErrorMessage()) {
+    <span class="error-text" [id]="errorId">{{ displayErrorMessage() }}</span>
+    }
+</div>

@@ -1,0 +1,12 @@
+<div class="toast" [class]="'toast-' + type()">
+    <div class="toast-content">
+    @if (title()) {
+        <h4 class="toast-title">{{ title() }}</h4>
+    }
+    <p class="toast-message">{{ message() }}</p>
+    </div>
+    
+    <button class="toast-close" (click)="onClose()" aria-label="Cerrar notificación">
+    &times;
+    </button>
+</div>

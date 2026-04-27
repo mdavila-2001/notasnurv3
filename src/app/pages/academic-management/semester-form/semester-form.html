@@ -1,0 +1,55 @@
+<form class="semester-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <app-input
+    type="select"
+    label="Gestión"
+    placeholder="Selecciona una gestión"
+    [value]="managementIdControl.value || ''"
+    [required]="true"
+    [showErrors]="managementIdControl.touched"
+    [options]="managementOptions()"
+    [errorMessage]="getRequiredMessage(managementIdControl, 'La gestión')"
+    (valueChange)="onManagementChange($event)">
+  </app-input>
+
+  <app-input
+    type="select"
+    label="Número"
+    placeholder="Selecciona un número"
+    [value]="numberControl.value ?? ''"
+    [required]="true"
+    [showErrors]="numberControl.touched"
+    [options]="numberOptions"
+    [errorMessage]="getRequiredMessage(numberControl, 'El número')"
+    (valueChange)="onNumberChange($event)">
+  </app-input>
+
+  <app-input
+    type="date"
+    label="Fecha inicio"
+    [value]="startDateControl.value || ''"
+    [required]="true"
+    [showErrors]="startDateControl.touched"
+    [errorMessage]="getRequiredMessage(startDateControl, 'La fecha inicio')"
+    (valueChange)="onStartDateChange($event)">
+  </app-input>
+
+  <app-input
+    type="date"
+    label="Fecha fin"
+    [value]="endDateControl.value || ''"
+    [required]="true"
+    [showErrors]="endDateControl.touched"
+    [errorMessage]="getRequiredMessage(endDateControl, 'La fecha fin') || dateRangeErrorMessage"
+    (valueChange)="onEndDateChange($event)">
+  </app-input>
+
+  <div class="form-actions">
+    <app-button variant="secondary" type="button" (clicked)="onCancel()">
+      Cancelar
+    </app-button>
+
+    <app-button variant="primary" type="submit">
+      Guardar
+    </app-button>
+  </div>
+</form>

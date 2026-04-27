@@ -1,0 +1,160 @@
+<main class="test-page">
+  <header class="hero">
+    <h1>Playground de componentes</h1>
+    <p>Vista rápida para validar estados visuales y comportamiento base.</p>
+  </header>
+
+  <section class="card">
+    <h2>Badge</h2>
+    <div class="row-wrap">
+      <app-badge text="Info" type="info"></app-badge>
+      <app-badge text="Warning" type="warning"></app-badge>
+      <app-badge text="Dark" type="dark"></app-badge>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Button</h2>
+    <div class="row-wrap">
+      <app-button variant="primary" (clicked)="onButtonClick('Primary')">Primary</app-button>
+      <app-button variant="secondary" (clicked)="onButtonClick('Secondary')">Secondary</app-button>
+      <app-button variant="tertiary" (clicked)="onButtonClick('Tertiary')">Tertiary</app-button>
+      <app-button [disabled]="true">Disabled</app-button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Input</h2>
+    <div class="grid-2">
+      <app-input
+        type="text"
+        label="Texto"
+        placeholder="Escribe una nota"
+        [value]="textValue()"
+        (valueChange)="onTextChange($event)">
+      </app-input>
+
+      <app-input
+        type="number"
+        label="Número"
+        placeholder="0"
+        [value]="numberValue()"
+        (valueChange)="onNumberChange($event)">
+      </app-input>
+
+      <app-input
+        type="date"
+        label="Fecha"
+        [value]="dateValue()"
+        (valueChange)="onDateChange($event)">
+      </app-input>
+
+      <app-input
+        type="search"
+        label="Buscar"
+        placeholder="Buscar materia"
+        [value]="searchValue()"
+        (valueChange)="onSearchChange($event)">
+      </app-input>
+
+      <app-input
+        type="select"
+        label="Materia"
+        placeholder="Selecciona una materia"
+        [value]="selectValue()"
+        [options]="selectOptions"
+        (valueChange)="onSelectChange($event)">
+      </app-input>
+
+      <app-input
+        type="text"
+        label="Correo (validación interna)"
+        placeholder="nombre@dominio.com"
+        [value]="emailValue()"
+        [required]="true"
+        [pattern]="'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'"
+        [showErrors]="true"
+        (valueChange)="onEmailChange($event)">
+      </app-input>
+
+      <app-input
+        type="number"
+        label="Nota final (0 a 10)"
+        placeholder="0"
+        [value]="scoreValue()"
+        [required]="true"
+        [min]="0"
+        [max]="10"
+        [showErrors]="true"
+        (valueChange)="onScoreChange($event)">
+      </app-input>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Table</h2>
+    <app-table
+      [columns]="tableColumns"
+      [data]="tableData()"
+      [showActions]="true"
+      (editClicked)="onEditRow($event)"
+      (deleteClicked)="onDeleteRow($event)">
+    </app-table>
+  </section>
+
+  <section class="card">
+    <h2>Toast</h2>
+    <div class="row-wrap">
+      <app-button variant="primary" (clicked)="showToast('success')">Success</app-button>
+      <app-button variant="secondary" (clicked)="showToast('info')">Info</app-button>
+      <app-button variant="tertiary" (clicked)="showToast('warning')">Warning</app-button>
+      <app-button variant="tertiary" (clicked)="showToast('error')">Error</app-button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Modal</h2>
+    <div class="row-wrap">
+      <app-button variant="primary" (clicked)="openModal()">Abrir modal</app-button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Loader</h2>
+    <div class="row-wrap">
+      <app-loader size="sm" label="Cargando notas..."></app-loader>
+      <app-loader size="md" label="Sincronizando información..."></app-loader>
+      <app-loader size="lg" label="Procesando reporte..."></app-loader>
+    </div>
+
+    <div class="row-wrap">
+      <app-loader variant="dots" label="Actualizando datos..."></app-loader>
+      <app-loader variant="dots" label="Cargando en segundo plano" [showLabel]="false"></app-loader>
+      <app-loader variant="spinner" label="Cargando centrado" [centered]="true"></app-loader>
+    </div>
+  </section>
+
+  <footer class="status">{{ lastAction() }}</footer>
+
+  <div class="toast-layer">
+    @if (toast(); as currentToast) {
+      <app-toast
+        [type]="currentToast.type"
+        [title]="currentToast.title"
+        [message]="currentToast.message"
+        [duration]="currentToast.duration"
+        (closed)="closeToast()">
+      </app-toast>
+    }
+  </div>
+
+  <app-modal [isOpen]="modalOpen()" title="Confirmar cambios" (closed)="closeModal()">
+    <p>Este es un modal de prueba para validar la interacción del componente.</p>
+    <p>Si confirmas, se cerrará y mostrará un toast de éxito.</p>
+
+    <div modal-actions class="modal-actions">
+      <app-button variant="secondary" (clicked)="closeModal()">Cancelar</app-button>
+      <app-button variant="primary" (clicked)="confirmModal()">Confirmar</app-button>
+    </div>
+  </app-modal>
+</main>
