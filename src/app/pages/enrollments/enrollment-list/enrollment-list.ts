@@ -45,9 +45,9 @@ export class EnrollmentListComponent implements OnInit {
   readonly toastType = signal<'success' | 'error'>('success');
 
 
-  // Solo materias ACTIVE
+  // Solo materias publicadas
   readonly activeSubjects = computed(() =>
-    this.subjects().filter(s => s.recordStatus === 'ACTIVE')
+    this.subjects().filter(s => s.recordStatus === 'PUBLISHED')
   );
 
 

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { Subject, SubjectRequest } from '../../../core/models/subject.model';
+import { Subject, SubjectModality, SubjectRequest } from '../../../core/models/subject.model';
 
 @Component({
   selector: 'app-subject-form',
@@ -24,7 +24,7 @@ export class SubjectFormComponent {
   form = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    modality: new FormControl<'PRESENCIAL' | 'SEMI_PRESENCIAL' | ''>('', {
+    modality: new FormControl<SubjectModality | ''>('', {
       nonNullable: true,
       validators: [Validators.required],
     }),
@@ -36,22 +36,21 @@ export class SubjectFormComponent {
   });
 
   readonly modalityOptions: SelectOption[] = [
-    { label: 'Presencial', value: 'PRESENCIAL' },
-    { label: 'Semi-presencial', value: 'SEMI_PRESENCIAL' },
+    { label: 'Presencial', value: 'FACE_TO_FACE' },
+    { label: 'Semi-presencial', value: 'BLENDED' },
+    { label: 'Virtual', value: 'ONLINE' },
   ];
 
   constructor() {
     effect(() => {
       const current = this.subject();
-      // En edición: código y nombre se pre-llenan; semestre/docente se dejan vacíos
-      // porque el SubjectResponse no devuelve sus IDs (solo texto)
       this.form.reset({
         code: current?.code ?? '',
         name: current?.name ?? '',
-        modality: (current?.modality as 'PRESENCIAL' | 'SEMI_PRESENCIAL' | '') ?? '',
+        modality: (current?.modality as SubjectModality | '') ?? '',
         capacity: current?.capacity ?? null,
-        semesterId: '',
-        teacherId: '',
+        semesterId: current?.semesterId ? String(current.semesterId) : '',
+        teacherId: current?.teacherId ?? '',
       });
       // En modo edición, el código no debe cambiarse
       if (current) {
@@ -81,7 +80,7 @@ export class SubjectFormComponent {
   }
 
   onModalityChange(value: string | number) {
-    this.modalityControl.setValue(value as 'PRESENCIAL' | 'SEMI_PRESENCIAL' | '');
+    this.modalityControl.setValue(value as SubjectModality | '');
     this.modalityControl.markAsTouched();
   }
 
@@ -111,7 +110,7 @@ export class SubjectFormComponent {
     this.save.emit({
       code: value.code,
       name: value.name,
-      modality: value.modality as 'PRESENCIAL' | 'SEMI_PRESENCIAL',
+      modality: value.modality as SubjectModality,
       capacity: value.capacity,
       semesterId: Number(value.semesterId),
       teacherId: value.teacherId,

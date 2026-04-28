@@ -1,7 +1,7 @@
 <div class="page-wrapper">
   <div class="page-header">
     <h1 class="page-title">Gestión de Matrículas</h1>
-    <p class="page-subtitle">Selecciona una materia activa para ver y gestionar sus alumnos</p>
+    <p class="page-subtitle">Selecciona una materia publicada para ver y gestionar sus alumnos</p>
   </div>
 
   <div class="enrollments-layout">
@@ -9,7 +9,7 @@
     <!-- Panel izquierdo: Materias activas -->
     <div class="subjects-panel">
       <div class="panel-header">
-        <h2 class="panel-title">Materias Activas</h2>
+        <h2 class="panel-title">Materias Publicadas</h2>
       </div>
 
       @if (isLoading()) {
@@ -20,7 +20,7 @@
       } @else if (activeSubjects().length === 0) {
         <div class="empty-state">
           <span class="material-symbols-outlined">auto_stories</span>
-          <p>No hay materias activas. Activa una materia desde el catálogo.</p>
+          <p>No hay materias publicadas. Publica una materia desde el catálogo.</p>
         </div>
       } @else {
         <ul class="subjects-list">

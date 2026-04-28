@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
+import { Auth } from '../../../core/services/auth/auth';
 import { SubjectService } from '../../../core/services/subject/subject.service';
 import { EnrollmentService } from '../../../core/services/enrollment/enrollment';
 import { Subject } from '../../../core/models/subject.model';
@@ -14,6 +15,7 @@ import { StudentResponseDTO } from '../../../core/models/enrollment.model';
   styleUrl: './teacher-subjects.css',
 })
 export class TeacherSubjectsComponent implements OnInit {
+  private readonly authService = inject(Auth);
   private readonly subjectService = inject(SubjectService);
   private readonly enrollmentService = inject(EnrollmentService);
 
@@ -23,28 +25,52 @@ export class TeacherSubjectsComponent implements OnInit {
 
   readonly isLoading = signal(false);
   readonly isLoadingStudents = signal(false);
+  readonly isResolvingProfile = signal(true);
   readonly errorMessage = signal('');
 
-  // Nombre del docente logueado (desde localStorage)
-  private readonly currentTeacherName = localStorage.getItem('fullName') || '';
+  readonly currentTeacherId = signal('');
 
-  // Filtra las materias que le pertenecen al docente actual por nombre
+  // Filtra las materias que le pertenecen al docente actual por ID
   readonly mySubjects = computed(() =>
-    this.allSubjects().filter(s =>
-      s.teacherName.toLowerCase().includes(this.currentTeacherName.toLowerCase())
-    )
+    this.currentTeacherId()
+      ? this.allSubjects().filter(s => s.teacherId === this.currentTeacherId())
+      : []
   );
 
   ngOnInit() {
-    this.loadSubjects();
+    this.resolveTeacherContext();
+  }
+
+  resolveTeacherContext() {
+    this.isResolvingProfile.set(true);
+    this.errorMessage.set('');
+
+    this.authService.getMe().subscribe({
+      next: (response) => {
+        this.currentTeacherId.set(response.data.id);
+        this.loadSubjects();
+      },
+      error: (err: any) => {
+        this.isResolvingProfile.set(false);
+        this.errorMessage.set(err?.error?.message || 'No se pudo identificar al docente autenticado.');
+      },
+    });
   }
 
   loadSubjects() {
+    if (!this.currentTeacherId()) {
+      this.resolveTeacherContext();
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     this.subjectService.getSubjects()
-      .pipe(finalize(() => this.isLoading.set(false)))
+      .pipe(finalize(() => {
+        this.isLoading.set(false);
+        this.isResolvingProfile.set(false);
+      }))
       .subscribe({
         next: (subjects) => this.allSubjects.set(subjects),
         error: (err: any) => {

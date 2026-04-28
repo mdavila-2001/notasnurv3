@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { SubjectService } from '../../../core/services/subject/subject.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import { User as UserService } from '../../../core/services/user/user';
-import { Subject, SubjectRequest } from '../../../core/models/subject.model';
+import { Subject, SubjectModality, SubjectRecordStatus, SubjectRequest } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
 import { UserResponse } from '../../../core/models/user.model';
 import { SubjectFormComponent } from '../subject-form/subject-form';
@@ -14,6 +14,18 @@ import { Button } from '../../../shared/components/button/button';
 import { SelectOption } from '../../../shared/components/input/input';
 import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Toast } from '../../../shared/components/toast/toast';
+
+const MODALITY_LABELS: Record<SubjectModality, string> = {
+  FACE_TO_FACE: 'Presencial',
+  BLENDED: 'Semi-presencial',
+  ONLINE: 'Virtual',
+};
+
+const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
+  DRAFT: 'Borrador',
+  PUBLISHED: 'Publicada',
+  INACTIVE: 'Inactiva',
+};
 
 @Component({
   selector: 'app-subject-list',
@@ -69,8 +81,8 @@ export class SubjectListComponent implements OnInit {
   readonly tableRows = computed(() =>
     this.subjects().map(sub => ({
       ...sub,
-      modalityDisplay: sub.modality === 'PRESENCIAL' ? 'Presencial' : 'Semi-presencial',
-      statusDisplay: sub.recordStatus === 'ACTIVE' ? 'Activa' : 'Borrador',
+      modalityDisplay: MODALITY_LABELS[sub.modality],
+      statusDisplay: STATUS_LABELS[sub.recordStatus],
     }))
   );
 

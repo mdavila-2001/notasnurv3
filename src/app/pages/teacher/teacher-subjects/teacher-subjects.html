@@ -12,7 +12,7 @@
         <h2 class="panel-title">Mis Materias Asignadas</h2>
       </div>
 
-      @if (isLoading()) {
+      @if (isLoading() || isResolvingProfile()) {
         <div class="loading-state">
           <span class="material-symbols-outlined spinning">progress_activity</span>
           <p>Cargando materias...</p>
@@ -41,8 +41,8 @@
               </div>
               <div class="subject-item-meta">
                 <span>{{ subject.semesterName }} · {{ subject.management }}</span>
-                <span class="status-badge" [class.active]="subject.recordStatus === 'ACTIVE'">
-                  {{ subject.recordStatus === 'ACTIVE' ? 'Activa' : 'Borrador' }}
+                <span class="status-badge" [class.active]="subject.recordStatus === 'PUBLISHED'">
+                  {{ subject.recordStatus === 'PUBLISHED' ? 'Publicada' : subject.recordStatus === 'DRAFT' ? 'Borrador' : 'Inactiva' }}
                 </span>
               </div>
             </li>
