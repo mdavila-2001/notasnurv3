@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ import { Button } from '../../../shared/components/button/button';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(Auth);
   private router = inject(Router);
@@ -26,6 +26,30 @@ export class Login {
     password: ['', Validators.required],
     rememberMe: [false]
   });
+
+  ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.isLoading.set(true);
+      this.authService.getMe().subscribe({
+        next: (response) => {
+          this.isLoading.set(false);
+          if (response.success && response.data) {
+            localStorage.setItem('role', response.data.role);
+            localStorage.setItem('fullName', response.data.fullName);
+            this.router.navigate(['/dashboard']);
+          }
+        },
+        error: () => {
+          this.isLoading.set(false);
+          localStorage.removeItem('token');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('role');
+          localStorage.removeItem('fullName');
+        }
+      });
+    }
+  }
 
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -58,14 +82,7 @@ export class Login {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        // Redirigir según el rol
-        if (response.data.role === 'ADMIN') {
-          this.router.navigate(['/admin/dashboard']);
-        } else if (response.data.role === 'TEACHER') {
-          this.router.navigate(['/teacher/dashboard']);
-        } else {
-          this.router.navigate(['/student/dashboard']);
-        }
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
