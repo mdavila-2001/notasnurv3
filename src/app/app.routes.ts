@@ -7,26 +7,28 @@ import { Users } from './features/users/users';
 import { ManagementListComponent } from './pages/academic-management/management-list/management-list';
 import { SemesterListComponent } from './pages/academic-management/semester-list/semester-list';
 import { SubjectListComponent } from './pages/subjects/subject-list/subject-list';
+import { EnrollmentListComponent } from './pages/enrollments/enrollment-list/enrollment-list';
+import { StudentSubjectsComponent } from './pages/student/student-subjects/student-subjects';
+import { TeacherSubjectsComponent } from './pages/teacher/teacher-subjects/teacher-subjects';
 
 export const routes: Routes = [
-    { path: '', pathMatch: 'full', redirectTo: 'login' },
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
 
-    {
-        path: '',
-        component: Layout,
-        canActivate: [authGuard],
-        children: [
-            { path: 'admin/dashboard', component: Dashboard },
-            { path: 'admin/managements', component: ManagementListComponent },
-            { path: 'admin/semesters', component: SemesterListComponent },
-            { path: 'teacher/dashboard', component: Dashboard },
-            { path: 'student/dashboard', component: Dashboard },
-            { path: 'admin/users', component: Users },
-            { path: 'admin/subjects', component: SubjectListComponent }
-        ]
-    },
+  {
+    path: '',
+    component: Layout,
+    canActivate: [authGuard],
+    children: [
+      { path: 'dashboard', component: Dashboard },
+      { path: 'managements', component: ManagementListComponent },
+      { path: 'semesters', component: SemesterListComponent },
+      { path: 'subjects', component: SubjectListComponent },
+      { path: 'users', component: Users },
+      { path: 'enrollments', component: EnrollmentListComponent },
+    ]
+  },
 
-    { path: 'login', component: Login },
+  { path: 'login', component: Login },
 
-    { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'login' }
 ];

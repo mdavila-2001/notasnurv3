@@ -12,16 +12,14 @@ import { Modal } from '../../../shared/components/modal/modal';
 import { ManagementFormComponent } from '../management-form/management-form';
 
 interface ManagementTableRow {
-  id: string;
+  id: number;
   year: number;
-  createdAt: string;
   raw: Management;
 }
 
 const MANAGEMENT_COLUMNS: TableColumn[] = [
   { key: 'id', label: 'ID' },
   { key: 'year', label: 'Año' },
-  { key: 'createdAt', label: 'Fecha de creación' },
 ];
 
 @Component({
@@ -62,7 +60,6 @@ export class ManagementListComponent {
           data.map((item) => ({
             id: item.id,
             year: item.year,
-            createdAt: this.formatDate(item.createdAt),
             raw: item,
           }))
         );
@@ -144,14 +141,6 @@ export class ManagementListComponent {
         this.showError(error, 'No se pudo eliminar la gestión.');
       },
     });
-  }
-
-  private formatDate(value?: string) {
-    if (!value) {
-      return '-';
-    }
-
-    return new Date(value).toLocaleDateString('es-BO');
   }
 
   private showError(error: ApiError, fallback: string) {

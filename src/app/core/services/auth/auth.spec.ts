@@ -41,7 +41,7 @@ describe('Auth', () => {
     };
 
     service.login(credentials).subscribe((response) => {
-      expect(response.success).toBeTrue();
+      expect(response.success).toBe(true);
       expect(localStorage.getItem('token')).toBe(authData.token);
       expect(localStorage.getItem('role')).toBe(authData.role);
       expect(localStorage.getItem('fullName')).toBe(authData.fullName);

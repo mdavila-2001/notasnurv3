@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { Subject, SubjectRequest } from '../../../core/models/subject.model';
+import { Subject, SubjectModality, SubjectRequest } from '../../../core/models/subject.model';
 
 @Component({
   selector: 'app-subject-form',
@@ -24,14 +24,21 @@ export class SubjectFormComponent {
   form = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    modality: new FormControl<'PRESENCIAL' | 'SEMI_PRESENCIAL' | ''>('', { nonNullable: true, validators: [Validators.required] }),
+    modality: new FormControl<SubjectModality | ''>('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    capacity: new FormControl<number | null>(null, {
+      validators: [Validators.required, Validators.min(1)],
+    }),
     semesterId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teacherId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
   readonly modalityOptions: SelectOption[] = [
-    { label: 'Presencial', value: 'PRESENCIAL' },
-    { label: 'Semi-presencial', value: 'SEMI_PRESENCIAL' },
+    { label: 'Presencial', value: 'FACE_TO_FACE' },
+    { label: 'Semi-presencial', value: 'BLENDED' },
+    { label: 'Virtual', value: 'ONLINE' },
   ];
 
   constructor() {
@@ -40,16 +47,25 @@ export class SubjectFormComponent {
       this.form.reset({
         code: current?.code ?? '',
         name: current?.name ?? '',
-        modality: current?.modality ?? '',
-        semesterId: current?.semesterId ?? '',
+        modality: (current?.modality as SubjectModality | '') ?? '',
+        capacity: current?.capacity ?? null,
+        semesterId: current?.semesterId ? String(current.semesterId) : '',
         teacherId: current?.teacherId ?? '',
       });
+      // En modo edición, el código no debe cambiarse
+      if (current) {
+        this.form.controls.code.disable();
+      } else {
+        this.form.controls.code.enable();
+      }
     });
   }
 
+  get isEditing() { return this.subject() !== null; }
   get codeControl() { return this.form.controls.code; }
   get nameControl() { return this.form.controls.name; }
   get modalityControl() { return this.form.controls.modality; }
+  get capacityControl() { return this.form.controls.capacity; }
   get semesterIdControl() { return this.form.controls.semesterId; }
   get teacherIdControl() { return this.form.controls.teacherId; }
 
@@ -64,8 +80,14 @@ export class SubjectFormComponent {
   }
 
   onModalityChange(value: string | number) {
-    this.modalityControl.setValue(value as 'PRESENCIAL' | 'SEMI_PRESENCIAL' | '');
+    this.modalityControl.setValue(value as SubjectModality | '');
     this.modalityControl.markAsTouched();
+  }
+
+  onCapacityChange(value: string | number) {
+    const num = Number(value);
+    this.capacityControl.setValue(isNaN(num) ? null : num);
+    this.capacityControl.markAsTouched();
   }
 
   onSemesterChange(value: string | number) {
@@ -83,13 +105,14 @@ export class SubjectFormComponent {
     if (this.form.invalid) return;
 
     const value = this.form.getRawValue();
-    if (!value.modality) return;
+    if (!value.modality || value.capacity === null) return;
 
     this.save.emit({
       code: value.code,
       name: value.name,
-      modality: value.modality as 'PRESENCIAL' | 'SEMI_PRESENCIAL',
-      semesterId: value.semesterId,
+      modality: value.modality as SubjectModality,
+      capacity: value.capacity,
+      semesterId: Number(value.semesterId),
       teacherId: value.teacherId,
     });
   }
@@ -98,4 +121,3 @@ export class SubjectFormComponent {
     this.cancel.emit();
   }
 }
-

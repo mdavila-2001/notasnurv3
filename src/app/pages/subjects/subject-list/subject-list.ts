@@ -5,14 +5,27 @@ import { CommonModule } from '@angular/common';
 import { SubjectService } from '../../../core/services/subject/subject.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import { User as UserService } from '../../../core/services/user/user';
-import { Subject, SubjectRequest } from '../../../core/models/subject.model';
+import { Subject, SubjectModality, SubjectRecordStatus, SubjectRequest } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
+import { UserResponse } from '../../../core/models/user.model';
 import { SubjectFormComponent } from '../subject-form/subject-form';
 import { Modal } from '../../../shared/components/modal/modal';
 import { Button } from '../../../shared/components/button/button';
 import { SelectOption } from '../../../shared/components/input/input';
 import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Toast } from '../../../shared/components/toast/toast';
+
+const MODALITY_LABELS: Record<SubjectModality, string> = {
+  FACE_TO_FACE: 'Presencial',
+  BLENDED: 'Semi-presencial',
+  ONLINE: 'Virtual',
+};
+
+const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
+  DRAFT: 'Borrador',
+  PUBLISHED: 'Publicada',
+  INACTIVE: 'Inactiva',
+};
 
 @Component({
   selector: 'app-subject-list',
@@ -28,7 +41,7 @@ export class SubjectListComponent implements OnInit {
 
   readonly subjects = signal<Subject[]>([]);
   readonly semesters = signal<Semester[]>([]);
-  readonly teachers = signal<any[]>([]);
+  readonly teachers = signal<UserResponse[]>([]);
 
   readonly isLoading = signal(false);
   readonly isFormModalOpen = signal(false);
@@ -42,40 +55,36 @@ export class SubjectListComponent implements OnInit {
     { key: 'code', label: 'Código' },
     { key: 'name', label: 'Nombre' },
     { key: 'modalityDisplay', label: 'Modalidad' },
-    { key: 'semesterDisplay', label: 'Semestre' },
-    { key: 'teacherDisplay', label: 'Docente' },
+    { key: 'capacity', label: 'Cupos' },
+    { key: 'semesterName', label: 'Semestre' },
+    { key: 'teacherName', label: 'Docente' },
+    { key: 'management', label: 'Gestión' },
+    { key: 'statusDisplay', label: 'Estado' },
   ];
 
-  readonly semesterOptions = computed<SelectOption[]>(() => {
-    return this.semesters().map(s => ({
-      label: `Semestre ${s.number} (${s.management?.year || 'Sin gestión'})`,
-      value: s.id
-    }));
-  });
+  // Opciones para el formulario de crear/editar
+  readonly semesterOptions = computed<SelectOption[]>(() =>
+    this.semesters().map(s => ({
+      label: `Sem. ${s.number} — Gestión ${s.managementYear}`,
+      value: String(s.id),
+    }))
+  );
 
-  readonly teacherOptions = computed<SelectOption[]>(() => {
-    return this.teachers().map(t => ({
-      label: `${t.name} ${t.lastName}`,
-      value: t.id
-    }));
-  });
+  readonly teacherOptions = computed<SelectOption[]>(() =>
+    this.teachers().map(t => ({
+      label: t.fullName,
+      value: t.id,
+    }))
+  );
 
-  readonly tableRows = computed(() => {
-    const subs = this.subjects();
-    const sems = this.semesters();
-    const teach = this.teachers();
-
-    return subs.map(sub => {
-      const semester = sems.find(s => s.id === sub.semesterId);
-      const teacher = teach.find(t => t.id === sub.teacherId);
-      return {
-        ...sub,
-        modalityDisplay: sub.modality === 'PRESENCIAL' ? 'Presencial' : 'Semi-presencial',
-        semesterDisplay: semester ? `Semestre ${semester.number}` : '-',
-        teacherDisplay: teacher ? `${teacher.name} ${teacher.lastName}` : '-',
-      };
-    });
-  });
+  // El backend ya devuelve semesterName y teacherName — solo agrega campos de display
+  readonly tableRows = computed(() =>
+    this.subjects().map(sub => ({
+      ...sub,
+      modalityDisplay: MODALITY_LABELS[sub.modality],
+      statusDisplay: STATUS_LABELS[sub.recordStatus],
+    }))
+  );
 
   ngOnInit() {
     this.loadData();
@@ -118,22 +127,41 @@ export class SubjectListComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.displayToast(current ? 'Materia actualizada exitosamente' : 'Materia creada exitosamente', 'success');
+        this.displayToast(
+          current ? 'Materia actualizada exitosamente' : 'Materia creada exitosamente',
+          'success'
+        );
         this.closeFormModal();
         this.loadData();
       },
-      error: () => this.displayToast('Error al guardar la materia', 'error')
+      error: (err: any) => {
+        const msg = err?.error?.message || 'Error al guardar la materia';
+        this.displayToast(msg, 'error');
+      },
+    });
+  }
+
+  onActivate(subject: Subject) {
+    this.subjectService.activateSubject(subject.id).subscribe({
+      next: () => {
+        this.displayToast('Materia activada correctamente', 'success');
+        this.loadData();
+      },
+      error: (err: any) => {
+        const msg = err?.error?.message || 'Error al activar la materia. Verifica que las ponderaciones sumen 100.';
+        this.displayToast(msg, 'error');
+      },
     });
   }
 
   onDelete(subject: Subject) {
-    if (confirm(`¿Estás seguro de eliminar la materia ${subject.name}?`)) {
+    if (confirm(`¿Estás seguro de eliminar la materia "${subject.name}"?`)) {
       this.subjectService.deleteSubject(subject.id).subscribe({
         next: () => {
           this.displayToast('Materia eliminada', 'success');
           this.loadData();
         },
-        error: () => this.displayToast('Error al eliminar', 'error')
+        error: () => this.displayToast('Error al eliminar la materia', 'error'),
       });
     }
   }
@@ -148,4 +176,3 @@ export class SubjectListComponent implements OnInit {
     this.showToast.set(false);
   }
 }
-

@@ -36,13 +36,30 @@ export class Layout implements OnInit {
   isLogoutModalOpen = signal<boolean>(false);
 
   ngOnInit() {
-    const role = localStorage.getItem('role') || '';
-    const fullName = localStorage.getItem('fullName') || 'Usuario Desconocido';
+    // Fallback inmediato desde caché local (UI instantánea)
+    const cachedRole = localStorage.getItem('role') || '';
+    const cachedName = localStorage.getItem('fullName') || 'Cargando...';
+    this.userRole.set(cachedRole);
+    this.userName.set(cachedName);
+    this.buildMenu(cachedRole);
 
-    this.userRole.set(role);
-    this.userName.set(fullName);
-
-    this.buildMenu(role);
+    // Verificar perfil real con el servidor
+    this.authService.getMe().subscribe({
+      next: (response) => {
+        const profile = response.data;
+        this.userName.set(profile.fullName);
+        this.userRole.set(profile.role);
+        // Sincronizar localStorage con datos frescos del servidor
+        localStorage.setItem('fullName', profile.fullName);
+        localStorage.setItem('role', profile.role);
+        // Reconstruir menú por si el rol cambió
+        this.buildMenu(profile.role);
+      },
+      error: () => {
+        // El interceptor ya maneja el 401 → redirige a /login
+        // Otros errores: mantenemos datos de localStorage silenciosamente
+      }
+    });
   }
 
   private buildMenu(role: string) {

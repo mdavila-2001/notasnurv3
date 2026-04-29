@@ -1,16 +1,15 @@
 export interface Management {
-  id: string;
+  id: number;
   year: number;
-  createdAt?: string;
 }
 
 export interface Semester {
-  id: string;
+  id: number;
   number: 1 | 2;
   startDate: string;
   endDate: string;
-  managementId: string;
-  management?: Management;
+  managementId: number;
+  managementYear: number;
 }
 
 export interface ManagementRequest {
@@ -21,7 +20,7 @@ export interface SemesterRequest {
   number: 1 | 2;
   startDate: string;
   endDate: string;
-  managementId: string;
+  managementId: number;
 }
 
 export interface ApiError {
