@@ -1,0 +1,127 @@
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.subject-card {
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.subject-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.subject-card-header {
+  padding: 16px 20px 12px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.1));
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.06));
+}
+
+.subject-code-badge {
+  display: inline-block;
+  background: rgba(99,102,241,0.25);
+  color: #a5b4fc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(99,102,241,0.3);
+}
+
+.subject-card-body {
+  padding: 16px 20px 20px;
+}
+
+.subject-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.subject-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.meta-icon {
+  font-size: 0.95rem;
+  color: var(--primary, #6366f1);
+}
+
+.total-count {
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+  text-align: right;
+}
+
+/* Estados */
+.loading-state,
+.empty-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.loading-state .material-symbols-outlined,
+.empty-state .material-symbols-outlined,
+.error-state .material-symbols-outlined {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.error-state .material-symbols-outlined {
+  color: #f87171;
+  opacity: 1;
+}
+
+.error-state p {
+  color: #fca5a5;
+}
+
+.btn-retry {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  background: transparent;
+  color: var(--text-primary, #e2e8f0);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.15s ease;
+}
+
+.btn-retry:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

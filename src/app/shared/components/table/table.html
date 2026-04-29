@@ -1,0 +1,41 @@
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+          <tr>
+            @for (col of columns(); track col.key) {
+              <th>{{ col.label }}</th>
+            }
+            @if (showActions()) {
+              <th class="actions-column">Acciones</th>
+            }
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (row of data(); track row.id || $index) {
+            <tr>
+              @for (col of columns(); track col.key) {
+                <td>{{ row[col.key] }}</td>
+              }
+              
+              @if (showActions()) {
+                <td class="actions-cell">
+                  <app-button variant="primary" (clicked)="editClicked.emit(row)">
+                    Editar
+                  </app-button>
+                  <app-button variant="tertiary" (clicked)="deleteClicked.emit(row)">
+                    Eliminar
+                  </app-button>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)" class="empty-state">
+                No se encontraron registros para mostrar.
+              </td>
+            </tr>
+          }
+        </tbody>
+    </table>
+</div>

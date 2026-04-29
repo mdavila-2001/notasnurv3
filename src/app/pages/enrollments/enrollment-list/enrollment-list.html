@@ -1,0 +1,172 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Gestión de Matrículas</h1>
+    <p class="page-subtitle">Selecciona una materia activa para ver y gestionar sus alumnos</p>
+  </div>
+
+  <div class="enrollments-layout">
+
+    <!-- Panel izquierdo: Materias activas -->
+    <div class="subjects-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Materias Activas</h2>
+      </div>
+
+      @if (isLoading()) {
+        <div class="loading-state">
+          <span class="material-symbols-outlined spinning">progress_activity</span>
+          <p>Cargando materias...</p>
+        </div>
+      } @else if (activeSubjects().length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined">auto_stories</span>
+          <p>No hay materias activas. Activa una materia desde el catálogo.</p>
+        </div>
+      } @else {
+        <ul class="subjects-list">
+          @for (subject of activeSubjects(); track subject.id) {
+            <li
+              class="subject-item"
+              [class.selected]="selectedSubject()?.id === subject.id"
+              (click)="selectSubject(subject)">
+              <div class="subject-item-main">
+                <span class="subject-code">{{ subject.code }}</span>
+                <span class="subject-name">{{ subject.name }}</span>
+              </div>
+              <div class="subject-item-meta">
+                <span>{{ subject.teacherName }}</span>
+                <span class="cupos-badge">{{ subject.capacity }} cupos</span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Panel derecho: Alumnos matriculados -->
+    <div class="students-panel">
+      @if (!selectedSubject()) {
+        <div class="empty-state centered">
+          <span class="material-symbols-outlined">school</span>
+          <p>Selecciona una materia para ver sus alumnos matriculados</p>
+        </div>
+      } @else {
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">{{ selectedSubject()!.name }}</h2>
+            <p class="panel-subtitle">{{ selectedSubject()!.code }} · {{ selectedSubject()!.semesterName }} · Gestión {{ selectedSubject()!.management }}</p>
+          </div>
+          <app-button variant="primary" (clicked)="openEnrollModal()">
+            <span class="material-symbols-outlined btn-icon-left">person_add</span>
+            Matricular Alumno
+          </app-button>
+        </div>
+
+        @if (isLoadingStudents()) {
+          <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando alumnos...</p>
+          </div>
+        } @else if (enrolledStudents().length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-outlined">group</span>
+            <p>No hay alumnos matriculados en esta materia.</p>
+          </div>
+        } @else {
+          <div class="students-table-wrapper">
+            <table class="students-table">
+              <thead>
+                <tr>
+                  <th>Nombre Completo</th>
+                  <th>CI</th>
+                  <th>Correo</th>
+                  <th>Carrera</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (student of enrolledStudents(); track student.studentId) {
+                  <tr>
+                    <td>{{ student.fullName }}</td>
+                    <td>{{ student.ci }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.degreeName || '—' }}</td>
+                    <td>
+                      <button
+                        class="btn-withdraw"
+                        title="Dar de baja"
+                        (click)="withdrawStudent(student.studentId, student.fullName)">
+                        <span class="material-symbols-outlined">person_remove</span>
+                        Dar de baja
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal: Matricular Alumno -->
+<app-modal
+  [isOpen]="isEnrollModalOpen()"
+  title="Matricular Alumno"
+  (closed)="closeEnrollModal()">
+
+  <div class="enroll-form">
+    <div class="form-group">
+      <label class="form-label">Alumno</label>
+      <select
+        class="form-input"
+        [(ngModel)]="selectedStudentId">
+        <option value="">— Selecciona un alumno —</option>
+        @for (option of studentOptions(); track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ID de Expediente Académico (userDegreeId)</label>
+      <input
+        type="number"
+        class="form-input"
+        [(ngModel)]="userDegreeId"
+        placeholder="Ej: 1"
+        min="1" />
+      <p class="form-hint">
+        <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
+        El ID del expediente académico del estudiante en esta carrera.
+      </p>
+    </div>
+
+    @if (selectedSubject()) {
+      <div class="enroll-summary">
+        <p><strong>Materia:</strong> {{ selectedSubject()!.code }} — {{ selectedSubject()!.name }}</p>
+        <p><strong>Cupos disponibles:</strong> {{ selectedSubject()!.capacity }}</p>
+      </div>
+    }
+  </div>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" (clicked)="closeEnrollModal()">Cancelar</app-button>
+    <app-button variant="primary" (clicked)="confirmEnroll()">
+      <span class="material-symbols-outlined btn-icon-left">how_to_reg</span>
+      Confirmar Matrícula
+    </app-button>
+  </div>
+</app-modal>
+
+<!-- Toast de notificación -->
+@if (showToast()) {
+  <app-toast
+    [message]="toastMessage()"
+    [type]="toastType()"
+    (closed)="onToastClosed()">
+  </app-toast>
+}

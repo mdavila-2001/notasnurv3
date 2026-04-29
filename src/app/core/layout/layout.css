@@ -1,0 +1,243 @@
+.layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--neutral-color);
+  font-family: var(--font-family);
+}
+
+.sidebar {
+  height: 100vh;
+  width: 256px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: var(--secondary-color);
+  box-shadow: var(--shadow-sidebar);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  box-sizing: border-box; /* Previene overflow por el padding */
+}
+
+.sidebar-header {
+  padding: 0 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-shrink: 0; /* Previene que el header se encoja */
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  color: var(--text-on-dark);
+  margin: 0;
+}
+
+.brand-subtitle {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--brand-cyan);
+  font-weight: 700;
+  margin: 0.25rem 0 0 0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto; /* Permite scroll vertical */
+  overflow-x: hidden;
+}
+
+.nav-link {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted-dark);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-right: 4px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--text-on-dark);
+  background-color: var(--bg-sidebar-hover);
+}
+
+.nav-icon {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.active-nav-link {
+  background-color: var(--bg-sidebar-active);
+  color: var(--brand-cyan-soft);
+  border-right-color: var(--brand-cyan);
+}
+
+.active-nav-link .nav-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.sidebar-footer {
+  padding: 0 1.5rem;
+  margin-top: auto;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-md);
+  background-color: var(--bg-profile-card);
+  border: 1px solid var(--border-glass);
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--brand-cyan);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  overflow: hidden;
+}
+
+.profile-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-on-dark);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-role {
+  font-size: 0.625rem;
+  color: var(--text-muted-dark);
+  margin: 0;
+}
+
+.topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: calc(100% - 256px);
+  height: 64px;
+  background-color: var(--bg-topbar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-sizing: border-box;
+}
+
+.welcome-greeting {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.welcome-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--brand-navy);
+  margin: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.icon-btn {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  color: var(--brand-cyan);
+  background-color: rgba(0, 174, 239, 0.1);
+}
+
+.badge-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--error);
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.divider {
+  height: 24px;
+  width: 1px;
+  background-color: var(--border-light);
+  margin: 0 0.5rem;
+}
+
+.logout-btn {
+  background-color: var(--brand-navy);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sidebar-logout {
+  width: 100%;
+  margin-top: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.sidebar-logout:hover {
+  background-color: var(--error);
+  color: white;
+}
+
+.logout-btn:active {
+  transform: scale(0.95);
+}
+
+.main-content {
+  margin-left: 256px;
+  padding: 88px 2rem 3rem 2rem;
+  width: calc(100% - 256px);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
