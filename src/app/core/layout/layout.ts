@@ -37,7 +37,7 @@ export class Layout implements OnInit {
 
   ngOnInit() {
     // Fallback inmediato desde caché local (UI instantánea)
-    const cachedRole = localStorage.getItem('role') || '';
+    const cachedRole = this.authService.getRole() || '';
     const cachedName = localStorage.getItem('fullName') || 'Cargando...';
     this.userRole.set(cachedRole);
     this.userName.set(cachedName);

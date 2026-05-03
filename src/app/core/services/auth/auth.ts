@@ -36,6 +36,37 @@ export class Auth {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = environment.apiBaseUrl + '/auth';
 
+  getToken(): string | null {
+    return localStorage.getItem('token') || localStorage.getItem('access_token');
+  }
+
+  getRole(): string | null {
+    const token = this.getToken();
+    const tokenRole = this.getRoleFromToken(token);
+
+    return tokenRole || localStorage.getItem('role');
+  }
+
+  private getRoleFromToken(token: string | null): string | null {
+    if (!token) {
+      return null;
+    }
+
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    try {
+      const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+      const payload = JSON.parse(payloadJson) as { role?: string; roles?: string[] };
+
+      return payload.role || payload.roles?.[0] || null;
+    } catch {
+      return null;
+    }
+  }
+
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/login`, credentials)
       .pipe(

@@ -45,18 +45,9 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     });
   }
 
-  if (!environment.production) {
-    console.log('[AuthInterceptor] URL:', request.url);
-    console.log('[AuthInterceptor] Token encontrado:', Boolean(token));
-    console.log('[AuthInterceptor] Authorization agregado:', shouldAttachToken);
-  }
-
   return next(requestToSend).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        if (!environment.production) {
-          console.warn('[AuthInterceptor] 401 detectado. Redirigiendo a login.');
-        }
         localStorage.removeItem('token');
         localStorage.removeItem('access_token');
         localStorage.removeItem('role');
