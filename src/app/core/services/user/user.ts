@@ -9,7 +9,7 @@ import { UserResponse, UserRequest, ApiResponse } from '../../models/user.model'
 })
 export class User {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiBaseUrl}/users`;
+  private readonly apiUrl = `${environment.apiBaseUrl}/users`;
 
   getUsersByRole(role: string): Observable<UserResponse[]> {
     return this.http
@@ -21,7 +21,10 @@ export class User {
     return this.http.post<ApiResponse<void>>(this.apiUrl, userData);
   }
 
-  update(id: string, userData: UserRequest): Observable<ApiResponse<UserResponse>> {
+  update(
+    id: string,
+    userData: UserRequest
+  ): Observable<ApiResponse<UserResponse>> {
     return this.http.put<ApiResponse<UserResponse>>(`${this.apiUrl}/${id}`, userData);
   }
 

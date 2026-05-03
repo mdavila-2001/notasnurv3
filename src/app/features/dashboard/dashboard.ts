@@ -1,6 +1,5 @@
 import { Component, inject, OnInit, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { Auth } from '../../core/services/auth/auth';
 import { ManagementListComponent } from '../../pages/academic-management/management-list/management-list';
 import { StudentSubjectsComponent } from '../../pages/student/student-subjects/student-subjects';
@@ -28,12 +27,11 @@ export class Dashboard implements OnInit {
   userRole = '';
   componentToRender: Type<any> | null = null;
 
-  private auth = inject(Auth);
-  private router = inject(Router);
+  private readonly auth = inject(Auth);
 
   ngOnInit() {
     this.userName = localStorage.getItem('fullName') || 'Usuario Desconocido';
-    this.userRole = localStorage.getItem('role') || 'SIN_ROL';
+    this.userRole = this.auth.getRole() || 'SIN_ROL';
     this.resolveComponent();
   }
 

@@ -9,6 +9,7 @@ import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 const TOKEN_STORAGE_KEYS = ['token', 'access_token'] as const;
+const AUTH_API_BASE_URL = `${environment.apiBaseUrl.replace(/\/$/, '')}/auth`;
 
 function resolveToken() {
   for (const key of TOKEN_STORAGE_KEYS) {
@@ -22,7 +23,10 @@ function resolveToken() {
 }
 
 function isAuthEndpoint(request: HttpRequest<unknown>) {
-  return request.url.includes('/api/auth/login') || request.url.includes('/api/auth/logout');
+  return (
+    request.url.startsWith(`${AUTH_API_BASE_URL}/login`) ||
+    request.url.startsWith(`${AUTH_API_BASE_URL}/logout`)
+  );
 }
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
@@ -41,18 +45,9 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
     });
   }
 
-  if (!environment.production) {
-    console.log('[AuthInterceptor] URL:', request.url);
-    console.log('[AuthInterceptor] Token encontrado:', Boolean(token));
-    console.log('[AuthInterceptor] Authorization agregado:', shouldAttachToken);
-  }
-
   return next(requestToSend).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        if (!environment.production) {
-          console.warn('[AuthInterceptor] 401 detectado. Redirigiendo a login.');
-        }
         localStorage.removeItem('token');
         localStorage.removeItem('access_token');
         localStorage.removeItem('role');
