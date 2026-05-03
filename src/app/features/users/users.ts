@@ -76,7 +76,7 @@ export class Users implements OnInit {
       status: (this.newUser as any).status || 'ACTIVE',
     };
 
-    if (password) {
+    if (!isEditing && password) {
       payload.password = password;
     }
 

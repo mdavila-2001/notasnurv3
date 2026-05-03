@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 import { Dashboard } from './features/dashboard/dashboard';
 import { Layout } from './core/layout/layout';
 import { Users } from './features/users/users';
@@ -20,11 +21,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: Dashboard },
-      { path: 'managements', component: ManagementListComponent },
-      { path: 'semesters', component: SemesterListComponent },
-      { path: 'subjects', component: SubjectListComponent },
-      { path: 'users', component: Users },
-      { path: 'enrollments', component: EnrollmentListComponent },
+      { path: 'managements', component: ManagementListComponent, canActivate: [adminGuard] },
+      { path: 'semesters', component: SemesterListComponent, canActivate: [adminGuard] },
+      { path: 'subjects', component: SubjectListComponent, canActivate: [adminGuard] },
+      { path: 'users', component: Users, canActivate: [adminGuard] },
+      { path: 'enrollments', component: EnrollmentListComponent, canActivate: [adminGuard] },
     ]
   },
 
