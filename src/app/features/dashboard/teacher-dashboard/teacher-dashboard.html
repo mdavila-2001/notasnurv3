@@ -1,0 +1,83 @@
+<div class="dashboard-wrapper">
+  
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Gestione su aula con <span>precisión académica.</span></h1>
+      <p class="hero-subtitle">
+        Tiene {{ subjects().length }} materias activas para este semestre. El cierre de actas finaliza pronto.
+      </p>
+    </div>
+    <div class="hero-glow"></div>
+    <div class="hero-icon">
+      <span class="material-symbols-outlined">auto_stories</span>
+    </div>
+  </section>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <app-loader></app-loader>
+      <p>Cargando sus materias...</p>
+    </div>
+  } @else {
+    
+    <section class="subjects-section">
+      <div class="section-header">
+        <div>
+          <h3>Mis Materias</h3>
+          <p>Semestre Lectivo en Curso</p>
+        </div>
+        <div class="badge-count">
+          {{ subjects().length }} En curso
+        </div>
+      </div>
+
+      <div class="bento-grid">
+        
+        @for (subject of subjects(); track subject.id) {
+          <div class="subject-card group" (click)="selectSubject(subject)">
+            
+            <div class="card-top">
+              <span class="modality-badge" [class.semi]="subject.modality === 'SEMI_PRESENCIAL'">
+                {{ subject.modality === 'PRESENCIAL' ? 'Presencial' : 'Semi-presencial' }}
+              </span>
+              <p class="subject-code">{{ subject.code }}</p>
+            </div>
+            
+            <h4 class="subject-name">{{ subject.name }}</h4>
+            <p class="subject-meta">{{ subject.semesterName }} • {{ subject.studentCount }} Estudiantes</p>
+            
+            <div class="progress-container">
+              <div class="progress-text">
+                <span>Avance estimado</span>
+                <strong>0%</strong>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <div class="action-buttons">
+                <button class="icon-btn" title="Registro de Notas" (click)="selectSubject(subject); $event.stopPropagation()">
+                  <span class="material-symbols-outlined">edit_note</span>
+                </button>
+                <button class="icon-btn" title="Control de Asistencia" (click)="selectSubject(subject); $event.stopPropagation()">
+                  <span class="material-symbols-outlined">fact_check</span>
+                </button>
+              </div>
+              <button class="enter-btn">
+                <span class="material-symbols-outlined">arrow_forward</span>
+              </button>
+            </div>
+
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <span class="material-symbols-outlined">inbox</span>
+            <p>No tiene materias asignadas en este semestre.</p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
