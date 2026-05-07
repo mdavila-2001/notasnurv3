@@ -35,9 +35,14 @@ export class Login implements OnInit {
         next: (response) => {
           this.isLoading.set(false);
           if (response.success && response.data) {
-            localStorage.setItem('role', response.data.role);
+            const role = response.data.role;
+            localStorage.setItem('role', role);
             localStorage.setItem('fullName', response.data.fullName);
-            this.router.navigate(['/dashboard']);
+            if (role === 'TEACHER') {
+              this.router.navigate(['/teacher/dashboard']);
+            } else {
+              this.router.navigate(['/dashboard']);
+            }
           }
         },
         error: () => {
@@ -82,7 +87,12 @@ export class Login implements OnInit {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        const role = response.data?.role || localStorage.getItem('role') || '';
+        if (role === 'TEACHER') {
+          this.router.navigate(['/teacher/dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

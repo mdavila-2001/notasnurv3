@@ -1,4 +1,3 @@
-// Coincide con UserResponse del backend
 export interface UserResponse {
   id: string;
   ci: string;
@@ -12,7 +11,6 @@ export interface UserResponse {
   fullName: string;
 }
 
-// Coincide con UserRequest del backend
 export interface UserRequest {
   name: string;
   middleName?: string;
