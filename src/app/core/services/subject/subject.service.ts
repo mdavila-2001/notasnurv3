@@ -22,8 +22,10 @@ export class SubjectService {
     return this.http.get<Subject[]>(this.apiUrl);
   }
 
-  getMySubjects(): Observable<ApiResponse<MySubject[]>> {
-    return this.http.get<ApiResponse<MySubject[]>>(`${this.apiUrl}/my-subjects`);
+  getMySubjects(): Observable<MySubject[]> {
+    return this.http
+      .get<ApiResponse<MySubject[]>>(`${this.apiUrl}/my-subjects`)
+      .pipe(map((r) => r.data));
   }
 
   createSubject(payload: SubjectRequest): Observable<Subject> {
