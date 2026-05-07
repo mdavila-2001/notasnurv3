@@ -32,7 +32,14 @@ export const routes: Routes = [
         path: 'teacher',
         children: [
           { path: 'dashboard', component: TeacherDashboard },
-          { path: 'subjects', component: TeacherSubjectsComponent }
+          { path: 'subjects', component: TeacherSubjectsComponent },
+          {
+            path: 'subject/:id',
+            children: [
+              // { path: 'students', component: StudentsListComponent },
+              // { path: 'evaluation-plan', component: EvaluationPlanComponent }
+            ]
+          }
         ]
       }
     ]
