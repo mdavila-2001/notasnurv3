@@ -36,7 +36,10 @@ export const routes: Routes = [
           {
             path: 'subject/:id',
             children: [
+              // Aquí Fernando conectará su lista de estudiantes (US-06)
               // { path: 'students', component: StudentsListComponent },
+              
+              // Aquí Joaquín/Rodrigo conectarán su plan de evaluación (US-07)
               // { path: 'evaluation-plan', component: EvaluationPlanComponent }
             ]
           }
