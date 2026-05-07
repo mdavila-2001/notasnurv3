@@ -90,7 +90,7 @@
           <div class="stats-row">
             <div class="stat-item">
               <p>Actas Pendientes</p>
-              <p class="stat-number">0{{ pendingRecords() }}</p>
+              <p class="stat-number">{{ pendingRecords() | number:'2.0-0' }}</p>
             </div>
             <div class="stat-item">
               <p>Promedio de Curso</p>
