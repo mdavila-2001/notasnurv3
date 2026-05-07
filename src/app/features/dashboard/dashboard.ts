@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { Auth } from '../../core/services/auth/auth';
 import { ManagementListComponent } from '../../pages/academic-management/management-list/management-list';
 import { StudentSubjectsComponent } from '../../pages/student/student-subjects/student-subjects';
-import { TeacherSubjectsComponent } from '../../pages/teacher/teacher-subjects/teacher-subjects';
 
 @Component({
   selector: 'app-dashboard',
@@ -43,7 +42,7 @@ export class Dashboard implements OnInit {
         this.componentToRender = ManagementListComponent;
         break;
       case 'TEACHER':
-        this.componentToRender = TeacherSubjectsComponent;
+        this.router.navigate(['/teacher/dashboard']);
         break;
       case 'STUDENT':
         this.componentToRender = StudentSubjectsComponent;

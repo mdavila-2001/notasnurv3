@@ -10,6 +10,7 @@ import { SubjectListComponent } from './pages/subjects/subject-list/subject-list
 import { EnrollmentListComponent } from './pages/enrollments/enrollment-list/enrollment-list';
 import { StudentSubjectsComponent } from './pages/student/student-subjects/student-subjects';
 import { TeacherSubjectsComponent } from './pages/teacher/teacher-subjects/teacher-subjects';
+import { TeacherDashboard } from './features/dashboard/teacher-dashboard/teacher-dashboard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -25,6 +26,15 @@ export const routes: Routes = [
       { path: 'subjects', component: SubjectListComponent },
       { path: 'users', component: Users },
       { path: 'enrollments', component: EnrollmentListComponent },
+      
+      // Rutas específicas por rol (como se define en el sidebar)
+      { 
+        path: 'teacher',
+        children: [
+          { path: 'dashboard', component: TeacherDashboard },
+          { path: 'subjects', component: TeacherSubjectsComponent }
+        ]
+      }
     ]
   },
 
