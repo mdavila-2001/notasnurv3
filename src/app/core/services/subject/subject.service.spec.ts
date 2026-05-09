@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { SubjectService } from './subject.service';
 import { environment } from '../../../../environments/environment';
-import { Subject } from '../../models/subject.model';
+import { Subject, SubjectRequest } from '../../models/subject.model';
 
 describe('SubjectService', () => {
   let service: SubjectService;
@@ -32,7 +32,19 @@ describe('SubjectService', () => {
 
   it('should fetch subjects', () => {
     const mockSubjects: Subject[] = [
-      { id: '1', code: 'CS101', name: 'Intro to Programming', description: 'Basics' },
+      {
+        id: 1,
+        code: 'CS101',
+        name: 'Intro to Programming',
+        teacherId: 'teacher-1',
+        teacherName: 'Fernando',
+        capacity: 30,
+        semesterId: 1,
+        semesterName: '2024-I',
+        management: '2024',
+        modality: 'FACE_TO_FACE',
+        recordStatus: 'PUBLISHED'
+      },
     ];
 
     service.getSubjects().subscribe((subjects) => {
@@ -45,8 +57,29 @@ describe('SubjectService', () => {
   });
 
   it('should create a subject', () => {
-    const payload = { code: 'CS102', name: 'Data Structures', description: 'Advanced' };
-    const mockSubject: Subject = { id: '2', ...payload };
+    // CORREGIDO: Tipado estricto con SubjectRequest y modalidad correcta
+    const payload: SubjectRequest = { 
+      code: 'CS102', 
+      name: 'Data Structures', 
+      modality: 'FACE_TO_FACE', 
+      capacity: 25,
+      semesterId: 1,
+      teacherId: 'teacher-1'
+    };
+
+    const mockSubject: Subject = { 
+      id: 2, 
+      code: payload.code,
+      name: payload.name,
+      teacherId: payload.teacherId,
+      teacherName: 'Fernando',
+      capacity: payload.capacity,
+      semesterId: payload.semesterId, 
+      semesterName: '2024-I',
+      management: '2024',
+      modality: payload.modality, 
+      recordStatus: 'PUBLISHED'
+    };
 
     service.createSubject(payload).subscribe((subject) => {
       expect(subject).toEqual(mockSubject);
