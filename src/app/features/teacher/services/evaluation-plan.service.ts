@@ -23,6 +23,12 @@ export interface ComponentRequest {
   planId: number;
 }
 
+export interface ComponentUpdateRequest {
+  name: string;
+  weight: number;
+  description: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class EvaluationPlanService {
   private readonly api = inject(ApiService);
@@ -35,8 +41,8 @@ export class EvaluationPlanService {
   readonly isLoading = computed(() => this._isLoading());
   readonly error = computed(() => this._error());
 
-  readonly weightSum = computed(() =>
-    this._plan()?.components.reduce((acc, c) => acc + c.weight, 0) ?? 0
+  readonly weightSum = computed(
+    () => this._plan()?.components.reduce((acc, c) => acc + Number(c.weight ?? 0), 0) ?? 0,
   );
 
   readonly canActivate = computed(() => this.weightSum() === 100);
@@ -48,8 +54,8 @@ export class EvaluationPlanService {
     this._error.set(null);
 
     return this.api.get<EvaluationPlanResponse>(`/evaluation-plans/subject/${subjectId}`).pipe(
-      map(response => response.data),
-      tap(plan => this._plan.set(plan)),
+      map((response) => response.data),
+      tap((plan) => this._plan.set(plan)),
       catchError(() => {
         this._plan.set(null);
         return of(null);
@@ -63,9 +69,9 @@ export class EvaluationPlanService {
     this._error.set(null);
 
     return this.api.post<EvaluationPlanResponse>(`/evaluation-plans/subject/${subjectId}`, {}).pipe(
-      map(response => response.data),
-      tap(plan => this._plan.set(plan)),
-      catchError(error => {
+      map((response) => response.data),
+      tap((plan) => this._plan.set(plan)),
+      catchError((error) => {
         this._error.set(error.error?.message ?? 'Error al crear el plan de evaluación');
         return of(null);
       }),
@@ -76,19 +82,68 @@ export class EvaluationPlanService {
   addComponent(request: ComponentRequest): Observable<ComponentResponse | null> {
     this._error.set(null);
 
-    return this.api.post<ComponentResponse>('/components', request).pipe(
-      map(response => response.data),
-      tap(component => {
-        const current = this._plan();
-        if (current) {
-          this._plan.set({ ...current, components: [...current.components, component] });
-        }
-      }),
-      catchError(error => {
-        this._error.set(error.error?.message ?? 'Error al agregar el componente');
-        return of(null);
-      }),
-    );
+    return this.api
+      .post<ComponentResponse>('/components', {
+        ...request,
+        weight: Number(request.weight),
+      })
+      .pipe(
+        map((response) => response.data),
+        tap((component) => {
+          if (!component) {
+            return;
+          }
+
+          const current = this._plan();
+
+          if (current) {
+            this._plan.set({
+              ...current,
+              components: [...current.components, component],
+            });
+          }
+        }),
+        catchError((error) => {
+          this._error.set(error.error?.message ?? 'Error al agregar el componente');
+          return of(null);
+        }),
+      );
+  }
+
+  updateComponent(
+    componentId: number,
+    request: ComponentUpdateRequest,
+  ): Observable<ComponentResponse | null> {
+    this._error.set(null);
+
+    return this.api
+      .put<ComponentResponse>(`/components/${componentId}`, {
+        ...request,
+        weight: Number(request.weight),
+      })
+      .pipe(
+        map((response: ApiResponse<ComponentResponse>) => response.data),
+        tap((updatedComponent) => {
+          if (!updatedComponent) {
+            return;
+          }
+
+          const current = this._plan();
+
+          if (current) {
+            this._plan.set({
+              ...current,
+              components: current.components.map((component) =>
+                component.id === componentId ? updatedComponent : component,
+              ),
+            });
+          }
+        }),
+        catchError((error) => {
+          this._error.set(error.error?.message ?? 'Error al actualizar el componente');
+          return of(null);
+        }),
+      );
   }
 
   deleteComponent(componentId: number): Observable<boolean> {
@@ -98,14 +153,15 @@ export class EvaluationPlanService {
       map(() => true),
       tap(() => {
         const current = this._plan();
+
         if (current) {
           this._plan.set({
             ...current,
-            components: current.components.filter(c => c.id !== componentId),
+            components: current.components.filter((component) => component.id !== componentId),
           });
         }
       }),
-      catchError(error => {
+      catchError((error) => {
         this._error.set(error.error?.message ?? 'Error al eliminar el componente');
         return of(false);
       }),
@@ -118,8 +174,8 @@ export class EvaluationPlanService {
 
     return this.api.post<void>(`/evaluation-plans/subject/${subjectId}/activate`, {}).pipe(
       map(() => true),
-      catchError(error => {
-        this._error.set(error.error?.message ?? 'Error al activar el plan');
+      catchError((error) => {
+        this._error.set(error.error?.message ?? 'Error al finalizar la configuración del plan');
         return of(false);
       }),
       tap(() => this._isLoading.set(false)),
