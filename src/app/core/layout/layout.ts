@@ -24,6 +24,7 @@ export class Layout implements OnInit {
   userRole = signal<string>('');
   userName = signal<string>('Usuario');
   isLogoutModalOpen = signal<boolean>(false);
+  isSidebarOpen = signal<boolean>(false);
 
   userRoleDisplay = computed(() => {
     const roleMap: Record<string, string> = {
@@ -92,6 +93,14 @@ export class Layout implements OnInit {
       'STUDENT': 'Portal Estudiante'
     };
     return roleMap[this.userRole()] || 'Portal Universitario';
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen.set(false);
   }
 
   openLogoutModal() {

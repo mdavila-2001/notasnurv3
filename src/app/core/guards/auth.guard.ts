@@ -6,7 +6,7 @@ import { UserRole } from '../models/api.models';
 const ROLE_DASHBOARD: Record<UserRole, string> = {
   ADMIN: '/admin/dashboard',
   TEACHER: '/teacher/dashboard',
-  STUDENT: '/student/dashboard',
+  STUDENT: '/student/subjects',
 };
 
 export const authGuard: CanActivateFn = (route, state) => {
@@ -22,7 +22,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   if (requiredRole && !authService.hasRole(requiredRole)) {
     const userRole = authService.getUserRole();
-    const fallback = userRole ? ROLE_DASHBOARD[userRole] || '/dashboard' : '/dashboard';
+    const fallback = userRole ? ROLE_DASHBOARD[userRole] || '/login' : '/login';
     router.navigate([fallback]);
     return false;
   }

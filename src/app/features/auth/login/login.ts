@@ -78,12 +78,19 @@ export class Login implements OnInit {
   }
 
   private redirectByRole(role: string | undefined): void {
-    if (role === 'TEACHER') {
-      this.router.navigate(['/teacher/dashboard']);
-    } else if (role === 'ADMIN') {
-      this.router.navigate(['/admin/dashboard']);
-    } else {
-      this.router.navigate(['/dashboard']);
+    switch (role) {
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'TEACHER':
+        this.router.navigate(['/teacher/dashboard']);
+        break;
+      case 'STUDENT':
+        this.router.navigate(['/student/subjects']);
+        break;
+      default:
+        this.router.navigate(['/login']);
+        break;
     }
   }
 

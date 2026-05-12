@@ -1,4 +1,4 @@
-<div class="layout-wrapper">
+<div class="layout-wrapper" [class.sidebar-open]="isSidebarOpen()">
   
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -10,7 +10,8 @@
       @for (item of menuItems(); track item.path) {
         <a [routerLink]="[item.path]" 
           routerLinkActive="active-nav-link" 
-          class="nav-link">
+          class="nav-link"
+          (click)="closeSidebar()">
           <span class="material-symbols-outlined nav-icon">{{ item.icon }}</span>
           {{ item.label }}
         </a>
@@ -37,6 +38,9 @@
 
   <header class="topbar">
     <div class="topbar-left">
+      <button class="mobile-menu-btn" (click)="toggleSidebar()" aria-label="Menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
       <div class="welcome-text">
         <span class="welcome-greeting">Bienvenido de nuevo,</span>
         <h2 class="welcome-name">{{ userName() }}</h2>
@@ -56,6 +60,9 @@
       <div class="divider"></div>
     </div>
   </header>
+
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay" (click)="closeSidebar()"></div>
 
   <main class="main-content">
     <router-outlet></router-outlet>

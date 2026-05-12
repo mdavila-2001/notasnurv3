@@ -2,12 +2,6 @@ import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth.guard';
 import { Layout } from './core/layout/layout';
-import { Dashboard } from './features/dashboard/dashboard';
-import { Users } from './features/users/users';
-import { ManagementListComponent } from './pages/academic-management/management-list/management-list';
-import { SemesterListComponent } from './pages/academic-management/semester-list/semester-list';
-import { SubjectListComponent } from './pages/subjects/subject-list/subject-list';
-import { EnrollmentListComponent } from './pages/enrollments/enrollment-list/enrollment-list';
 import { StudentSubjectsComponent } from './pages/student/student-subjects/student-subjects';
 
 export const routes: Routes = [
@@ -18,36 +12,34 @@ export const routes: Routes = [
     component: Layout,
     canActivate: [authGuard],
     children: [
-      // === Admin (lazy-loaded) ===
+      // === Admin (lazy-loaded, role-protected) ===
       {
         path: 'admin',
         loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes),
       },
 
-      // === Teacher (lazy-loaded) ===
+      // === Teacher (lazy-loaded, role-protected) ===
       {
         path: 'teacher',
         loadChildren: () => import('./features/teacher/teacher.routes').then(m => m.teacherRoutes),
       },
 
-      // === Rutas legacy (retrocompatibilidad) ===
-      { path: 'dashboard', component: Dashboard },
-      { path: 'managements', component: ManagementListComponent },
-      { path: 'semesters', component: SemesterListComponent },
-      { path: 'subjects', component: SubjectListComponent },
-      { path: 'users', component: Users },
-      { path: 'enrollments', component: EnrollmentListComponent },
-
-      // === Rutas Student ===
+      // === Student ===
       {
         path: 'student',
         children: [
           { path: 'subjects', component: StudentSubjectsComponent },
         ]
       },
+
+      // Redirect legacy /dashboard → role-appropriate dashboard
+      // El authGuard en la ruta padre ya verificó autenticación;
+      // la redirección se maneja en el login por rol.
+      { path: 'dashboard', redirectTo: '/admin/dashboard', pathMatch: 'full' },
     ]
   },
 
   { path: 'login', component: Login },
   { path: '**', redirectTo: 'login' }
 ];
+

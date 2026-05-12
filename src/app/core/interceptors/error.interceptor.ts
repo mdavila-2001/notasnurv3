@@ -2,22 +2,23 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { ToastService } from '../../shared/services/toast.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const toastService = inject(ToastService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      let errorMessage = 'Ocurrió un error inesperado en el servidor';
-
-      if (error.error && error.error.message) {
-        errorMessage = error.error.message;
-      }
+      // 1. Primero determinar el mensaje por defecto según status
+      let errorMessage: string;
 
       switch (error.status) {
         case 401:
           errorMessage = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('role');
+          localStorage.removeItem('fullName');
           router.navigate(['/login']);
           break;
         case 403:
@@ -29,14 +30,21 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         case 500:
           errorMessage = 'Error interno del servidor. Intente más tarde.';
           break;
+        default:
+          errorMessage = 'Ocurrió un error inesperado en el servidor.';
+          break;
+      }
+
+      // 2. Si el backend envió un mensaje específico, priorizarlo (excepto 401 por seguridad)
+      if (error.status !== 401 && error.error?.message) {
+        errorMessage = error.error.message;
       }
 
       console.error(`[API Error] ${error.status}: ${errorMessage}`);
-      
-      // Aquí se podría integrar un servicio de notificaciones/toasts
-      alert(errorMessage);
 
-      return throwError(() => new Error(errorMessage));
+      toastService.error(errorMessage);
+
+      return throwError(() => ({ status: error.status, message: errorMessage, details: error.error }));
     })
   );
 };

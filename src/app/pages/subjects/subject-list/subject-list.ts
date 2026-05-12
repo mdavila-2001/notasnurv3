@@ -155,16 +155,35 @@ export class SubjectListComponent implements OnInit {
     });
   }
 
+  // Delete confirmation modal state
+  readonly isDeleteModalOpen = signal(false);
+  readonly subjectToDelete = signal<Subject | null>(null);
+
   onDelete(subject: Subject) {
-    if (confirm(`¿Estás seguro de eliminar la materia "${subject.name}"?`)) {
-      this.adminSubjectService.delete(String(subject.id)).subscribe({
-        next: () => {
-          this.displayToast('Materia eliminada', 'success');
-          this.loadData();
-        },
-        error: () => this.displayToast('Error al eliminar la materia', 'error'),
-      });
-    }
+    this.subjectToDelete.set(subject);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  closeDeleteModal() {
+    this.isDeleteModalOpen.set(false);
+    this.subjectToDelete.set(null);
+  }
+
+  confirmDelete() {
+    const subject = this.subjectToDelete();
+    if (!subject) return;
+
+    this.adminSubjectService.delete(String(subject.id)).subscribe({
+      next: () => {
+        this.displayToast('Materia eliminada', 'success');
+        this.loadData();
+        this.closeDeleteModal();
+      },
+      error: () => {
+        this.displayToast('Error al eliminar la materia', 'error');
+        this.closeDeleteModal();
+      },
+    });
   }
 
   displayToast(message: string, type: 'success' | 'error') {
