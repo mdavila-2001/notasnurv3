@@ -10,8 +10,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
-import { User as UserService } from '../../core/services/user/user';
-import { UserResponse, UserRequest } from '../../core/models/user.model';
+import { AdminUserService, UserRequest } from '../admin/services/admin-user.service';
+import { UserResponse } from '../../core/models/api.models';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-users',
@@ -22,12 +23,17 @@ import { UserResponse, UserRequest } from '../../core/models/user.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Users implements OnInit {
-  private readonly userService = inject(UserService);
+  private readonly adminUserService = inject(AdminUserService);
+  private readonly toastService = inject(ToastService);
 
   allUsers = signal<UserResponse[]>([]);
   selectedTab = signal<'Docente' | 'Estudiante'>('Docente');
   searchQuery = signal('');
   isRegisterModalOpen = signal(false);
+
+  // Delete confirmation modal state
+  isDeleteModalOpen = signal(false);
+  userToDelete = signal<UserResponse | null>(null);
 
   newUser: Partial<UserRequest & { id: string; password: string }> = this.getEmptyUserStructure();
 
@@ -37,11 +43,9 @@ export class Users implements OnInit {
 
   loadUsers() {
     const role = this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT';
-    this.userService.getUsersByRole(role).subscribe({
-      next: (data) => {
-        this.allUsers.set(data);
-      },
-      error: (err: any) => console.error('Error al cargar usuarios:', err)
+    this.adminUserService.getByRole(role).subscribe({
+      next: (response) => this.allUsers.set(response.data ?? []),
+      error: () => this.toastService.error('Error al cargar usuarios')
     });
   }
 
@@ -57,11 +61,11 @@ export class Users implements OnInit {
   activeUsersCount = computed(() => this.allUsers().filter(u => u.status === 'ACTIVE').length);
 
   saveUser() {
-    const isEditing = !!(this.newUser as any).id;
-    const password = (this.newUser as any).password?.trim() || '';
+    const isEditing = !!this.newUser.id;
+    const password = this.newUser.password?.trim() || '';
 
     if (!isEditing && !password) {
-      alert('Debes ingresar una contraseña para crear el usuario.');
+      this.toastService.warning('Debes ingresar una contraseña para crear el usuario.');
       return;
     }
 
@@ -73,59 +77,73 @@ export class Users implements OnInit {
       ci: this.newUser.ci ? String(this.newUser.ci) : '',
       email: this.newUser.email?.trim() || '',
       role: this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT',
-      status: (this.newUser as any).status || 'ACTIVE',
+      status: 'ACTIVE',
     };
 
     if (password) {
       payload.password = password;
     }
 
-    const action$: import('rxjs').Observable<any> = isEditing
-      ? this.userService.update((this.newUser as any).id, payload)
-      : this.userService.create(payload);
+    const action$ = isEditing
+      ? this.adminUserService.update(this.newUser.id!, payload)
+      : this.adminUserService.create(payload);
 
     action$.subscribe({
       next: () => {
         this.loadUsers();
         this.closeRegisterModal();
-        alert(isEditing ? '¡Usuario actualizado!' : '¡Usuario registrado correctamente!');
+        this.toastService.success(isEditing ? '¡Usuario actualizado!' : '¡Usuario registrado correctamente!');
       },
       error: (err: any) => {
-        const backendMessage = err?.error?.message;
-        alert(backendMessage ? `Error: ${backendMessage}` : 'Error al procesar la solicitud.');
+        const backendMessage = err?.message || err?.error?.message;
+        this.toastService.error(backendMessage || 'Error al procesar la solicitud.');
       }
     });
   }
 
   onEdit(user: UserResponse) {
-    this.newUser = { ...user, password: '' };
+    this.newUser = { ...user, password: '', role: user.role as 'TEACHER' | 'STUDENT', status: user.status as 'ACTIVE' | 'INACTIVE' | 'GRADUATED' };
     this.isRegisterModalOpen.set(true);
   }
 
+  // Delete confirmation flow using Modal instead of confirm()
   onDelete(user: UserResponse) {
-    if (confirm(`¿Estás seguro de eliminar a ${user.fullName}?`)) {
-      this.userService.delete(user.id).subscribe({
-        next: () => {
-          this.allUsers.update(list => list.filter(u => u.id !== user.id));
-        },
-        error: (err: any) => alert('Error al eliminar: ' + (err?.error?.message || err.message))
-      });
-    }
+    this.userToDelete.set(user);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  closeDeleteModal() {
+    this.isDeleteModalOpen.set(false);
+    this.userToDelete.set(null);
+  }
+
+  confirmDelete() {
+    const user = this.userToDelete();
+    if (!user) return;
+
+    this.adminUserService.delete(user.id).subscribe({
+      next: () => {
+        this.allUsers.update(list => list.filter(u => u.id !== user.id));
+        this.toastService.success(`${user.fullName} eliminado correctamente`);
+        this.closeDeleteModal();
+      },
+      error: (err: any) => {
+        this.toastService.error(err?.message || 'Error al eliminar el usuario');
+        this.closeDeleteModal();
+      }
+    });
   }
 
   toggleEstado(user: UserResponse): void {
     const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    this.userService.updateStatus(user.id, newStatus).subscribe({
-      next: () => {
-        this.allUsers.update(list =>
-          list.map(u => u.id === user.id ? { ...u, status: newStatus } : u)
-        );
-      },
-      error: (err: any) => console.error('Error al cambiar estado:', err)
+    this.adminUserService.updateStatus(user.id, newStatus).subscribe({
+      next: () => this.allUsers.update(list =>
+        list.map(u => u.id === user.id ? { ...u, status: newStatus } : u)
+      ),
+      error: () => this.toastService.error('Error al cambiar estado del usuario')
     });
   }
 
-  // --- UI Y MODALES ---
   setTab(tab: 'Docente' | 'Estudiante') {
     this.selectedTab.set(tab);
     this.loadUsers();
@@ -143,7 +161,7 @@ export class Users implements OnInit {
 
   private getEmptyUserStructure() {
     return {
-      id: null as any,
+      id: '' as string,
       name: '',
       middleName: '',
       lastName: '',
@@ -152,7 +170,7 @@ export class Users implements OnInit {
       password: '',
       ci: '',
       role: (this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT') as 'TEACHER' | 'STUDENT',
-      status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
+      status: 'ACTIVE' as 'ACTIVE',
     };
   }
 
@@ -160,3 +178,4 @@ export class Users implements OnInit {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 }
+
