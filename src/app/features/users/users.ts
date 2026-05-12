@@ -10,8 +10,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
-import { User as UserService } from '../../core/services/user/user';
-import { UserResponse, UserRequest } from '../../core/models/user.model';
+import { AdminUserService, UserRequest } from '../admin/services/admin-user.service';
+import { UserResponse } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-users',
@@ -22,7 +22,7 @@ import { UserResponse, UserRequest } from '../../core/models/user.model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Users implements OnInit {
-  private readonly userService = inject(UserService);
+  private readonly adminUserService = inject(AdminUserService);
 
   allUsers = signal<UserResponse[]>([]);
   selectedTab = signal<'Docente' | 'Estudiante'>('Docente');
@@ -37,10 +37,8 @@ export class Users implements OnInit {
 
   loadUsers() {
     const role = this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT';
-    this.userService.getUsersByRole(role).subscribe({
-      next: (data) => {
-        this.allUsers.set(data);
-      },
+    this.adminUserService.getByRole(role).subscribe({
+      next: (response) => this.allUsers.set(response.data ?? []),
       error: (err: any) => console.error('Error al cargar usuarios:', err)
     });
   }
@@ -73,16 +71,16 @@ export class Users implements OnInit {
       ci: this.newUser.ci ? String(this.newUser.ci) : '',
       email: this.newUser.email?.trim() || '',
       role: this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT',
-      status: (this.newUser as any).status || 'ACTIVE',
+      status: 'ACTIVE',
     };
 
     if (password) {
       payload.password = password;
     }
 
-    const action$: import('rxjs').Observable<any> = isEditing
-      ? this.userService.update((this.newUser as any).id, payload)
-      : this.userService.create(payload);
+    const action$ = isEditing
+      ? this.adminUserService.update((this.newUser as any).id, payload)
+      : this.adminUserService.create(payload);
 
     action$.subscribe({
       next: () => {
@@ -98,16 +96,14 @@ export class Users implements OnInit {
   }
 
   onEdit(user: UserResponse) {
-    this.newUser = { ...user, password: '' };
+    this.newUser = { ...user, password: '', role: user.role as 'TEACHER' | 'STUDENT', status: user.status as 'ACTIVE' | 'INACTIVE' | 'GRADUATED' };
     this.isRegisterModalOpen.set(true);
   }
 
   onDelete(user: UserResponse) {
     if (confirm(`¿Estás seguro de eliminar a ${user.fullName}?`)) {
-      this.userService.delete(user.id).subscribe({
-        next: () => {
-          this.allUsers.update(list => list.filter(u => u.id !== user.id));
-        },
+      this.adminUserService.delete(user.id).subscribe({
+        next: () => this.allUsers.update(list => list.filter(u => u.id !== user.id)),
         error: (err: any) => alert('Error al eliminar: ' + (err?.error?.message || err.message))
       });
     }
@@ -115,17 +111,14 @@ export class Users implements OnInit {
 
   toggleEstado(user: UserResponse): void {
     const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    this.userService.updateStatus(user.id, newStatus).subscribe({
-      next: () => {
-        this.allUsers.update(list =>
-          list.map(u => u.id === user.id ? { ...u, status: newStatus } : u)
-        );
-      },
+    this.adminUserService.updateStatus(user.id, newStatus).subscribe({
+      next: () => this.allUsers.update(list =>
+        list.map(u => u.id === user.id ? { ...u, status: newStatus } : u)
+      ),
       error: (err: any) => console.error('Error al cambiar estado:', err)
     });
   }
 
-  // --- UI Y MODALES ---
   setTab(tab: 'Docente' | 'Estudiante') {
     this.selectedTab.set(tab);
     this.loadUsers();
@@ -152,7 +145,7 @@ export class Users implements OnInit {
       password: '',
       ci: '',
       role: (this.selectedTab() === 'Docente' ? 'TEACHER' : 'STUDENT') as 'TEACHER' | 'STUDENT',
-      status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
+      status: 'ACTIVE' as 'ACTIVE',
     };
   }
 

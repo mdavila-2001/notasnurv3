@@ -1,0 +1,116 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Mis Materias</h1>
+    <p class="page-subtitle">Materias que tienes asignadas. Selecciona una para ver los alumnos matriculados.</p>
+  </div>
+
+  <div class="teacher-layout">
+
+    <!-- Panel izquierdo: Materias del docente -->
+    <div class="subjects-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Mis Materias Asignadas</h2>
+      </div>
+
+      @if (isLoading() || isResolvingProfile()) {
+        <div class="loading-state">
+          <span class="material-symbols-outlined spinning">progress_activity</span>
+          <p>Cargando materias...</p>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="error-state">
+          <span class="material-symbols-outlined">error_outline</span>
+          <p>{{ errorMessage() }}</p>
+          <button class="btn-retry" (click)="loadSubjects()">Reintentar</button>
+        </div>
+      } @else if (mySubjects().length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined">class</span>
+          <p>No tienes materias asignadas actualmente.</p>
+        </div>
+      } @else {
+        <ul class="subjects-list">
+          @for (subject of mySubjects(); track subject.id) {
+            <li
+              class="subject-item"
+              [class.selected]="selectedSubject()?.id === subject.id"
+              (click)="selectSubject(subject)">
+              <div class="subject-item-main">
+                <span class="subject-code">{{ subject.code }}</span>
+                <span class="subject-name">{{ subject.name }}</span>
+              </div>
+              <div class="subject-item-meta">
+                <span>{{ subject.semesterName }} · Gestión —</span>
+                <span class="status-badge" [class.active]="subject.recordStatus === 'PUBLISHED'">
+                  {{ subject.recordStatus === 'PUBLISHED' ? 'Publicada' : subject.recordStatus === 'DRAFT' ? 'Borrador' : 'Inactiva' }}
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Panel derecho: Alumnos de la materia seleccionada -->
+    <div class="students-panel">
+      @if (!selectedSubject()) {
+        <div class="empty-state centered">
+          <span class="material-symbols-outlined">group</span>
+          <p>Selecciona una materia para ver los alumnos matriculados</p>
+        </div>
+      } @else {
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">{{ selectedSubject()!.name }}</h2>
+            <p class="panel-subtitle">
+              {{ selectedSubject()!.code }} · {{ selectedSubject()!.semesterName }} · Gestión —
+            </p>
+          </div>
+          <div class="cupos-info">
+            <span class="material-symbols-outlined">group</span>
+            Cupos disponibles: <strong>{{ selectedSubject()!.capacity }}</strong>
+          </div>
+        </div>
+
+        @if (isLoadingStudents()) {
+          <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando alumnos...</p>
+          </div>
+        } @else if (enrolledStudents().length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-outlined">person_search</span>
+            <p>No hay alumnos matriculados en esta materia.</p>
+          </div>
+        } @else {
+          <div class="students-table-wrapper">
+            <table class="students-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre Completo</th>
+                  <th>CI</th>
+                  <th>Correo</th>
+                  <th>Carrera</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (student of enrolledStudents(); track student.studentId; let i = $index) {
+                  <tr>
+                    <td class="row-number">{{ i + 1 }}</td>
+                    <td class="student-name">{{ student.fullName }}</td>
+                    <td>{{ student.ci }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.degreeName || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="students-count">{{ enrolledStudents().length }} alumno(s) matriculado(s)</p>
+        }
+      }
+    </div>
+
+  </div>
+</div>

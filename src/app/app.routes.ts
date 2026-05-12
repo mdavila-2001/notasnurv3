@@ -1,16 +1,14 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { authGuard } from './core/guards/auth.guard';
-import { Dashboard } from './features/dashboard/dashboard';
 import { Layout } from './core/layout/layout';
+import { Dashboard } from './features/dashboard/dashboard';
 import { Users } from './features/users/users';
 import { ManagementListComponent } from './pages/academic-management/management-list/management-list';
 import { SemesterListComponent } from './pages/academic-management/semester-list/semester-list';
 import { SubjectListComponent } from './pages/subjects/subject-list/subject-list';
 import { EnrollmentListComponent } from './pages/enrollments/enrollment-list/enrollment-list';
 import { StudentSubjectsComponent } from './pages/student/student-subjects/student-subjects';
-import { TeacherSubjectsComponent } from './pages/teacher/teacher-subjects/teacher-subjects';
-import { TeacherDashboard } from './features/dashboard/teacher-dashboard/teacher-dashboard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -20,35 +18,36 @@ export const routes: Routes = [
     component: Layout,
     canActivate: [authGuard],
     children: [
+      // === Admin (lazy-loaded) ===
+      {
+        path: 'admin',
+        loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes),
+      },
+
+      // === Teacher (lazy-loaded) ===
+      {
+        path: 'teacher',
+        loadChildren: () => import('./features/teacher/teacher.routes').then(m => m.teacherRoutes),
+      },
+
+      // === Rutas legacy (retrocompatibilidad) ===
       { path: 'dashboard', component: Dashboard },
       { path: 'managements', component: ManagementListComponent },
       { path: 'semesters', component: SemesterListComponent },
       { path: 'subjects', component: SubjectListComponent },
       { path: 'users', component: Users },
       { path: 'enrollments', component: EnrollmentListComponent },
-      
-      // Rutas específicas por rol (como se define en el sidebar)
-      { 
-        path: 'teacher',
+
+      // === Rutas Student ===
+      {
+        path: 'student',
         children: [
-          { path: 'dashboard', component: TeacherDashboard },
-          { path: 'subjects', component: TeacherSubjectsComponent },
-          {
-            path: 'subject/:id',
-            children: [
-              // Aquí Fernando conectará su lista de estudiantes (US-06)
-              // { path: 'students', component: StudentsListComponent },
-              
-              // Aquí Joaquín/Rodrigo conectarán su plan de evaluación (US-07)
-              // { path: 'evaluation-plan', component: EvaluationPlanComponent }
-            ]
-          }
+          { path: 'subjects', component: StudentSubjectsComponent },
         ]
-      }
+      },
     ]
   },
 
   { path: 'login', component: Login },
-
   { path: '**', redirectTo: 'login' }
 ];

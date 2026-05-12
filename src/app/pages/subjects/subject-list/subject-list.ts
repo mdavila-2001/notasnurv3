@@ -1,13 +1,13 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { SubjectService } from '../../../core/services/subject/subject.service';
+import { AdminSubjectService, SubjectResponse } from '../../../features/admin/services/admin-subject.service';
+import { AdminUserService } from '../../../features/admin/services/admin-user.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
-import { User as UserService } from '../../../core/services/user/user';
 import { Subject, SubjectModality, SubjectRecordStatus, SubjectRequest } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
-import { UserResponse } from '../../../core/models/user.model';
+import { UserResponse } from '../../../core/models/api.models';
 import { SubjectFormComponent } from '../subject-form/subject-form';
 import { Modal } from '../../../shared/components/modal/modal';
 import { Button } from '../../../shared/components/button/button';
@@ -35,9 +35,9 @@ const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
   styleUrl: './subject-list.css',
 })
 export class SubjectListComponent implements OnInit {
-  private readonly subjectService = inject(SubjectService);
+  private readonly adminSubjectService = inject(AdminSubjectService);
+  private readonly adminUserService = inject(AdminUserService);
   private readonly academicService = inject(AcademicManagementService);
-  private readonly userService = inject(UserService);
 
   readonly subjects = signal<Subject[]>([]);
   readonly semesters = signal<Semester[]>([]);
@@ -94,14 +94,14 @@ export class SubjectListComponent implements OnInit {
     this.isLoading.set(true);
 
     forkJoin({
-      subjects: this.subjectService.getSubjects(),
+      subjects: this.adminSubjectService.getAll().pipe(map(r => r.data ?? [])),
       semesters: this.academicService.getSemesters(),
-      teachers: this.userService.getUsersByRole('TEACHER'),
+      teachers: this.adminUserService.getByRole('TEACHER').pipe(map(r => r.data ?? [])),
     })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: ({ subjects, semesters, teachers }) => {
-          this.subjects.set(Array.isArray(subjects) ? subjects : []);
+          this.subjects.set(Array.isArray(subjects) ? subjects as any : []);
           this.semesters.set(semesters);
           this.teachers.set(teachers);
         },
@@ -121,9 +121,10 @@ export class SubjectListComponent implements OnInit {
 
   onSave(payload: SubjectRequest) {
     const current = this.selectedSubject();
+    const servicePayload = { ...payload, semesterId: String(payload.semesterId) };
     const request$ = current
-      ? this.subjectService.updateSubject(current.id, payload)
-      : this.subjectService.createSubject(payload);
+      ? this.adminSubjectService.update(String(current.id), servicePayload)
+      : this.adminSubjectService.create(servicePayload);
 
     request$.subscribe({
       next: () => {
@@ -142,7 +143,7 @@ export class SubjectListComponent implements OnInit {
   }
 
   onActivate(subject: Subject) {
-    this.subjectService.activateSubject(subject.id).subscribe({
+    this.adminSubjectService.activate(String(subject.id)).subscribe({
       next: () => {
         this.displayToast('Materia activada correctamente', 'success');
         this.loadData();
@@ -156,7 +157,7 @@ export class SubjectListComponent implements OnInit {
 
   onDelete(subject: Subject) {
     if (confirm(`¿Estás seguro de eliminar la materia "${subject.name}"?`)) {
-      this.subjectService.deleteSubject(subject.id).subscribe({
+      this.adminSubjectService.delete(String(subject.id)).subscribe({
         next: () => {
           this.displayToast('Materia eliminada', 'success');
           this.loadData();
