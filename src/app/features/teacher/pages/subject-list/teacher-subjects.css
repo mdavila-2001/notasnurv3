@@ -212,3 +212,35 @@
 
 .spinning { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Search Filter ---- */
+.students-filter-section {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: var(--text-primary, #e2e8f0);
+  font-size: 0.875rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.search-input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(99,102,241,0.5);
+}
+
+.search-input:focus::placeholder {
+  color: rgba(99,102,241,0.6);
+}
