@@ -1,15 +1,15 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 export interface SelectOption {
   label: string;
-  value: string | number;
+  value: any;
 }
 
 @Component({
   selector: 'app-input',
   standalone: true,
-  imports: [CommonModule],
+  imports: [FormsModule],
   templateUrl: './input.html',
   styleUrl: './input.css',
 })

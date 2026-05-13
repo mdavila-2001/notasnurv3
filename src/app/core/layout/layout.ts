@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from "../services/auth.service";
 import { Modal } from "../../shared/components/modal/modal";
@@ -13,7 +12,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [CommonModule, RouterModule, Modal, Button],
+  imports: [RouterModule, Modal, Button],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })
