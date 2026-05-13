@@ -14,6 +14,7 @@ export interface SubjectResponse {
   semesterName?: string;
   teacherName?: string;
   recordStatus: string;
+  management?: string;
 }
 
 export interface SubjectRequest {
