@@ -50,7 +50,7 @@ export class Layout implements OnInit {
         this.userRole.set(profile.role);
         this.buildMenu(profile.role);
       },
-      error: () => {}
+      error: (err) => console.error('[Layout] Error al obtener perfil de usuario:', err)
     });
   }
 
@@ -85,14 +85,14 @@ export class Layout implements OnInit {
     }
   }
 
-  getRoleDisplayName(): string {
+  readonly roleDisplayName = computed(() => {
     const roleMap: Record<string, string> = {
       'ADMIN': 'Portal Administrador',
       'TEACHER': 'Portal Docente',
       'STUDENT': 'Portal Estudiante'
     };
     return roleMap[this.userRole()] || 'Portal Universitario';
-  }
+  });
 
   toggleSidebar() {
     this.isSidebarOpen.update(v => !v);
