@@ -39,11 +39,11 @@
         
             @for (subject of subjects(); track subject.id) {
                 <div class="subject-card group" (click)="selectSubject(subject)">
-                    <div class="glass-accent" [ngClass]="{'presencial': subject.modality === 'PRESENCIAL', 'semi': subject.modality === 'SEMI_PRESENCIAL'}"></div>
+                    <div class="glass-accent" [class.presencial]="subject.modality === 'FACE_TO_FACE'" [class.semi]="subject.modality === 'BLENDED'" [class.online]="subject.modality === 'ONLINE'"></div>
             
                     <div class="card-top">
-                        <div class="glass-badge" [class.semi]="subject.modality === 'SEMI_PRESENCIAL'">
-                            {{ subject.modality === 'PRESENCIAL' ? 'PRESENCIAL' : 'SEMI-PRESENCIAL' }}
+                        <div class="glass-badge" [class.semi]="subject.modality === 'BLENDED'" [class.online]="subject.modality === 'ONLINE'">
+                            {{ subject.modality === 'FACE_TO_FACE' ? 'PRESENCIAL' : (subject.modality === 'BLENDED' ? 'SEMI-PRESENCIAL' : 'VIRTUAL') }}
                         </div>
                         <span class="subject-code">{{ subject.code }}</span>
                     </div>
@@ -54,10 +54,10 @@
                     <div class="progress-section">
                         <div class="progress-header">
                             <span>Progreso del programa</span>
-                            <span class="progress-percentage">0%</span>
+                            <span class="progress-percentage">{{ ($any(subject).progressPercentage || 0) | number:'1.0-0' }}%</span>
                         </div>
                         <div class="progress-track">
-                            <div class="progress-fill" style="width: 0%"></div>
+                            <div class="progress-fill" [style.width.%]="$any(subject).progressPercentage || 0"></div>
                         </div>
                     </div>
 
@@ -90,15 +90,19 @@
           <div class="stats-row">
             <div class="stat-item">
               <p>Actas Pendientes</p>
-              <p class="stat-number">{{ pendingRecords() | number:'2.0-0' }}</p>
+              <p class="stat-number">{{ pendingRecords() }}</p>
             </div>
             <div class="stat-item">
               <p>Promedio de Curso</p>
-              <p class="stat-number">78.4 <span>pts</span></p>
+              <p class="stat-number">{{ averageGrade() | number:'1.1-1' }} <span>pts</span></p>
             </div>
             <div class="stat-item">
               <p>Próximo Examen</p>
-              <p class="stat-number">{{ nextExamDate().split(' ')[0] }} <span>{{ nextExamDate().split(' ')[1] }}</span></p>
+              @if (nextExamDate().includes(' ')) {
+                <p class="stat-number">{{ nextExamDate().split(' ')[0] }} <span>{{ nextExamDate().split(' ')[1] }}</span></p>
+              } @else {
+                <p class="stat-number">{{ nextExamDate() }}</p>
+              }
             </div>
           </div>
         </div>

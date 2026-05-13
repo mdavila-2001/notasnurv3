@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { AdminSubjectService } from '../../../admin/services/admin-subject.service';
@@ -20,7 +19,7 @@ interface Tab {
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, StudentsTabComponent, EvaluationPlanTabComponent, GradeEntryTabComponent, AttendanceTabComponent, ReportsTabComponent],
+  imports: [RouterModule, StudentsTabComponent, EvaluationPlanTabComponent, GradeEntryTabComponent, AttendanceTabComponent, ReportsTabComponent],
   template: `
     <div class="subject-detail">
       @if (isLoading()) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
@@ -8,11 +8,11 @@ import { ApiResponse, AuthResponse, UserProfileResponse, UserRole, LoginRequest 
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly apiService = inject(ApiService);
+
   private readonly TOKEN_KEY = 'token';
   private readonly ROLE_KEY = 'role';
   private readonly FULL_NAME_KEY = 'fullName';
-
-  constructor(private apiService: ApiService) {}
 
   login(credentials: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.apiService.post<AuthResponse>('/auth/login', credentials).pipe(

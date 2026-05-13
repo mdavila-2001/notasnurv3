@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from "../services/auth.service";
 import { Modal } from "../../shared/components/modal/modal";
@@ -13,7 +12,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [CommonModule, RouterModule, Modal, Button],
+  imports: [RouterModule, Modal, Button],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })
@@ -51,7 +50,7 @@ export class Layout implements OnInit {
         this.userRole.set(profile.role);
         this.buildMenu(profile.role);
       },
-      error: () => {}
+      error: (err) => console.error('[Layout] Error al obtener perfil de usuario:', err)
     });
   }
 
@@ -86,14 +85,14 @@ export class Layout implements OnInit {
     }
   }
 
-  getRoleDisplayName(): string {
+  readonly roleDisplayName = computed(() => {
     const roleMap: Record<string, string> = {
       'ADMIN': 'Portal Administrador',
       'TEACHER': 'Portal Docente',
       'STUDENT': 'Portal Estudiante'
     };
     return roleMap[this.userRole()] || 'Portal Universitario';
-  }
+  });
 
   toggleSidebar() {
     this.isSidebarOpen.update(v => !v);

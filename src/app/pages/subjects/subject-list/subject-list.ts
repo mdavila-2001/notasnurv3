@@ -1,8 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
-import { AdminSubjectService, SubjectResponse } from '../../../features/admin/services/admin-subject.service';
+import { AdminSubjectService } from '../../../features/admin/services/admin-subject.service';
 import { AdminUserService } from '../../../features/admin/services/admin-user.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import { Subject, SubjectModality, SubjectRecordStatus, SubjectRequest } from '../../../core/models/subject.model';
@@ -30,7 +29,7 @@ const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
 @Component({
   selector: 'app-subject-list',
   standalone: true,
-  imports: [CommonModule, SubjectFormComponent, Modal, Button, Table, Toast],
+  imports: [SubjectFormComponent, Modal, Button, Table, Toast],
   templateUrl: './subject-list.html',
   styleUrl: './subject-list.css',
 })

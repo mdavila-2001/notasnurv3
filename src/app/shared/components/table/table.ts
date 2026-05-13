@@ -1,5 +1,4 @@
 import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Button } from '../button/button';
 
 export interface TableColumn {
@@ -10,7 +9,7 @@ export interface TableColumn {
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule, Button],
+  imports: [Button],
   templateUrl: './table.html',
   styleUrl: './table.css',
 })

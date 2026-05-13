@@ -1,10 +1,8 @@
-import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './modal.html',
   styleUrl: './modal.css',
 })
@@ -15,6 +13,13 @@ export class Modal {
   disableBackdropClick = input<boolean>(false);
 
   closed = output<void>();
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.isOpen()) {
+      this.onClose();
+    }
+  }
 
   onClose() {
     this.closed.emit();
