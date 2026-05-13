@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TeacherService } from '../../services/teacher.service';
@@ -9,7 +8,7 @@ import { Loader } from '../../../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-teacher-dashboard',
-  imports: [CommonModule, Loader],
+  imports: [Loader],
   standalone: true,
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.css',
