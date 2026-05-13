@@ -241,3 +241,69 @@
   min-height: 100vh;
   box-sizing: border-box;
 }
+
+/* === Mobile hamburger button === */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--brand-navy);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+  color: var(--brand-cyan);
+  background-color: rgba(0, 174, 239, 0.1);
+}
+
+/* === Sidebar overlay (mobile) === */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 45;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* === Responsive: tablet & mobile === */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .topbar {
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 1rem 2rem 1rem;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Sidebar open state */
+  .layout-wrapper.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .layout-wrapper.sidebar-open .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

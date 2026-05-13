@@ -1,112 +1,74 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, map, throwError } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiService } from '../api.service';
+import { ApiResponse } from '../../models/api.models';
 import {
-  ApiError,
   Management,
   ManagementRequest,
   Semester,
   SemesterRequest,
 } from '../../models/academic-management.model';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AcademicManagementService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = environment.apiBaseUrl;
-
-  private unwrapResponse<T>(response: ApiResponse<T>): T {
-    return response.data;
-  }
-
-  private unwrapArrayResponse<T>(response: ApiResponse<T[]>): T[] {
-    return Array.isArray(response.data) ? response.data : [];
-  }
+  private readonly api = inject(ApiService);
 
   // ========== MANAGEMENT ==========
 
   getManagements(): Observable<Management[]> {
-    return this.http
-      .get<ApiResponse<Management[]>>(`${this.baseUrl}/managements`)
-      .pipe(map((r) => this.unwrapArrayResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.get<Management[]>('/managements').pipe(
+      map(r => Array.isArray(r.data) ? r.data : [])
+    );
   }
 
   createManagement(payload: ManagementRequest): Observable<Management> {
-    return this.http
-      .post<ApiResponse<Management>>(`${this.baseUrl}/managements`, payload)
-      .pipe(map((r) => this.unwrapResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.post<Management>('/managements', payload).pipe(
+      map(r => r.data)
+    );
   }
 
   updateManagement(id: number, payload: ManagementRequest): Observable<Management> {
-    return this.http
-      .put<ApiResponse<Management>>(`${this.baseUrl}/managements/${id}`, payload)
-      .pipe(map((r) => this.unwrapResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.put<Management>(`/managements/${id}`, payload).pipe(
+      map(r => r.data)
+    );
   }
 
   deleteManagement(id: number): Observable<void> {
-    return this.http
-      .delete<ApiResponse<void>>(`${this.baseUrl}/managements/${id}`)
-      .pipe(map(() => void 0))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.delete<void>(`/managements/${id}`).pipe(
+      map(() => void 0)
+    );
   }
 
   // ========== SEMESTER ==========
 
   getSemesters(): Observable<Semester[]> {
-    return this.http
-      .get<ApiResponse<Semester[]>>(`${this.baseUrl}/semesters`)
-      .pipe(map((r) => this.unwrapArrayResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.get<Semester[]>('/semesters').pipe(
+      map(r => Array.isArray(r.data) ? r.data : [])
+    );
   }
 
   getSemestersByManagement(managementId: number): Observable<Semester[]> {
-    return this.http
-      .get<ApiResponse<Semester[]>>(`${this.baseUrl}/semesters/by-management/${managementId}`)
-      .pipe(map((r) => this.unwrapArrayResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.get<Semester[]>(`/semesters/by-management/${managementId}`).pipe(
+      map(r => Array.isArray(r.data) ? r.data : [])
+    );
   }
 
   createSemester(payload: SemesterRequest): Observable<Semester> {
-    return this.http
-      .post<ApiResponse<Semester>>(`${this.baseUrl}/semesters`, payload)
-      .pipe(map((r) => this.unwrapResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.post<Semester>('/semesters', payload).pipe(
+      map(r => r.data)
+    );
   }
 
   updateSemester(id: number, payload: SemesterRequest): Observable<Semester> {
-    return this.http
-      .put<ApiResponse<Semester>>(`${this.baseUrl}/semesters/${id}`, payload)
-      .pipe(map((r) => this.unwrapResponse(r)))
-      .pipe(catchError((error) => this.handleError(error)));
+    return this.api.put<Semester>(`/semesters/${id}`, payload).pipe(
+      map(r => r.data)
+    );
   }
 
   deleteSemester(id: number): Observable<void> {
-    return this.http
-      .delete<ApiResponse<void>>(`${this.baseUrl}/semesters/${id}`)
-      .pipe(map(() => void 0))
-      .pipe(catchError((error) => this.handleError(error)));
-  }
-
-  private handleError(error: HttpErrorResponse) {
-    const apiError: ApiError = {
-      status: error.status,
-      message:
-        typeof error.error?.message === 'string'
-          ? error.error.message
-          : error.message || 'Error inesperado al comunicarse con el servidor.',
-      details: error.error,
-    };
-    return throwError(() => apiError);
+    return this.api.delete<void>(`/semesters/${id}`).pipe(
+      map(() => void 0)
+    );
   }
 }

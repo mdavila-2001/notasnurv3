@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Auth } from "../services/auth/auth";
+import { AuthService } from "../services/auth.service";
 import { Modal } from "../../shared/components/modal/modal";
 import { Button } from "../../shared/components/button/button";
 
@@ -19,10 +19,12 @@ interface MenuItem {
 })
 export class Layout implements OnInit {
   private readonly router = inject(Router);
-  private readonly authService = inject(Auth);
+  private readonly authService = inject(AuthService);
 
   userRole = signal<string>('');
   userName = signal<string>('Usuario');
+  isLogoutModalOpen = signal<boolean>(false);
+  isSidebarOpen = signal<boolean>(false);
 
   userRoleDisplay = computed(() => {
     const roleMap: Record<string, string> = {
@@ -32,33 +34,24 @@ export class Layout implements OnInit {
     };
     return roleMap[this.userRole()] || 'Universitario';
   });
+
   menuItems = signal<MenuItem[]>([]);
-  isLogoutModalOpen = signal<boolean>(false);
 
   ngOnInit() {
-    // Fallback inmediato desde caché local (UI instantánea)
-    const cachedRole = localStorage.getItem('role') || '';
-    const cachedName = localStorage.getItem('fullName') || 'Cargando...';
+    const cachedRole = this.authService.getUserRole() || '';
+    const cachedName = this.authService.getUserFullName() || 'Cargando...';
     this.userRole.set(cachedRole);
     this.userName.set(cachedName);
     this.buildMenu(cachedRole);
 
-    // Verificar perfil real con el servidor
-    this.authService.getMe().subscribe({
+    this.authService.getCurrentUserProfile().subscribe({
       next: (response) => {
         const profile = response.data;
         this.userName.set(profile.fullName);
         this.userRole.set(profile.role);
-        // Sincronizar localStorage con datos frescos del servidor
-        localStorage.setItem('fullName', profile.fullName);
-        localStorage.setItem('role', profile.role);
-        // Reconstruir menú por si el rol cambió
         this.buildMenu(profile.role);
       },
-      error: () => {
-        // El interceptor ya maneja el 401 → redirige a /login
-        // Otros errores: mantenemos datos de localStorage silenciosamente
-      }
+      error: () => {}
     });
   }
 
@@ -69,16 +62,14 @@ export class Layout implements OnInit {
         { path: '/admin/managements', icon: 'calendar_month', label: 'Gestiones' },
         { path: '/admin/semesters', icon: 'date_range', label: 'Semestres' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
-
         { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
-
         { path: '/admin/enrollments', icon: 'school', label: 'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
     } else if (role === 'TEACHER') {
       this.menuItems.set([
-        { path: '/teacher/dashboard', icon: 'dashboard', label: 'Inicio' }, // Agregado por seguridad
+        { path: '/teacher/dashboard', icon: 'dashboard', label: 'Inicio' },
         { path: '/teacher/subjects', icon: 'class', label: 'Mis Materias' },
         { path: '/teacher/attendance', icon: 'assignment_late', label: 'Reportes de Faltas' },
         { path: '/teacher/actas', icon: 'task_alt', label: 'Cierre de Actas' },
@@ -94,6 +85,7 @@ export class Layout implements OnInit {
       ]);
     }
   }
+
   getRoleDisplayName(): string {
     const roleMap: Record<string, string> = {
       'ADMIN': 'Portal Administrador',
@@ -101,6 +93,14 @@ export class Layout implements OnInit {
       'STUDENT': 'Portal Estudiante'
     };
     return roleMap[this.userRole()] || 'Portal Universitario';
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen.update(v => !v);
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen.set(false);
   }
 
   openLogoutModal() {
@@ -112,14 +112,7 @@ export class Layout implements OnInit {
   }
 
   confirmLogout() {
-    const logoutResult = this.authService.logout();
-    if (logoutResult && typeof logoutResult.subscribe === 'function') {
-      logoutResult.subscribe({
-        next: () => this.router.navigate(['/login']),
-        error: () => this.router.navigate(['/login'])
-      });
-    } else {
-      this.router.navigate(['/login']);
-    }
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

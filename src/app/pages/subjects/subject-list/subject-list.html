@@ -34,6 +34,23 @@
   </app-subject-form>
 </app-modal>
 
+<!-- Delete Confirmation Modal -->
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar Eliminación"
+  (closed)="closeDeleteModal()">
+
+  <p style="margin: 0; color: var(--text-secondary); line-height: 1.5;">
+    ¿Estás seguro de eliminar la materia <strong>"{{ subjectToDelete()?.name }}"</strong>?
+    Esta acción no se puede deshacer.
+  </p>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" (clicked)="closeDeleteModal()">Cancelar</app-button>
+    <app-button variant="primary" (clicked)="confirmDelete()">Sí, eliminar</app-button>
+  </div>
+</app-modal>
+
 @if (showToast()) {
   <app-toast
     [type]="toastType()"
@@ -41,4 +58,3 @@
     (closed)="onToastClosed()">
   </app-toast>
 }
-
