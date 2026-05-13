@@ -5,21 +5,16 @@
   </div>
 
   <div class="teacher-layout">
-
-    <!-- Panel izquierdo: Materias del docente -->
     <div class="subjects-panel">
       <div class="panel-header">
         <h2 class="panel-title">Mis Materias Asignadas</h2>
       </div>
 
       @if (isLoading() || isResolvingProfile()) {
-        <app-loader 
-          variant="spinner" 
-          size="md" 
-          label="Cargando materias..." 
-          [showLabel]="true"
-          [centered]="true">
-        </app-loader>
+        <div class="loading-state">
+          <span class="material-symbols-outlined spinning">progress_activity</span>
+          <p>Cargando materias...</p>
+        </div>
       } @else if (errorMessage()) {
         <div class="error-state">
           <span class="material-symbols-outlined">error_outline</span>
@@ -76,17 +71,9 @@
         </div>
 
         @if (isLoadingStudents()) {
-          <app-loader 
-            variant="spinner" 
-            size="md" 
-            label="Cargando alumnos..." 
-            [showLabel]="true"
-            [centered]="true">
-          </app-loader>
-        } @else if (errorMessage()) {
-          <div class="error-state">
-            <span class="material-symbols-outlined">error_outline</span>
-            <p>{{ errorMessage() }}</p>
+          <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando alumnos...</p>
           </div>
         } @else if (enrolledStudents().length === 0) {
           <div class="empty-state">
@@ -94,15 +81,6 @@
             <p>No hay alumnos matriculados en esta materia.</p>
           </div>
         } @else {
-          <div class="students-filter-section">
-            <input 
-              type="text" 
-              class="search-input"
-              placeholder="Buscar por nombre..."
-              [value]="searchQuery()"
-              (input)="searchQuery.set($any($event.target).value)">
-          </div>
-
           <div class="students-table-wrapper">
             <table class="students-table">
               <thead>
@@ -111,35 +89,23 @@
                   <th>Nombre Completo</th>
                   <th>CI</th>
                   <th>Correo</th>
-                  <th>Estado Académico</th>
+                  <th>Carrera</th>
                 </tr>
               </thead>
               <tbody>
-                @for (student of filteredStudents(); track student.studentId; let i = $index) {
+                @for (student of enrolledStudents(); track student.studentId; let i = $index) {
                   <tr>
                     <td class="row-number">{{ i + 1 }}</td>
                     <td class="student-name">{{ student.fullName }}</td>
                     <td>{{ student.ci }}</td>
                     <td>{{ student.email }}</td>
-                    <td>
-                      @if (student.academicStatus) {
-                        <app-badge [text]="student.academicStatus" [type]="getAcademicStatusType(student.academicStatus)"></app-badge>
-                      } @else {
-                        <span>—</span>
-                      }
-                    </td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td [attr.colspan]="5" class="empty-state">
-                      No se encontraron alumnos con ese nombre.
-                    </td>
+                    <td>{{ student.degreeName || '—' }}</td>
                   </tr>
                 }
               </tbody>
             </table>
           </div>
-          <p class="students-count">{{ filteredStudents().length }} de {{ enrolledStudents().length }} alumno(s)</p>
+          <p class="students-count">{{ enrolledStudents().length }} alumno(s) matriculado(s)</p>
         }
       }
     </div>
