@@ -15,6 +15,10 @@ export class ApiService {
     return this.http.get<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, { params: this.convertToHttpParams(params) });
   }
 
+  getRaw<T>(endpoint: string, params?: any): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { params: this.convertToHttpParams(params) });
+  }
+
   post<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, body);
   }

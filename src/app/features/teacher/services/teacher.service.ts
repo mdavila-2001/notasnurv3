@@ -4,11 +4,22 @@ import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
 import { SubjectResponse } from '../../admin/services/admin-subject.service';
 
+export interface SubjectSummary {
+  id: number;
+  code: string;
+  name: string;
+  modality: string;
+  studentCount: number;
+  progressPercentage: number;
+}
+
 export interface TeacherDashboardData {
+  welcomeMessage: string;
   averageAttendance: number;
-  pendingRecords: number;
-  subjectCount: number;
-  totalStudents: number;
+  pendingActasCount: number;
+  averageCourseGrade: number;
+  nextExamDate: string;
+  subjects: SubjectSummary[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -19,7 +30,7 @@ export class TeacherService {
     return this.api.get<TeacherDashboardData>('/dashboard/teacher');
   }
 
-  getMySubjects(): Observable<ApiResponse<SubjectResponse[]>> {
-    return this.api.get<SubjectResponse[]>('/subjects/my-subjects');
+  getMySubjects(): Observable<SubjectResponse[]> {
+    return this.api.getRaw<SubjectResponse[]>('/subjects/my-subjects');
   }
 }
