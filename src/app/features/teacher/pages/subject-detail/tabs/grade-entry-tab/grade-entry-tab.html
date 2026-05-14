@@ -1,0 +1,122 @@
+<div class="grade-tab">
+    <div class="tab-header">
+        <h2>Carga de Notas</h2>
+        @if (service.totalCount() > 0) {
+            <span class="progress-badge">
+                {{ service.gradedCount() }}/{{ service.totalCount() }} calificados
+                ({{ service.completionPercentage() }}%)
+            </span>
+        }
+    </div>
+
+    @if (service.error(); as errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    @if (service.isLoading()) {
+        <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando estudiantes y componentes...</p>
+        </div>
+    } @else if (service.components().length === 0) {
+        <div class="empty-state">
+            <span class="material-symbols-outlined">assignment</span>
+            <p>Esta materia no tiene un plan de evaluación. Cree uno primero.</p>
+        </div>
+    } @else {
+        <div class="component-selector">
+            <label>Componente a calificar:</label>
+            <select
+                class="select-field"
+                [ngModel]="service.selectedComponentId()"
+                (ngModelChange)="handleComponentChange($event)"
+            >
+                @for (comp of service.components(); track comp.id) {
+                    <option [value]="comp.id">
+                        {{ comp.name }} ({{ comp.weight }}%) — {{ comp.description || 'Sin descripción' }}
+                    </option>
+                }
+            </select>
+        </div>
+
+        @if (service.selectedComponent(); as component) {
+            <div class="component-info">
+                <span class="info-badge">Peso del componente: {{ component.weight }}%</span>
+                <span class="info-badge">Nota máxima: {{ component.weight }}</span>
+            </div>
+        }
+
+        <div class="table-wrapper">
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Estudiante</th>
+                        <th>CI</th>
+                        <th>Carrera</th>
+                        <th>Nota (0-{{ service.selectedComponent()?.weight ?? 100 }})</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of service.studentRows(); track row.studentId; let i = $index) {
+                        <tr>
+                            <td class="row-number">{{ i + 1 }}</td>
+                            <td class="student-name">{{ row.fullName }}</td>
+                            <td>{{ row.ci }}</td>
+                            <td>{{ row.degreeName || '—' }}</td>
+                            <td>
+                                <input
+                                    type="number"
+                                    class="grade-input"
+                                    [ngModel]="row.score"
+                                    (ngModelChange)="handleGradeChange(row.studentId, $event)"
+                                    [min]="0"
+                                    [max]="service.selectedComponent()?.weight ?? 100"
+                                    [disabled]="row.status === 'saving'"
+                                />
+                            </td>
+                            <td>
+                                @switch (row.status) {
+                                    @case ('saving') {
+                                        <span class="status-saving">Guardando...</span>
+                                    }
+                                    @case ('saved') {
+                                        <span class="status-saved">✓ Guardado</span>
+                                    }
+                                    @case ('error') {
+                                        <span class="status-error">✗ Error</span>
+                                    }
+                                    @default {
+                                        <span class="status-pending">—</span>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <app-button
+                                    variant="secondary"
+                                    [disabled]="row.score === null || row.score === undefined || row.status === 'saving'"
+                                    (clicked)="handleSave(row.studentId)"
+                                >
+                                    @if (row.status === 'saving') {
+                                        Guardando...
+                                    } @else {
+                                        Guardar
+                                    }
+                                </app-button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (service.studentRows().length === 0) {
+            <div class="empty-state">
+                <span class="material-symbols-outlined">group_off</span>
+                <p>No hay estudiantes inscritos en esta materia</p>
+            </div>
+        }
+    }
+</div>
