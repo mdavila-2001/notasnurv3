@@ -16,8 +16,7 @@ import { SubjectOperationalService } from '../../../../../../core/services/subje
 })
 export class StudentsTab {
   private readonly operationalService = inject(SubjectOperationalService);
-
-  // Consumo reactivo del estado global mediante signals (Sin llamadas a API duplicadas)
+  // Los datos fluyen mágicamente desde el cerebro central
   readonly students = this.operationalService.students;
   readonly isLoading = this.operationalService.isLoading;
 }
