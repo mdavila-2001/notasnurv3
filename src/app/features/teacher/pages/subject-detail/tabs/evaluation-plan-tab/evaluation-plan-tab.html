@@ -1,95 +1,186 @@
 <div class="plan-tab">
-    <div class="tab-header">
-        <h2>Plan de Evaluación</h2>
-        @if (service.hasPlan()) {
-            <span class="weight-badge" [class.valid]="service.canActivate()" [class.invalid]="!service.canActivate()">
-                Peso total: {{ service.weightSum() }}%
+  <div class="tab-header">
+    <h2>Configuración del Plan</h2>
+
+    @if (service.hasPlan()) {
+    <span
+      class="weight-badge"
+      [class.valid]="service.isComponentsWeightValid()"
+      [class.invalid]="!service.isComponentsWeightValid()"
+    >
+                Peso total: {{ service.componentsTotalWeight() }}%
             </span>
-        }
+    }
+  </div>
+
+  @if (service.error(); as errorMessage) {
+  <div class="error-banner">
+    {{ errorMessage }}
+    <button type="button" class="banner-close" (click)="service.clearError()">×</button>
+  </div>
+  }
+
+  @if (service.isLoading()) {
+  <div class="loading-state">
+    <span class="material-symbols-outlined spinning">progress_activity</span>
+    <p>Cargando...</p>
+  </div>
+  } @else if (!service.hasPlan()) {
+  <div class="empty-state">
+    <span class="material-symbols-outlined">assignment_add</span>
+    <p>Esta materia aún no tiene un plan de evaluación</p>
+    <app-button variant="primary" (clicked)="handleCreate()">Crear Plan de Evaluación</app-button>
+  </div>
+  } @else {
+  <div class="components-list">
+    <div class="list-header">
+      <span class="col-name">Componente</span>
+      <span class="col-weight">Peso</span>
+      <span class="col-desc">Descripción</span>
+      <span class="col-action">Acciones</span>
     </div>
 
-    @if (service.error(); as errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
-    }
+    @for (component of service.components(); track component.id) {
+    @if (editingComponentId() === component.id) {
+    <div class="component-row editing-row">
+                        <span class="col-name">
+                            <input
+                              [ngModel]="editName()"
+                              (ngModelChange)="editName.set($event)"
+                              placeholder="Nombre"
+                              class="input-field"
+                            />
+                        </span>
 
-    @if (service.isLoading()) {
-        <div class="loading-state">
-            <span class="material-symbols-outlined spinning">progress_activity</span>
-            <p>Cargando...</p>
-        </div>
-    } @else if (!service.hasPlan()) {
-        <div class="empty-state">
-            <span class="material-symbols-outlined">assignment_add</span>
-            <p>Esta materia aún no tiene un plan de evaluación</p>
-            <app-button variant="primary" (clicked)="handleCreate()">Crear Plan de Evaluación</app-button>
-        </div>
+      <span class="col-weight">
+                            <input
+                              type="number"
+                              [ngModel]="editWeight()"
+                              (ngModelChange)="editWeight.set($event)"
+                              placeholder="Peso (%)"
+                              class="input-field weight-input"
+                              min="1"
+                              max="100"
+                            />
+                        </span>
+
+      <span class="col-desc">
+                            <input
+                              [ngModel]="editDescription()"
+                              (ngModelChange)="editDescription.set($event)"
+                              placeholder="Descripción"
+                              class="input-field"
+                            />
+                        </span>
+
+      <span class="col-action action-buttons">
+                            <app-button
+                              variant="primary"
+                              [disabled]="isEditComponentDisabled()"
+                              (clicked)="handleSaveEdit()"
+                            >
+                                Guardar
+                            </app-button>
+
+                            <app-button variant="tertiary" (clicked)="cancelEdit()">
+                                Cancelar
+                            </app-button>
+                        </span>
+    </div>
     } @else {
-        <div class="components-list">
-            <div class="list-header">
-                <span class="col-name">Componente</span>
-                <span class="col-weight">Peso</span>
-                <span class="col-desc">Descripción</span>
-                <span class="col-action"></span>
-            </div>
+    <div class="component-row">
+      <span class="col-name">{{ component.name }}</span>
+      <span class="col-weight">{{ component.weight }}%</span>
+      <span class="col-desc">{{ component.description || '—' }}</span>
 
-            @for (component of service.components(); track component.id) {
-                <div class="component-row">
-                    <span class="col-name">{{ component.name }}</span>
-                    <span class="col-weight">{{ component.weight }}%</span>
-                    <span class="col-desc">{{ component.description || '—' }}</span>
-                    <span class="col-action">
-                        <app-button variant="tertiary" (clicked)="handleDelete(component.id)">
-                            <span class="material-symbols-outlined">delete</span>
-                            Eliminar
-                        </app-button>
-                    </span>
-                </div>
-            } @empty {
-                <div class="empty-components">
-                    <p>Sin componentes. Agregue al menos un componente.</p>
-                </div>
-            }
-        </div>
+      <span class="col-action action-buttons">
+                            <app-button variant="secondary" (clicked)="startEdit(component)">
+                                <span class="material-symbols-outlined">edit</span>
+                                Editar
+                            </app-button>
 
-        <div class="add-component-section">
-            <h3>Agregar Componente</h3>
-            <div class="add-form">
-                <input
-                    [(ngModel)]="newName"
-                    placeholder="Nombre del componente"
-                    class="input-field"
-                />
-                <input
-                    type="number"
-                    [(ngModel)]="newWeight"
-                    placeholder="Peso (%)"
-                    class="input-field weight-input"
-                    min="1"
-                    max="100"
-                />
-                <input
-                    [(ngModel)]="newDescription"
-                    placeholder="Descripción (opcional)"
-                    class="input-field"
-                />
-                <app-button
-                    variant="secondary"
-                    [disabled]="!newName || !newWeight"
-                    (clicked)="handleAddComponent()"
-                >
-                    Agregar
-                </app-button>
-            </div>
-        </div>
-
-        <div class="actions-section">
-            <app-button
-                variant="primary"
-                [disabled]="!service.canActivate()"
-                (clicked)="handleActivate()"
-            >
-            {{ service.canActivate() ? 'Activar Plan' : 'Los componentes deben sumar 100%' }}
-            </app-button>
-        </div>
+                            <app-button variant="tertiary" (clicked)="handleDelete(component)">
+                                <span class="material-symbols-outlined">delete</span>
+                                Eliminar
+                            </app-button>
+                        </span>
+    </div>
     }
+    } @empty {
+    <div class="empty-components">
+      <p>Sin componentes. Agregue al menos un componente.</p>
+    </div>
+    }
+  </div>
+
+  <div
+    class="weight-summary"
+    [class.valid]="service.isComponentsWeightValid()"
+    [class.invalid]="!service.isComponentsWeightValid()"
+  >
+    <strong>Total actual: {{ service.componentsTotalWeight() }}%</strong>
+
+    @if (service.componentsTotalWeight() < 100) {
+    <span>Faltan {{ service.componentsMissingWeight() }}% para completar la configuración.</span>
+    } @else if (service.componentsTotalWeight() > 100) {
+    <span>Excede por {{ service.componentsExcessWeight() }}%. Ajuste los pesos.</span>
+    } @else {
+    <span>Configuración completa. Los componentes suman 100%.</span>
+    }
+  </div>
+
+  <div class="add-component-section">
+    <h3>Agregar Componente</h3>
+
+    <div class="add-form">
+      <input
+        [ngModel]="newName()"
+        (ngModelChange)="newName.set($event)"
+        placeholder="Nombre del componente"
+        class="input-field"
+      />
+
+      <input
+        type="number"
+        [ngModel]="newWeight()"
+        (ngModelChange)="newWeight.set($event)"
+        placeholder="Peso (%)"
+        class="input-field weight-input"
+        min="1"
+        max="100"
+      />
+
+      <input
+        [ngModel]="newDescription()"
+        (ngModelChange)="newDescription.set($event)"
+        placeholder="Descripción (opcional)"
+        class="input-field"
+      />
+
+      <app-button
+        variant="secondary"
+        [disabled]="isAddComponentDisabled()"
+        (clicked)="handleAddComponent()"
+      >
+        Agregar
+      </app-button>
+    </div>
+
+    @if (newWeight() !== null && projectedNewTotalWeight() > 100) {
+    <p class="form-warning">
+      Este componente excede el 100%. Total proyectado: {{ projectedNewTotalWeight() }}%.
+    </p>
+    }
+  </div>
+
+  <div class="actions-section">
+    <app-button
+      variant="primary"
+      [disabled]="!service.isComponentsWeightValid()"
+      (clicked)="handleFinalizeConfiguration()"
+    >
+      Finalizar Configuración
+    </app-button>
+  </div>
+  }
 </div>

@@ -203,3 +203,50 @@
     color: #ef4444;
     background: #fef2f2;
 }
+.weight-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.weight-summary.valid {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.weight-summary.invalid {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.banner-close {
+  margin-left: 0.75rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.editing-row {
+  background: #f9fafb;
+}
+
+.form-warning {
+  margin: 0.5rem 0 0 0;
+  color: #92400e;
+  font-size: 0.8125rem;
+}
