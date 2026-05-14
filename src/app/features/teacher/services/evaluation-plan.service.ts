@@ -23,7 +23,7 @@ export interface ComponentRequest {
   planId: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class EvaluationPlanService {
   private readonly api = inject(ApiService);
 

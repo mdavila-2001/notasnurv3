@@ -1,0 +1,107 @@
+<div class="attendance-tab">
+    <div class="tab-header">
+        <h2>Registro de Asistencia</h2>
+        @if (service.recordCounts(); as counts) {
+            <div class="counts-row">
+                <span class="count present">{{ counts.present }} Presentes</span>
+                <span class="count absent">{{ counts.absent }} Ausentes</span>
+                <span class="count justified">{{ counts.justified }} Justificados</span>
+                <span class="count total">{{ counts.total }} Total</span>
+            </div>
+        }
+    </div>
+
+    @if (service.successMessage(); as msg) {
+        <div class="success-banner">{{ msg }}</div>
+    }
+
+    @if (service.error(); as errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    <div class="date-picker-row">
+        <label for="att-date">Fecha:</label>
+        <input
+            id="att-date"
+            type="date"
+            class="date-input"
+            [ngModel]="service.date()"
+            (ngModelChange)="handleDateChange($event)"
+        />
+    </div>
+
+    @if (service.isLoading()) {
+        <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando estudiantes...</p>
+        </div>
+    } @else {
+        <div class="bulk-actions">
+            <app-button variant="secondary" (clicked)="setAll('PRESENT')">Todos Presentes</app-button>
+            <app-button variant="secondary" (clicked)="setAll('ABSENT')">Todos Ausentes</app-button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Estudiante</th>
+                        <th>CI</th>
+                        <th>Carrera</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of service.attendanceRecords(); track row.enrollmentId; let i = $index) {
+                        <tr>
+                            <td class="row-number">{{ i + 1 }}</td>
+                            <td class="student-name">{{ row.fullName }}</td>
+                            <td>{{ row.ci }}</td>
+                            <td>{{ row.degreeName || '—' }}</td>
+                            <td>
+                                <div class="status-selector">
+                                    <app-button
+                                        [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
+                                    >P</app-button>
+                                    <app-button
+                                        [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
+                                    >A</app-button>
+                                    <app-button
+                                        [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
+                                    >J</app-button>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="5" class="empty-cell">
+                                <div class="empty-state">
+                                    <span class="material-symbols-outlined">group_off</span>
+                                    <p>No hay estudiantes inscritos</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="submit-section">
+            <app-button
+                variant="primary"
+                [disabled]="service.isSaving() || !service.isReady()"
+                (clicked)="handleSubmit()"
+            >
+                @if (service.isSaving()) {
+                    Guardando...
+                } @else {
+                    Guardar Asistencia
+                }
+            </app-button>
+        </div>
+    }
+</div>

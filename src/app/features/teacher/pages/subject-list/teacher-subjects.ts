@@ -12,7 +12,7 @@ import { EnrollmentApiService, StudentEnrolledResponse } from '../../services/en
   templateUrl: './teacher-subjects.html',
   styleUrl: './teacher-subjects.css',
 })
-export class TeacherSubjectsComponent implements OnInit {
+export class TeacherSubjects implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly adminSubjectService = inject(AdminSubjectService);
   private readonly enrollmentApi = inject(EnrollmentApiService);

@@ -1,0 +1,44 @@
+<div class="reports-tab">
+    <div class="tab-header">
+        <h2>Reportes</h2>
+    </div>
+
+    @if (service.lastSuccess(); as msg) {
+        <div class="success-banner">{{ msg }}</div>
+    }
+
+    @if (service.error(); as errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    <div class="reports-grid">
+        @for (option of service.reportOptions; track option.type) {
+            <div class="report-card">
+                <div class="report-icon">
+                    <span class="material-symbols-outlined">{{ option.icon }}</span>
+                </div>
+                <div class="report-info">
+                    <h3>{{ option.label }}</h3>
+                    <p>{{ option.description }}</p>
+                </div>
+                <app-button
+                    variant="secondary"
+                    [disabled]="service.isDownloading() !== null"
+                    (clicked)="handleDownload(option.type)"
+                >
+                    @if (service.isDownloading() === option.type) {
+                        <span class="downloading">
+                            <span class="material-symbols-outlined spinning">progress_activity</span>
+                            Descargando...
+                        </span>
+                    } @else {
+                        <span class="download-content">
+                            <span class="material-symbols-outlined">download</span>
+                            Descargar
+                        </span>
+                    }
+                </app-button>
+            </div>
+        }
+    </div>
+</div>
