@@ -226,43 +226,6 @@
     background: #f3f4f6;
 }
 
-.status-btn.active {
-    background: var(--primary-color, #002131);
-    color: white;
-    border-color: var(--primary-color, #002131);
-}
-
-.status-btn.absent.active {
-    background: #dc2626;
-    border-color: #dc2626;
-}
-
-.status-btn.justified.active {
-    background: #d97706;
-    border-color: #d97706;
-}
-
 .submit-section {
     padding-top: 1rem;
-}
-
-.btn-primary {
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    background: var(--primary-color, #002131);
-    color: white;
-    transition: all 0.2s;
-}
-
-.btn-primary:hover:not(:disabled) {
-    opacity: 0.9;
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
