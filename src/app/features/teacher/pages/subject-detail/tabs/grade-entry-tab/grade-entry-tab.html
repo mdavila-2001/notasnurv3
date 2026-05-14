@@ -73,7 +73,6 @@
                                     [ngModel]="row.score"
                                     (ngModelChange)="handleGradeChange(row.studentId, $event)"
                                     [min]="0"
-                                    [max]="service.selectedComponent()?.weight ?? 100"
                                     [disabled]="row.status === 'saving'"
                                 />
                             </td>
