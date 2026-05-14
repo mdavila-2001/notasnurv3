@@ -38,8 +38,9 @@
                     <span class="col-weight">{{ component.weight }}%</span>
                     <span class="col-desc">{{ component.description || '—' }}</span>
                     <span class="col-action">
-                        <app-button variant="tertiary" (clicked)="handleDelete(component.id)" title="Eliminar">
+                        <app-button variant="tertiary" (clicked)="handleDelete(component.id)">
                             <span class="material-symbols-outlined">delete</span>
+                            Eliminar
                         </app-button>
                     </span>
                 </div>
