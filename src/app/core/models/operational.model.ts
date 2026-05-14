@@ -1,9 +1,9 @@
 export interface StudentOperational {
     studentId: string;
     fullName: string;
-    ci: string;
-    email: string;
-    degreeName: string;
+    ci?: string;
+    email?: string;
+    degreeName?: string;
 }
 
 export interface EvaluationComponent {
