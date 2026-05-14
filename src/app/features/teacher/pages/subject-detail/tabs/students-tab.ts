@@ -1,105 +1,75 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EnrollmentApiService, StudentEnrolledResponse } from '../../../services/enrollment-api.service';
+import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+// Importa los servicios correctos
+import { SubjectContextService } from '../../../../../core/services/subject-context/subject-context.service'; // El contexto de Marcelo
+
+// Importa los Átomos del equipo
+import { Table } from '../../../../../shared/components/table/table';
+import { Input } from '../../../../../shared/components/input/input';
+import { Loader } from '../../../../../shared/components/loader/loader';
+import { EnrollmentApiService } from '../../../../../features/teacher/services/enrollment-api.service';
+
+// Modelo
+import { StudentResponseDTO } from '../../../../../core/models/enrollment.model';
 
 @Component({
   selector: 'app-students-tab',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="students-tab">
-      <div class="tab-header">
-        <h2>Estudiantes Inscritos</h2>
-        <span class="count-badge">{{ students().length }} alumnos</span>
-      </div>
-
-      @if (isLoading()) {
-        <div class="loading-state">
-          <span class="material-symbols-outlined spinning">progress_activity</span>
-          <p>Cargando estudiantes...</p>
-        </div>
-      } @else if (students().length === 0) {
-        <div class="empty-state">
-          <span class="material-symbols-outlined">person_search</span>
-          <p>No hay estudiantes inscritos en esta materia</p>
-        </div>
-      } @else {
-        <div class="table-wrapper">
-          <table class="students-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Nombre Completo</th>
-                <th>CI</th>
-                <th>Correo</th>
-                <th>Carrera</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (student of students(); track student.studentId; let i = $index) {
-                <tr>
-                  <td class="row-number">{{ i + 1 }}</td>
-                  <td class="student-name">{{ student.fullName }}</td>
-                  <td>{{ student.ci }}</td>
-                  <td>{{ student.email }}</td>
-                  <td>{{ student.degreeName || '—' }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-  `,
-  styles: [`
-    .students-tab { padding: 1rem 0; }
-    .tab-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-    .tab-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--primary-color, #002131); }
-    .count-badge {
-      font-size: 0.75rem; font-weight: 600;
-      padding: 0.25rem 0.75rem; border-radius: 9999px;
-      background-color: #e0f2fe; color: #0369a1;
-    }
-    .table-wrapper { overflow-x: auto; border-radius: 0.75rem; border: 1px solid #e5e7eb; }
-    .students-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
-    .students-table th {
-      text-align: left; padding: 0.75rem 1rem;
-      background-color: #f9fafb; color: #374151;
-      font-weight: 600; border-bottom: 1px solid #e5e7eb;
-    }
-    .students-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; }
-    .students-table tr:last-child td { border-bottom: none; }
-    .students-table tr:hover td { background-color: #f9fafb; }
-    .row-number { color: #9ca3af; width: 3rem; }
-    .student-name { font-weight: 500; color: #111827; }
-    .loading-state, .empty-state {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 4rem 0; color: #9ca3af; gap: 0.75rem;
-    }
-    .spinning { animation: spin 1s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  `]
+  // OJO: Ya no está Badge aquí para que no rompa la compilación
+  imports: [CommonModule, FormsModule, Table, Input, Loader],
+  templateUrl: './students-tab.html' 
 })
 export class StudentsTabComponent implements OnInit {
-  readonly subjectId = input.required<string>();
+  // 1. Inyección de dependencias (Cero Inputs)
+private readonly enrollmentService = inject(EnrollmentApiService);
+  private readonly subjectContext = inject(SubjectContextService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private readonly enrollmentApi = inject(EnrollmentApiService);
-
-  readonly students = signal<StudentEnrolledResponse[]>([]);
+  // 2. Estado (Signals)
+ readonly students = signal<StudentResponseDTO[]>([]);
   readonly isLoading = signal(true);
+  readonly searchTerm = signal(''); // Signal para el input de búsqueda
+
+  // 3. Reactividad (El requerimiento Senior de Marcelo)
+  readonly filteredStudents = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const allStudents = this.students();
+
+    if (!term) return allStudents;
+
+    return allStudents.filter(student => 
+      student.fullName.toLowerCase().includes(term) || 
+      student.ci.toLowerCase().includes(term)
+    );
+  });
 
   ngOnInit() {
     this.loadStudents();
   }
 
   private loadStudents() {
+    // Obtenemos el ID del contexto global de Marcelo
+const currentSubjectId = this.subjectContext.currentSubject()?.id; 
+
+    if (!currentSubjectId) return;
+
     this.isLoading.set(true);
-    this.enrollmentApi.getStudentsBySubject(this.subjectId()).subscribe({
-      next: (response) => {
-        this.students.set(response.data ?? []);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false),
-    });
+
+    this.enrollmentService.getStudentsBySubject(currentSubjectId)
+      // Evita fugas de memoria (DoD check)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response: any) => {
+          this.students.set(response.data ?? []);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.students.set([]);
+        },
+      });
   }
 }
