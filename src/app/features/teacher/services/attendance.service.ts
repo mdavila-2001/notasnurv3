@@ -2,7 +2,6 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
-import { EnrollmentApiService, StudentEnrolledResponse } from './enrollment-api.service';
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'JUSTIFIED';
 
@@ -21,12 +20,13 @@ export interface AttendanceBulkRequest {
   records: { enrollmentId: string; status: AttendanceStatus }[];
 }
 
-@Injectable({ providedIn: 'root' })
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
+
+@Injectable()
 export class AttendanceService {
   private readonly api = inject(ApiService);
-  private readonly enrollmentApi = inject(EnrollmentApiService);
+  private readonly operationalService = inject(SubjectOperationalService);
 
-  private readonly _students = signal<StudentEnrolledResponse[]>([]);
   private readonly _records = signal<Map<string, AttendanceStatus>>(new Map());
   private readonly _date = signal<string>(this.todayISO());
   private readonly _isLoading = signal(false);
@@ -41,12 +41,12 @@ export class AttendanceService {
   readonly successMessage = computed(() => this._successMessage());
 
   readonly attendanceRecords = computed<StudentAttendanceRecord[]>(() =>
-    this._students().map(student => ({
+    this.operationalService.students().map(student => ({
       enrollmentId: student.studentId,
       fullName: student.fullName,
-      ci: student.ci,
-      email: student.email,
-      degreeName: student.degreeName,
+      ci: student.ci ?? '',
+      email: student.email ?? '',
+      degreeName: student.degreeName ?? '',
       status: this._records().get(student.studentId) ?? 'PRESENT',
     }))
   );
@@ -62,29 +62,17 @@ export class AttendanceService {
   });
 
   readonly isReady = computed(() =>
-    this._students().length > 0 && !!this._date() && this.attendanceRecords().length > 0
+    this.operationalService.students().length > 0 && !!this._date() && this.attendanceRecords().length > 0
   );
 
-  loadData(subjectId: string): Observable<void> {
+  loadData(): void {
     this._isLoading.set(true);
     this._error.set(null);
     this._successMessage.set(null);
 
-    return this.enrollmentApi.getStudentsBySubject(subjectId).pipe(
-      map(r => r.data ?? []),
-      tap(students => {
-        this._students.set(students);
-        this._records.set(new Map());
-        this._date.set(this.todayISO());
-        this._isLoading.set(false);
-      }),
-      map(() => void 0),
-      catchError(() => {
-        this._error.set('Error al cargar los estudiantes');
-        this._isLoading.set(false);
-        return of(void 0);
-      }),
-    );
+    this._records.set(new Map());
+    this._date.set(this.todayISO());
+    this._isLoading.set(false);
   }
 
   setDate(date: string): void {
@@ -103,9 +91,10 @@ export class AttendanceService {
     this._successMessage.set(null);
   }
 
-  submit(subjectId: string): Observable<boolean> {
-    if (!this.isReady()) {
-      this._error.set('No hay registros para enviar');
+  submit(): Observable<boolean> {
+    const subjectId = this.operationalService.subject()?.id;
+    if (!this.isReady() || !subjectId) {
+      this._error.set('No hay registros para enviar o falta contexto de la materia');
       return of(false);
     }
 
@@ -137,7 +126,6 @@ export class AttendanceService {
   }
 
   reset(): void {
-    this._students.set([]);
     this._records.set(new Map());
     this._date.set(this.todayISO());
     this._isLoading.set(false);

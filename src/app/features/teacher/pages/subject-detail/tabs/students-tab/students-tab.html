@@ -1,0 +1,43 @@
+<div class="students-tab">
+    <div class="tab-header">
+        <h2>Estudiantes Inscritos</h2>
+        <span class="count-badge">{{ students().length }} alumnos</span>
+    </div>
+
+    @if (isLoading()) {
+        <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando estudiantes...</p>
+        </div>
+    } @else if (students().length === 0) {
+        <div class="empty-state">
+            <span class="material-symbols-outlined">person_search</span>
+            <p>No hay estudiantes inscritos en esta materia</p>
+        </div>
+    } @else {
+        <div class="table-wrapper">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre Completo</th>
+                        <th>CI</th>
+                        <th>Correo</th>
+                        <th>Carrera</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (student of students(); track student.studentId; let i = $index) {
+                        <tr>
+                            <td class="row-number">{{ i + 1 }}</td>
+                            <td class="student-name">{{ student.fullName }}</td>
+                            <td>{{ student.ci }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.degreeName || '—' }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
