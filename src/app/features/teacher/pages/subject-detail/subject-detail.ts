@@ -20,6 +20,10 @@ interface Tab {
   icon: string;
 }
 
+/**
+ * Componente Padre: Orquestador del detalle de la materia.
+ * Provee el ecosistema de servicios (Scope local) y delega el estado al SubjectOperationalService.
+ */
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
@@ -47,17 +51,20 @@ export class SubjectDetail implements OnInit, OnDestroy {
   ];
 
   readonly activeTab = signal<TabId>('students');
+  
+  // Exponemos las signals para el template padre
   readonly subject = this.operationalService.subject;
   readonly isLoading = this.operationalService.isLoading;
 
-  ngOnInit() {
+  ngOnInit(): void {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
+      // Disparamos la carga centralizada ("Cerebro")
       this.operationalService.loadSubjectContext(subjectId);
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.operationalService.clearStore();
   }
 }
