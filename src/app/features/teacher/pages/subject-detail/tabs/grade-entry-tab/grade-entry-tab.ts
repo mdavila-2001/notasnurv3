@@ -1,4 +1,4 @@
-import { Component, input, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GradeService } from '../../../../services/grade.service';
@@ -11,13 +11,8 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: 'grade-entry-tab.html',
   styleUrl: 'grade-entry-tab.css',
 })
-export class GradeEntryTab implements OnInit {
-  readonly subjectId = input.required<string>();
+export class GradeEntryTab {
   readonly service = inject(GradeService);
-
-  ngOnInit() {
-    this.service.loadData(this.subjectId()).subscribe();
-  }
 
   handleComponentChange(componentId: number) {
     this.service.selectComponent(componentId);

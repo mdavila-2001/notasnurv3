@@ -12,11 +12,11 @@ import { Button } from '../../../../../../shared/components/button/button';
   styleUrl: 'attendance-tab.css'
 })
 export class AttendanceTab implements OnInit {
-  readonly subjectId = input.required<string>();
+
   readonly service = inject(AttendanceService);
 
   ngOnInit() {
-    this.service.loadData(this.subjectId()).subscribe();
+    this.service.loadData();
   }
 
   handleDateChange(date: string) {
@@ -34,6 +34,6 @@ export class AttendanceTab implements OnInit {
   }
 
   handleSubmit() {
-    this.service.submit(this.subjectId()).subscribe();
+    this.service.submit().subscribe();
   }
 }

@@ -1,6 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { SubjectResponse, AdminSubjectService } from '../../../admin/services/admin-subject.service';
+import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
+import { EvaluationPlanService } from '../../services/evaluation-plan.service';
+import { AttendanceService } from '../../services/attendance.service';
+import { GradeService } from '../../services/grade.service';
+import { ReportService } from '../../services/report.service';
 import { StudentsTab } from './tabs/students-tab/students-tab';
 import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
 import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
@@ -21,11 +25,18 @@ interface Tab {
   standalone: true,
   imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
   templateUrl: './subject-detail.html',
-  styleUrl: './subject-detail.css'
+  styleUrl: './subject-detail.css',
+  providers: [
+    SubjectOperationalService,
+    EvaluationPlanService,
+    AttendanceService,
+    GradeService,
+    ReportService
+  ]
 })
-export class SubjectDetail implements OnInit {
+export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
-  private readonly subjectService = inject(AdminSubjectService);
+  private readonly operationalService = inject(SubjectOperationalService);
 
   readonly tabs: Tab[] = [
     { id: 'students', label: 'Estudiantes', icon: 'group' },
@@ -36,19 +47,17 @@ export class SubjectDetail implements OnInit {
   ];
 
   readonly activeTab = signal<TabId>('students');
-  readonly subject = signal<SubjectResponse | null>(null);
-  readonly isLoading = signal(true);
+  readonly subject = this.operationalService.subject;
+  readonly isLoading = this.operationalService.isLoading;
 
   ngOnInit() {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
-      this.subjectService.getById(subjectId).subscribe({
-        next: (response) => {
-          this.subject.set(response.data);
-          this.isLoading.set(false);
-        },
-        error: () => this.isLoading.set(false),
-      });
+      this.operationalService.loadSubjectContext(subjectId);
     }
+  }
+
+  ngOnDestroy() {
+    this.operationalService.clearStore();
   }
 }

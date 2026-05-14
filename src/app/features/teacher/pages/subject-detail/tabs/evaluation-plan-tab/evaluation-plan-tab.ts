@@ -1,8 +1,9 @@
-import { Component, input, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvaluationPlanService, ComponentRequest } from '../../../../services/evaluation-plan.service';
 import { Button } from '../../../../../../shared/components/button/button';
+import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 
 @Component({
   selector: 'app-evaluation-plan-tab',
@@ -11,20 +12,21 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: './evaluation-plan-tab.html',
   styleUrl: './evaluation-plan-tab.css'
 })
-export class EvaluationPlanTab implements OnInit {
-  readonly subjectId = input.required<string>();
+export class EvaluationPlanTab {
   readonly service = inject(EvaluationPlanService);
+  private readonly operationalService = inject(SubjectOperationalService);
 
   newName = '';
   newWeight = 0;
   newDescription = '';
 
-  ngOnInit() {
-    this.service.fetchPlan(this.subjectId()).subscribe();
-  }
+
 
   handleCreate() {
-    this.service.createPlan(this.subjectId()).subscribe();
+    const subjectId = this.operationalService.subject()?.id?.toString();
+    if (subjectId) {
+      this.service.createPlan(subjectId).subscribe();
+    }
   }
 
   handleAddComponent() {
@@ -50,6 +52,9 @@ export class EvaluationPlanTab implements OnInit {
   }
 
   handleActivate() {
-    this.service.activatePlan(this.subjectId()).subscribe();
+    const subjectId = this.operationalService.subject()?.id?.toString();
+    if (subjectId) {
+      this.service.activatePlan(subjectId).subscribe();
+    }
   }
 }

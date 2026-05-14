@@ -1,4 +1,4 @@
-import { Component, input, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReportService } from '../../../../services/report.service';
 import { Button } from '../../../../../../shared/components/button/button';
@@ -11,11 +11,10 @@ import { Button } from '../../../../../../shared/components/button/button';
   styleUrl: './reports-tab.css',
 })
 export class ReportsTab {
-  readonly subjectId = input.required<string>();
   readonly service = inject(ReportService);
 
   handleDownload(reportType: 'acta-pdf' | 'asistencia-excel') {
     this.service.clearFeedback();
-    this.service.download(this.subjectId(), reportType).subscribe();
+    this.service.download(reportType).subscribe();
   }
 }

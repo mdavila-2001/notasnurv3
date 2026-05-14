@@ -1,7 +1,6 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EnrollmentApiService, StudentEnrolledResponse } from '../../../../services/enrollment-api.service';
-
+import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 @Component({
   selector: 'app-students-tab',
   standalone: true,
@@ -9,26 +8,9 @@ import { EnrollmentApiService, StudentEnrolledResponse } from '../../../../servi
   styleUrl: './students-tab.css',
   templateUrl: './students-tab.html'
 })
-export class StudentsTab implements OnInit {
-  readonly subjectId = input.required<string>();
+export class StudentsTab {
+  private readonly operationalService = inject(SubjectOperationalService);
 
-  private readonly enrollmentApi = inject(EnrollmentApiService);
-
-  readonly students = signal<StudentEnrolledResponse[]>([]);
-  readonly isLoading = signal(true);
-
-  ngOnInit() {
-    this.loadStudents();
-  }
-
-  private loadStudents() {
-    this.isLoading.set(true);
-    this.enrollmentApi.getStudentsBySubject(this.subjectId()).subscribe({
-      next: (response) => {
-        this.students.set(response.data ?? []);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false),
-    });
-  }
+  readonly students = this.operationalService.students;
+  readonly isLoading = this.operationalService.isLoading;
 }

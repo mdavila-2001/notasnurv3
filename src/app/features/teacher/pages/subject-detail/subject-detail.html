@@ -31,19 +31,19 @@
     <section class="tab-content">
       @switch (activeTab()) {
         @case ('students') {
-          <app-students-tab [subjectId]="subject()!.id" />
+          <app-students-tab />
         }
         @case ('evaluation-plan') {
-          <app-evaluation-plan-tab [subjectId]="subject()!.id" />
+          <app-evaluation-plan-tab />
         }
         @case ('grades') {
-          <app-grade-entry-tab [subjectId]="subject()!.id" />
+          <app-grade-entry-tab />
         }
         @case ('attendance') {
-          <app-attendance-tab [subjectId]="subject()!.id" />
+          <app-attendance-tab />
         }
         @case ('reports') {
-          <app-reports-tab [subjectId]="subject()!.id" />
+          <app-reports-tab />
         }
       }
     </section>
