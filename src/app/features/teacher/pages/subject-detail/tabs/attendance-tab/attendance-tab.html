@@ -62,18 +62,15 @@
                             <td>
                                 <div class="status-selector">
                                     <app-button
-                                        variant="tertiary"
-                                        [class.active]="row.status === 'PRESENT'"
+                                        [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
                                     >P</app-button>
                                     <app-button
-                                        variant="tertiary"
-                                        [class.active]="row.status === 'ABSENT'"
+                                        [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
                                     >A</app-button>
                                     <app-button
-                                        variant="tertiary"
-                                        [class.active]="row.status === 'JUSTIFIED'"
+                                        [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
                                     >J</app-button>
                                 </div>
