@@ -14,11 +14,11 @@ export const teacherRoutes: Routes = [
       },
       {
         path: 'subjects',
-        loadComponent: () => import('./pages/subject-list/teacher-subjects').then(m => m.TeacherSubjectsComponent),
+        loadComponent: () => import('./pages/subject-list/teacher-subjects').then(m => m.TeacherSubjects),
       },
       {
         path: 'subject/:id',
-        loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetailComponent),
+        loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetail),
       },
     ],
   },

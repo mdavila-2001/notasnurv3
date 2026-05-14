@@ -9,7 +9,7 @@ import { EnrollmentApiService, StudentEnrolledResponse } from '../../../../servi
   styleUrl: './students-tab.css',
   templateUrl: './students-tab.html'
 })
-export class StudentsTabComponent implements OnInit {
+export class StudentsTab implements OnInit {
   readonly subjectId = input.required<string>();
 
   private readonly enrollmentApi = inject(EnrollmentApiService);

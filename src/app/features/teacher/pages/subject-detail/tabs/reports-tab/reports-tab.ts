@@ -10,7 +10,7 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: './reports-tab.html',
   styleUrl: './reports-tab.css',
 })
-export class ReportsTabComponent {
+export class ReportsTab {
   readonly subjectId = input.required<string>();
   readonly service = inject(ReportService);
 

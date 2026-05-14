@@ -11,7 +11,7 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: 'grade-entry-tab.html',
   styleUrl: 'grade-entry-tab.css',
 })
-export class GradeEntryTabComponent implements OnInit {
+export class GradeEntryTab implements OnInit {
   readonly subjectId = input.required<string>();
   readonly service = inject(GradeService);
 

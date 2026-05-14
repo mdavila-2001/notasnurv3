@@ -1,11 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectResponse, AdminSubjectService } from '../../../admin/services/admin-subject.service';
-import { StudentsTabComponent } from './tabs/students-tab/students-tab';
-import { EvaluationPlanTabComponent } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
-import { GradeEntryTabComponent } from './tabs/grade-entry-tab/grade-entry-tab';
-import { AttendanceTabComponent } from './tabs/attendance-tab/attendance-tab';
-import { ReportsTabComponent } from './tabs/reports-tab/reports-tab';
+import { StudentsTab } from './tabs/students-tab/students-tab';
+import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
+import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
+import { AttendanceTab } from './tabs/attendance-tab/attendance-tab';
+import { ReportsTab } from './tabs/reports-tab/reports-tab';
 import { Button } from '../../../../shared/components/button/button';
 
 type TabId = 'students' | 'evaluation-plan' | 'grades' | 'attendance' | 'reports';
@@ -19,11 +19,11 @@ interface Tab {
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
-  imports: [RouterModule, StudentsTabComponent, EvaluationPlanTabComponent, GradeEntryTabComponent, AttendanceTabComponent, ReportsTabComponent, Button],
+  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
   templateUrl: './subject-detail.html',
   styleUrl: './subject-detail.css'
 })
-export class SubjectDetailComponent implements OnInit {
+export class SubjectDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly subjectService = inject(AdminSubjectService);
 

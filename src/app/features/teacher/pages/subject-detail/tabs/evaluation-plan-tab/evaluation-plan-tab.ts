@@ -11,7 +11,7 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: './evaluation-plan-tab.html',
   styleUrl: './evaluation-plan-tab.css'
 })
-export class EvaluationPlanTabComponent implements OnInit {
+export class EvaluationPlanTab implements OnInit {
   readonly subjectId = input.required<string>();
   readonly service = inject(EvaluationPlanService);
 

@@ -11,7 +11,7 @@ import { Button } from '../../../../../../shared/components/button/button';
   templateUrl: 'attendance-tab.html',
   styleUrl: 'attendance-tab.css'
 })
-export class AttendanceTabComponent implements OnInit {
+export class AttendanceTab implements OnInit {
   readonly subjectId = input.required<string>();
   readonly service = inject(AttendanceService);
 
