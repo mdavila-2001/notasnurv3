@@ -2,136 +2,126 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
-
-export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'JUSTIFIED';
-
-export interface StudentAttendanceRecord {
-  enrollmentId: string;
-  fullName: string;
-  ci: string;
-  email: string;
-  degreeName: string;
-  status: AttendanceStatus;
-}
-
-export interface AttendanceBulkRequest {
-  subjectId: number;
-  date: string;
-  records: { enrollmentId: string; status: AttendanceStatus }[];
-}
-
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 
-@Injectable()
+import {
+  AttendanceStatus,
+  AttendanceRowUi,
+  AttendanceBulkRequest
+} from '../../../core/models/attendance';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AttendanceService {
   private readonly api = inject(ApiService);
   private readonly operationalService = inject(SubjectOperationalService);
 
-  private readonly _records = signal<Map<string, AttendanceStatus>>(new Map());
+  private readonly _attendanceDraft = signal<AttendanceRowUi[]>([]);
   private readonly _date = signal<string>(this.todayISO());
-  private readonly _isLoading = signal(false);
   private readonly _isSaving = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly _successMessage = signal<string | null>(null);
 
+  // --- Selectores Públicos (Read-only) ---
+  readonly attendanceDraft = computed(() => this._attendanceDraft());
   readonly date = computed(() => this._date());
-  readonly isLoading = computed(() => this._isLoading());
   readonly isSaving = computed(() => this._isSaving());
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
 
-  readonly attendanceRecords = computed<StudentAttendanceRecord[]>(() =>
-    this.operationalService.students().map(student => ({
-      enrollmentId: student.studentId,
-      fullName: student.fullName,
-      ci: student.ci ?? '',
-      email: student.email ?? '',
-      degreeName: student.degreeName ?? '',
-      status: this._records().get(student.studentId) ?? 'PRESENT',
-    }))
-  );
-
+  // Selector derivado para las estadísticas del Header de la UI
   readonly recordCounts = computed(() => {
-    const records = this.attendanceRecords();
+    const records = this._attendanceDraft();
     return {
       present: records.filter(r => r.status === 'PRESENT').length,
       absent: records.filter(r => r.status === 'ABSENT').length,
-      justified: records.filter(r => r.status === 'JUSTIFIED').length,
+      late: records.filter(r => r.status === 'LATE').length,
       total: records.length,
     };
   });
-
-  readonly isReady = computed(() =>
-    this.operationalService.students().length > 0 && !!this._date() && this.attendanceRecords().length > 0
+  readonly isReadyToSubmit = computed(() =>
+    !!this.operationalService.subject() && this._attendanceDraft().length > 0
   );
 
-  loadData(): void {
-    this._isLoading.set(true);
+  initializeDraft(): void {
     this._error.set(null);
     this._successMessage.set(null);
+    
+    const students = this.operationalService.students();
 
-    this._records.set(new Map());
-    this._date.set(this.todayISO());
-    this._isLoading.set(false);
+    const initialDraft: AttendanceRowUi[] = students.map(student => ({
+      enrollmentId: student.studentId,
+      studentName: student.fullName,
+      ci: student.ci ?? 'N/A',
+      degreeName: student.degreeName,
+      status: 'PRESENT'
+    }));
+
+    this._attendanceDraft.set(initialDraft);
   }
 
   setDate(date: string): void {
     this._date.set(date);
-    this._successMessage.set(null);
-    this._error.set(null);
+    this.clearFeedback();
   }
 
-  setAttendanceStatus(enrollmentId: string, status: AttendanceStatus): void {
-    this._records.update(map => {
-      const newMap = new Map(map);
-      newMap.set(enrollmentId, status);
-      return newMap;
-    });
-    this._error.set(null);
-    this._successMessage.set(null);
+  /**
+   * Actualiza el estado de un alumno específico en el borrador reactivo.
+   */
+  updateStudentStatus(enrollmentId: string, status: AttendanceStatus): void {
+    this._attendanceDraft.update(currentDraft =>
+      currentDraft.map(row => 
+        row.enrollmentId === enrollmentId ? { ...row, status } : row
+      )
+    );
+    this.clearFeedback();
   }
+
+  /**
+   * Acción en lote: Marca a todos los alumnos con un estado específico.
+   */
+  markAllAs(status: AttendanceStatus): void {
+    this._attendanceDraft.update(currentDraft =>
+      currentDraft.map(row => ({ ...row, status }))
+    );
+    this.clearFeedback();
+  }
+
+  // --- Comunicación con el Backend ---
 
   submit(): Observable<boolean> {
     const subjectId = this.operationalService.subject()?.id;
-    if (!this.isReady() || !subjectId) {
-      this._error.set('No hay registros para enviar o falta contexto de la materia');
+    
+    if (!this.isReadyToSubmit() || !subjectId) {
+      this._error.set('No hay datos para guardar o falta el contexto de la materia.');
       return of(false);
     }
 
     this._isSaving.set(true);
-    this._error.set(null);
-    this._successMessage.set(null);
+    this.clearFeedback();
 
     const request: AttendanceBulkRequest = {
       subjectId: Number(subjectId),
       date: this._date(),
-      records: this.attendanceRecords().map(r => ({
-        enrollmentId: r.enrollmentId,
-        status: r.status,
+      records: this._attendanceDraft().map(row => ({
+        enrollmentId: row.enrollmentId,
+        status: row.status,
       })),
     };
 
     return this.api.post<void>('/attendance/bulk', request).pipe(
       tap(() => {
         this._isSaving.set(false);
-        this._successMessage.set(`Asistencia registrada correctamente para el ${this._date()}`);
+        this._successMessage.set('La asistencia se guardó correctamente.');
       }),
       map(() => true),
-      catchError(error => {
+      catchError(err => {
         this._isSaving.set(false);
-        this._error.set(error.error?.message ?? 'Error al registrar la asistencia');
+        this._error.set(err.error?.message ?? 'Ocurrió un error al guardar la asistencia.');
         return of(false);
-      }),
+      })
     );
-  }
-
-  reset(): void {
-    this._records.set(new Map());
-    this._date.set(this.todayISO());
-    this._isLoading.set(false);
-    this._isSaving.set(false);
-    this._error.set(null);
-    this._successMessage.set(null);
   }
 
   clearFeedback(): void {
@@ -139,6 +129,14 @@ export class AttendanceService {
     this._successMessage.set(null);
   }
 
+  resetModule(): void {
+    this._attendanceDraft.set([]);
+    this._date.set(this.todayISO());
+    this._isSaving.set(false);
+    this.clearFeedback();
+  }
+
+  // Helper interno
   private todayISO(): string {
     const d = new Date();
     const month = String(d.getMonth() + 1).padStart(2, '0');

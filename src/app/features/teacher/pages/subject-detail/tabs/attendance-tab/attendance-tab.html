@@ -1,21 +1,20 @@
 <div class="attendance-tab">
     <div class="tab-header">
         <h2>Registro de Asistencia</h2>
-        @if (service.recordCounts(); as counts) {
+        @if (recordCounts(); as counts) {
             <div class="counts-row">
                 <span class="count present">{{ counts.present }} Presentes</span>
                 <span class="count absent">{{ counts.absent }} Ausentes</span>
-                <span class="count justified">{{ counts.justified }} Justificados</span>
                 <span class="count total">{{ counts.total }} Total</span>
             </div>
         }
     </div>
 
-    @if (service.successMessage(); as msg) {
+    @if (successMessage(); as msg) {
         <div class="success-banner">{{ msg }}</div>
     }
 
-    @if (service.error(); as errorMessage) {
+    @if (error(); as errorMessage) {
         <div class="error-banner">{{ errorMessage }}</div>
     }
 
@@ -25,12 +24,12 @@
             id="att-date"
             type="date"
             class="date-input"
-            [ngModel]="service.date()"
+            [ngModel]="date()"
             (ngModelChange)="handleDateChange($event)"
         />
     </div>
 
-    @if (service.isLoading()) {
+    @if (isLoading()) {
         <div class="loading-state">
             <span class="material-symbols-outlined spinning">progress_activity</span>
             <p>Cargando estudiantes...</p>
@@ -53,10 +52,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (row of service.attendanceRecords(); track row.enrollmentId; let i = $index) {
+                    @for (row of attendanceDraft(); track row.enrollmentId; let i = $index) {
                         <tr>
                             <td class="row-number">{{ i + 1 }}</td>
-                            <td class="student-name">{{ row.fullName }}</td>
+                            <td class="student-name">{{ row.studentName }}</td>
                             <td>{{ row.ci }}</td>
                             <td>{{ row.degreeName || '—' }}</td>
                             <td>
@@ -93,10 +92,10 @@
         <div class="submit-section">
             <app-button
                 variant="primary"
-                [disabled]="service.isSaving() || !service.isReady()"
+                [disabled]="isSaving() || !isReady()"
                 (clicked)="handleSubmit()"
             >
-                @if (service.isSaving()) {
+                @if (isSaving()) {
                     Guardando...
                 } @else {
                     Guardar Asistencia
