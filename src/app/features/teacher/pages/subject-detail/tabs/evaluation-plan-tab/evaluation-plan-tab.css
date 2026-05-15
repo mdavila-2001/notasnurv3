@@ -1,6 +1,5 @@
 .plan-tab {
     padding: 1rem 0;
-    max-width: 48rem;
 }
 
 .tab-header {
@@ -8,6 +7,7 @@
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .tab-header h2 {
@@ -72,6 +72,8 @@
     border-radius: 0.75rem;
     overflow: hidden;
     margin-bottom: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .list-header,
@@ -249,4 +251,13 @@
   margin: 0.5rem 0 0 0;
   color: #92400e;
   font-size: 0.8125rem;
+}
+
+.components-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #1d4ed8;
 }

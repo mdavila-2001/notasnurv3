@@ -32,6 +32,25 @@ export class EvaluationPlanTab {
   readonly editWeight = signal<number | null>(null);
   readonly editDescription = signal('');
 
+  /** Convierte el valor del input a number en la frontera (sin Number() disperso) */
+  setNewWeight(value: string | number | null) {
+    if (value === null || value === '') {
+      this.newWeight.set(null);
+      return;
+    }
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    this.newWeight.set(isNaN(parsed) ? null : parsed);
+  }
+
+  setEditWeight(value: string | number | null) {
+    if (value === null || value === '') {
+      this.editWeight.set(null);
+      return;
+    }
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    this.editWeight.set(isNaN(parsed) ? null : parsed);
+  }
+
   readonly currentSubjectId = computed(
     () => this.operationalService.subject()?.id?.toString() ?? null,
   );
@@ -60,8 +79,10 @@ export class EvaluationPlanTab {
 
   readonly isAddComponentDisabled = computed(() => {
     const weight = this.newWeight();
+    const currentTotal = this.service.componentsTotalWeight();
 
     return (
+      currentTotal >= 100 || // Ya se alcanzó el 100%, bloquear completamente
       !this.newName().trim() ||
       weight === null ||
       weight <= 0 ||

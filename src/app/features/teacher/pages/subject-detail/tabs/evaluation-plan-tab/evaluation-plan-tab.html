@@ -3,6 +3,7 @@
     <h2>Configuración del Plan</h2>
 
     @if (service.hasPlan()) {
+    <span class="components-count">{{ service.components().length }} componente(s)</span>
     <span
       class="weight-badge"
       [class.valid]="service.isComponentsWeightValid()"
@@ -56,7 +57,7 @@
                             <input
                               type="number"
                               [ngModel]="editWeight()"
-                              (ngModelChange)="editWeight.set($event)"
+                              (ngModelChange)="setEditWeight($event)"
                               placeholder="Peso (%)"
                               class="input-field weight-input"
                               min="1"
@@ -143,7 +144,7 @@
       <input
         type="number"
         [ngModel]="newWeight()"
-        (ngModelChange)="newWeight.set($event)"
+        (ngModelChange)="setNewWeight($event)"
         placeholder="Peso (%)"
         class="input-field weight-input"
         min="1"
@@ -168,7 +169,12 @@
 
     @if (newWeight() !== null && projectedNewTotalWeight() > 100) {
     <p class="form-warning">
-      Este componente excede el 100%. Total proyectado: {{ projectedNewTotalWeight() }}%.
+      ⚠️ Este componente excede el 100%. Total proyectado: {{ projectedNewTotalWeight() }}%. No se puede agregar.
+    </p>
+    }
+    @if (service.componentsTotalWeight() >= 100 && newWeight() === null) {
+    <p class="form-warning">
+      ✅ Ya se alcanzó el 100%. No se pueden agregar más componentes.
     </p>
     }
   </div>
