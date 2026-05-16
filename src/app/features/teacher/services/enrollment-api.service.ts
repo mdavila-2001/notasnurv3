@@ -37,7 +37,8 @@ export class EnrollmentApiService {
   private readonly api = inject(ApiService);
 
   getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
-    return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subject/${subjectId}`);
+    // Ruta corregida: el backend expone /enrollments/subjects/{id}/students (plural + /students)
+    return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subjects/${subjectId}/students`);
   }
 
   getMySubjects(): Observable<ApiResponse<MySubjectResponse[]>> {

@@ -93,7 +93,9 @@ export class SubjectListComponent implements OnInit {
     this.isLoading.set(true);
 
     forkJoin({
-      subjects: this.adminSubjectService.getAll().pipe(map(r => r.data ?? [])),
+      subjects: this.adminSubjectService.getAll().pipe(
+        map(r => Array.isArray(r) ? r : (r.data ?? []))
+      ),
       semesters: this.academicService.getSemesters(),
       teachers: this.adminUserService.getByRole('TEACHER').pipe(map(r => r.data ?? [])),
     })
