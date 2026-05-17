@@ -45,6 +45,7 @@ export class SubjectOperationalService {
     };
   }
 
+<<<<<<< HEAD
   setSubjectDirectly(subject: SubjectResponse) {
     this._subject.set(subject);
   }
@@ -54,6 +55,17 @@ export class SubjectOperationalService {
       return;
     }
 
+=======
+  /**
+   * Inyecta la materia directamente sin hacer petición HTTP.
+   * Útil cuando ya tenemos los datos de la materia (ej. desde la lista de "Mis Materias").
+   */
+  setSubjectDirectly(subject: SubjectResponse): void {
+    this._subject.set(subject);
+  }
+
+  loadSubjectContext(subjectId: string): void {
+>>>>>>> origin/dev
     this._isLoading.set(true);
     this._error.set(null);
 
@@ -83,6 +95,7 @@ export class SubjectOperationalService {
     });
   }
 
+<<<<<<< HEAD
   async loadStudents(subjectId: string, force = false) {
     if (!subjectId) {
       this._students.set([]);
@@ -129,6 +142,9 @@ export class SubjectOperationalService {
   }
 
   clearStore() {
+=======
+  clearStore(): void {
+>>>>>>> origin/dev
     this._subject.set(null);
     this._students.set([]);
     this._studentsLoading.set(false);

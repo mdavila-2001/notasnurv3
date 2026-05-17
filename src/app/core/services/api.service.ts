@@ -3,6 +3,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../models/api.models';
 
+type ApiParams = Record<string, string | number | boolean | null | undefined>;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,23 +13,27 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  get<T>(endpoint: string, params?: any): Observable<ApiResponse<T>> {
-    return this.http.get<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, { params: this.convertToHttpParams(params) });
+  get<T>(endpoint: string, params?: ApiParams): Observable<ApiResponse<T>> {
+    return this.http.get<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, {
+      params: this.convertToHttpParams(params),
+    });
   }
 
-  getRaw<T>(endpoint: string, params?: any): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}${endpoint}`, { params: this.convertToHttpParams(params) });
+  getRaw<T>(endpoint: string, params?: ApiParams): Observable<T> {
+    return this.http.get<T>(`${this.baseUrl}${endpoint}`, {
+      params: this.convertToHttpParams(params),
+    });
   }
 
-  post<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+  post<T>(endpoint: string, body: unknown): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, body);
   }
 
-  put<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+  put<T>(endpoint: string, body: unknown): Observable<ApiResponse<T>> {
     return this.http.put<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, body);
   }
 
-  patch<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+  patch<T>(endpoint: string, body: unknown): Observable<ApiResponse<T>> {
     return this.http.patch<ApiResponse<T>>(`${this.baseUrl}${endpoint}`, body);
   }
 
@@ -35,21 +41,26 @@ export class ApiService {
     return this.http.delete<ApiResponse<T>>(`${this.baseUrl}${endpoint}`);
   }
 
-  downloadBlob(endpoint: string): Observable<Blob> {
+  downloadBlob(endpoint: string, accept = 'application/octet-stream'): Observable<Blob> {
     return this.http.get(`${this.baseUrl}${endpoint}`, {
+      headers: { Accept: accept },
       responseType: 'blob',
     });
   }
 
-  private convertToHttpParams(params?: any): HttpParams {
+  private convertToHttpParams(params?: ApiParams): HttpParams {
     let httpParams = new HttpParams();
-    if (params) {
-      Object.keys(params).forEach(key => {
-        if (params[key] !== null && params[key] !== undefined) {
-          httpParams = httpParams.append(key, params[key]);
-        }
-      });
+
+    if (!params) {
+      return httpParams;
     }
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        httpParams = httpParams.append(key, String(value));
+      }
+    });
+
     return httpParams;
   }
 }
