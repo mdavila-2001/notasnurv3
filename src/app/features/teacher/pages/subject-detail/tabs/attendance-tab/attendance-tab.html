@@ -44,61 +44,48 @@
             <app-button variant="secondary" (clicked)="setAll('JUSTIFIED')">Todos Justificados</app-button>
         </div>
 
-        <div class="table-wrapper">
-            <table class="attendance-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Estudiante</th>
-                        <th>CI</th>
-                        <th>Carrera</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (row of attendanceDraft(); track row.enrollmentId; let i = $index) {
-                        <tr>
-                            <td class="row-number">{{ i + 1 }}</td>
-                            <td class="student-name">{{ row.studentName }}</td>
-                            <td>{{ row.ci }}</td>
-                            <td>{{ row.degreeName || '—' }}</td>
-                            <td>
-                                <div class="status-selector">
-                                    <app-button
-                                        [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
-                                        (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
-                                    >P</app-button>
-                                    
-                                    <app-button
-                                        [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
-                                        (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
-                                    >A</app-button>
-                                    
-                                    <app-button
-                                        [variant]="row.status === 'LATE' ? 'secondary' : 'tertiary'"
-                                        (clicked)="handleStatusChange(row.enrollmentId, 'LATE')"
-                                    >R</app-button>
-                                    
-                                    <app-button
-                                        [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
-                                        (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
-                                    >J</app-button>
-                                </div>
-                            </td>
-                        </tr>
-                    } @empty {
-                        <tr>
-                            <td colspan="5" class="empty-cell">
-                                <div class="empty-state">
-                                    <span class="material-symbols-outlined">group_off</span>
-                                    <p>No hay estudiantes inscritos</p>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <app-table 
+            [columns]="[
+                { key: 'index', label: '#' },
+                { key: 'studentName', label: 'Estudiante' },
+                { key: 'ci', label: 'CI' },
+                { key: 'degreeName', label: 'Carrera' },
+                { key: 'status', label: 'Estado' }
+            ]" 
+            [data]="attendanceDraft()">
+            
+            <ng-template #customRow let-row let-i="index">
+                <tr>
+                    <td class="row-number">{{ i + 1 }}</td>
+                    <td class="student-name">{{ row.studentName }}</td>
+                    <td>{{ row.ci }}</td>
+                    <td>{{ row.degreeName || '—' }}</td>
+                    <td>
+                        <div class="status-selector">
+                            <app-button
+                                [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
+                                (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
+                            >P</app-button>
+                            
+                            <app-button
+                                [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
+                                (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
+                            >A</app-button>
+                            
+                            <app-button
+                                [variant]="row.status === 'LATE' ? 'secondary' : 'tertiary'"
+                                (clicked)="handleStatusChange(row.enrollmentId, 'LATE')"
+                            >R</app-button>
+                            
+                            <app-button
+                                [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
+                                (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
+                            >J</app-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </app-table>
 
         <div class="submit-section">
             <app-button
@@ -110,6 +97,7 @@
                     <span class="material-symbols-outlined spinning" style="margin-right: 8px;">progress_activity</span>
                     Guardando...
                 } @else {
+                    <span class="material-symbols-outlined" style="margin-right: 8px;">save</span>
                     Guardar Asistencia
                 }
             </app-button>

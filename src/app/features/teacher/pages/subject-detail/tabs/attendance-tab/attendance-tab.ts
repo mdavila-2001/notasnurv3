@@ -9,6 +9,9 @@ import { Input } from '../../../../../../shared/components/input/input';
 import { Loader } from '../../../../../../shared/components/loader/loader';
 import { Toast } from '../../../../../../shared/components/toast/toast';
 
+// 🚀 REGLA DE MARCELO CUMPLIDA: Usamos el componente central de tablas genéricas
+import { Table } from '../../../../../../shared/components/table/table';
+
 @Component({
   selector: 'app-attendance-tab',
   standalone: true,
@@ -18,7 +21,8 @@ import { Toast } from '../../../../../../shared/components/toast/toast';
     Button, 
     Input, 
     Loader, 
-    Toast
+    Toast,
+    Table // 👈 ¡Inyectamos tu componente Table modificado!
   ],
   templateUrl: './attendance-tab.html',
   styleUrl: './attendance-tab.css'
@@ -41,7 +45,7 @@ export class AttendanceTab implements OnInit {
     this.attendanceService.initializeDraft();
   }
 
- handleDateChange(value: string | number): void {
+  handleDateChange(value: string | number): void {
     this.attendanceService.setDate(String(value));
   }
 

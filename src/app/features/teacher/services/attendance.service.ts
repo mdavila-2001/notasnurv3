@@ -1,7 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 import {
@@ -16,7 +15,6 @@ import {
 export class AttendanceService {
   private readonly api = inject(ApiService);
   private readonly operationalService = inject(SubjectOperationalService);
-  private readonly route = inject(ActivatedRoute);
 
   private readonly _attendanceDraft = signal<AttendanceRowUi[]>([]);
   private readonly _date = signal<string>(this.todayISO());
