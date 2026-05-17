@@ -1,0 +1,93 @@
+<section class="plan-tab">
+  <header class="header-row">
+    <h2>Plan de Evaluación</h2>
+    <app-button variant="primary" (clicked)="openPlanModal()">Nuevo Hito</app-button>
+  </header>
+
+  <p class="info-note">
+    La edición de hitos y componentes está deshabilitada porque el backend actual no expone endpoints PUT.
+  </p>
+
+  @if (isLoading()) {
+    <app-loader [centered]="true" label="Cargando plan de evaluación..." />
+  } @else {
+    <section class="section-card">
+      <div class="section-header">
+        <h3>Hitos</h3>
+        <p class="row-help">Haz clic en una fila para seleccionar el hito activo.</p>
+      </div>
+
+      <app-table
+        [columns]="planColumns"
+        [data]="planRows()"
+        [showActions]="true"
+        [showDeleteAction]="true"
+        [showEditAction]="false"
+        (rowClicked)="selectPlan($event)"
+        (editClicked)="onPlanEditAttempt()"
+        (deleteClicked)="deletePlan($event)"
+      />
+
+      <p class="totals" [class.ok]="isTotalValid()" [class.warning]="!isTotalValid()">
+        Total actual: {{ totalWeight() }}% - faltan {{ remainingWeight() }}%
+      </p>
+
+      @if (planRows().length === 0) {
+        <p class="empty-state">No hay hitos registrados para esta materia.</p>
+      }
+    </section>
+
+    <section class="section-card">
+      <div class="section-header">
+        <h3>Componentes del Hito</h3>
+        <app-button variant="secondary" [disabled]="selectedPlanId() === null" (clicked)="openComponentModal()">
+          Nuevo Componente
+        </app-button>
+      </div>
+
+      @if (selectedPlanId() !== null) {
+        <p class="selected-label">Hito seleccionado: #{{ selectedPlanId() }}</p>
+      }
+
+      <app-table
+        [columns]="componentColumns"
+        [data]="componentRows()"
+        [showActions]="true"
+        [showDeleteAction]="true"
+        [showEditAction]="false"
+        (editClicked)="onComponentEditAttempt()"
+        (deleteClicked)="deleteComponent($event)"
+      />
+
+      <p class="totals" [class.ok]="areSelectedComponentsValid()" [class.warning]="!areSelectedComponentsValid()">
+        Total actual: {{ selectedComponentsTotal() }}% - faltan {{ selectedComponentsRemaining() }}%
+      </p>
+
+      @if (selectedPlanId() === null) {
+        <p class="empty-state">Selecciona un hito para gestionar sus componentes.</p>
+      }
+    </section>
+
+    <footer class="footer-actions">
+      <app-button variant="primary" [disabled]="!canFinalize()" (clicked)="finalizeConfiguration()">
+        Finalizar Configuración
+      </app-button>
+    </footer>
+  }
+
+  <app-evaluation-plan-form
+    [isOpen]="showPlanModal()"
+    [planId]="selectedPlanId()"
+    (save)="createPlan($event)"
+    (closed)="closePlanModal()"
+  />
+
+  @if (selectedPlanId() !== null) {
+    <app-component-form
+      [isOpen]="showComponentModal()"
+      [planId]="selectedPlanId()!"
+      (save)="createComponent($event)"
+      (closed)="closeComponentModal()"
+    />
+  }
+</section>

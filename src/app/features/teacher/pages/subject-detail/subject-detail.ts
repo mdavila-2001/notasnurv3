@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
+import { AdminSubjectService } from '../../../admin/services/admin-subject.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
 import { GradeService } from '../../services/grade.service';
@@ -40,7 +41,9 @@ interface Tab {
 })
 export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
+  private readonly subjectService = inject(AdminSubjectService);
 
   readonly tabs: Tab[] = [
     { id: 'students', label: 'Estudiantes', icon: 'group' },
@@ -56,10 +59,10 @@ export class SubjectDetail implements OnInit, OnDestroy {
   readonly subject = this.operationalService.subject;
   readonly isLoading = this.operationalService.isLoading;
 
-  ngOnInit(): void {
+  ngOnInit() {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
-      // Disparamos la carga centralizada ("Cerebro")
+      this.subjectService.getById(subjectId).subscribe();
       this.operationalService.loadSubjectContext(subjectId);
     }
   }

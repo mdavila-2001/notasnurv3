@@ -68,8 +68,21 @@
 </app-button>
         </div>
 
-        @if (isLoadingStudents()) {
-          <app-loader></app-loader>
+        <div class="subject-tabs">
+          <button class="tab-btn" [class.active]="activeTab() === 'students'" (click)="setTab('students')">
+            <span class="material-symbols-outlined">group</span> Estudiantes
+          </button>
+          <button class="tab-btn" [class.active]="activeTab() === 'evaluation'" (click)="setTab('evaluation')">
+            <span class="material-symbols-outlined">assignment</span> Plan de Evaluación (Hitos)
+          </button>
+        </div>
+
+        @if (activeTab() === 'students') {
+          @if (isLoadingStudents()) {
+          <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando alumnos...</p>
+          </div>
         } @else if (enrolledStudents().length === 0) {
           <div class="empty-state">
             <span class="material-symbols-outlined">person_search</span>
@@ -85,6 +98,12 @@
           <p class="students-count" style="margin-top: 15px; text-align: center;">
             Mostrando pre-visualización. Para usar el buscador, filtros y tabla inteligente, haz clic en el botón superior azul.
           </p>
+        }
+        } @else {
+          <!-- Pestaña de Plan de Evaluación -->
+          <div class="evaluation-tab-container">
+            <app-evaluation-plan-tab></app-evaluation-plan-tab>
+          </div>
         }
       }
     </div>
