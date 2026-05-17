@@ -14,11 +14,21 @@ export const teacherRoutes: Routes = [
       },
       {
         path: 'subjects',
-        loadComponent: () => import('./pages/subject-list/teacher-subjects').then(m => m.TeacherSubjectsComponent),
+        loadComponent: () => import('./pages/subject-list/teacher-subjects').then(m => m.TeacherSubjects),
       },
       {
         path: 'subject/:id',
-        loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetailComponent),
+        loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetail),
+        // 👇 ESTA ES LA MAGIA QUE FALTABA 👇
+        children: [
+          // Si entra a subject/2 nomás, lo redirigimos automático a la pestaña students
+          { path: '', redirectTo: 'students', pathMatch: 'full' }, 
+          {
+            path: 'students',
+            // Asegúrate de que esta ruta llegue correctamente a donde creamos tu componente
+            loadComponent: () => import('../teacher/pages/subject-detail/tabs/students-tab/students-tab').then(m => m.StudentsTabComponent)
+          }
+        ]
       },
     ],
   },

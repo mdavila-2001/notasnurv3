@@ -1,0 +1,207 @@
+.grade-tab {
+    padding: 1rem 0;
+}
+
+.tab-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary-color, #002131);
+}
+
+.progress-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.error-banner {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 0;
+    color: #9ca3af;
+    gap: 0.75rem;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.component-selector {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.component-selector label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.select-field {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    flex: 1;
+    max-width: 400px;
+    outline: none;
+}
+
+.select-field:focus {
+    border-color: var(--primary-color, #002131);
+}
+
+.component-info {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.grades-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.grades-table td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+    vertical-align: middle;
+}
+
+.grades-table tr:last-child td {
+    border-bottom: none;
+}
+
+.grades-table tr:hover td {
+    background: #f9fafb;
+}
+
+.row-number {
+    color: #9ca3af;
+    width: 2rem;
+}
+
+.student-name {
+    font-weight: 500;
+    color: #111827;
+}
+
+.grade-input {
+    width: 80px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    text-align: center;
+    outline: none;
+}
+
+.grade-input:focus {
+    border-color: var(--primary-color, #002131);
+}
+
+.status-saving {
+    color: #d97706;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-saved {
+    color: #059669;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-error {
+    color: #dc2626;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    color: #9ca3af;
+    font-size: 0.75rem;
+}
+
+.btn-save {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.btn-save:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

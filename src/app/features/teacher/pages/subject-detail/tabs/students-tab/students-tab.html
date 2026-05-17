@@ -1,0 +1,56 @@
+<div class="main-content">
+  <header class="page-header">
+    <div class="header-info">
+      <span class="gestion-tag">GESTIÓN ACADÉMICA</span>
+      <h1 class="page-title">Nómina de Estudiantes</h1>
+      <div class="subject-subinfo">
+        <span class="material-icons-outlined">assignment</span>
+        <span>Detalle de Materia</span>
+      </div>
+    </div>
+    
+    <div class="search-container">
+      <app-input 
+        ngDefaultControl
+        placeholder="Buscar por nombre o C.I..." 
+        [(ngModel)]="searchTerm">
+      </app-input>
+    </div>
+  </header>
+
+  <app-loader *ngIf="isLoading()"></app-loader>
+
+  <section class="card data-section" *ngIf="!isLoading() && students().length > 0">
+    <div class="card-header">
+      <div class="title-with-total">
+        <span class="material-icons card-icon">group_add</span>
+        <h2 class="card-title">Estudiantes Inscritos</h2>
+        <span class="total-tag">Total: {{ filteredStudents().length }}</span>
+      </div>
+    </div>
+
+    <app-table [data]="filteredStudents()" [columns]="tableColumns"></app-table>
+
+    <div class="pagination-container">
+      <span class="showing-text">Mostrando {{ filteredStudents().length }} estudiantes</span>
+      <div class="pagination-actions">
+        <button class="icon-btn" disabled><span class="material-icons">chevron_left</span></button>
+        <button class="icon-btn" disabled><span class="material-icons">chevron_right</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card empty-state-section" *ngIf="!isLoading() && students().length === 0">
+    <div class="empty-state">
+      <span class="material-icons empty-icon">group_off</span>
+      <h3 class="empty-title">No hay estudiantes inscritos</h3>
+      <p class="empty-desc">Actualmente no hay estudiantes registrados en la nómina de esta materia. Los estudiantes aparecerán aquí una vez que finalice su proceso de inscripción.</p>
+      
+      <app-button 
+        icon="refresh" 
+        (click)="refreshList()">
+        Actualizar Lista
+      </app-button>
+    </div>
+  </section>
+</div>

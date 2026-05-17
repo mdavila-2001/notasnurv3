@@ -1,9 +1,8 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
-import { EnrollmentApiService, StudentEnrolledResponse } from './enrollment-api.service';
-import { EvaluationPlanService, ComponentResponse } from './evaluation-plan.service';
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 
 export interface GradeRecord {
   enrollmentId: string;
@@ -38,35 +37,32 @@ export interface GradeRequest {
   score: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class GradeService {
   private readonly api = inject(ApiService);
-  private readonly enrollmentApi = inject(EnrollmentApiService);
-  private readonly evaluationPlanService = inject(EvaluationPlanService);
+  private readonly operationalService = inject(SubjectOperationalService);
 
-  private readonly _students = signal<StudentEnrolledResponse[]>([]);
-  private readonly _components = signal<ComponentResponse[]>([]);
   private readonly _selectedComponentId = signal<number | null>(null);
   private readonly _grades = signal<Map<string, Map<number, number>>>(new Map());
   private readonly _isLoading = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly _savingState = signal<Map<string, 'saving' | 'saved' | 'error'>>(new Map());
 
-  readonly students = computed(() => this._students());
-  readonly components = computed(() => this._components());
+  readonly students = this.operationalService.students;
+  readonly components = computed(() => this.operationalService.evaluationPlan()?.components ?? []);
   readonly selectedComponentId = computed(() => this._selectedComponentId());
   readonly isLoading = computed(() => this._isLoading());
   readonly error = computed(() => this._error());
 
   readonly selectedComponent = computed(() =>
-    this._components().find(c => c.id === this._selectedComponentId()) ?? null
+    this.components().find(c => c.id === this._selectedComponentId()) ?? null
   );
 
   readonly studentRows = computed<StudentGradeRow[]>(() => {
     const componentId = this._selectedComponentId();
     if (!componentId) return [];
 
-    return this._students().map(student => {
+    return this.students().map(student => {
       const score = this._grades().get(student.studentId)?.get(componentId) ?? null;
       const key = `${student.studentId}-${componentId}`;
       const statusEntry = this._savingState().get(key);
@@ -74,9 +70,9 @@ export class GradeService {
         enrollmentId: student.studentId,
         studentId: student.studentId,
         fullName: student.fullName,
-        ci: student.ci,
-        email: student.email,
-        degreeName: student.degreeName,
+        ci: student.ci ?? '',
+        email: student.email ?? '',
+        degreeName: student.degreeName ?? '',
         score,
         status: statusEntry ?? (score !== null ? 'saved' : 'pending'),
         errorMessage: undefined,
@@ -96,35 +92,14 @@ export class GradeService {
 
   private readonly DTO_KEY_DELIMITER = '::';
 
-  loadData(subjectId: string): Observable<void> {
-    this._isLoading.set(true);
-    this._error.set(null);
-
-    return forkJoin({
-      students: this.enrollmentApi.getStudentsBySubject(subjectId).pipe(
-        map(r => r.data ?? []),
-        catchError(() => of([] as StudentEnrolledResponse[])),
-      ),
-      components: this.evaluationPlanService.fetchPlan(subjectId).pipe(
-        map(plan => plan?.components ?? []),
-        catchError(() => of([] as ComponentResponse[])),
-      ),
-    }).pipe(
-      tap(({ students, components }) => {
-        this._students.set(students);
-        this._components.set(components);
-        this._grades.set(new Map());
-        this._savingState.set(new Map());
-        this._selectedComponentId.set(components.length > 0 ? components[0].id : null);
-        this._isLoading.set(false);
-      }),
-      map(() => void 0),
-      catchError(error => {
-        this._error.set('Error al cargar datos para calificación');
-        this._isLoading.set(false);
-        return of(void 0);
-      }),
-    );
+  // Effect para auto-seleccionar el primer componente si no hay ninguno seleccionado
+  constructor() {
+    effect(() => {
+      const comps = this.components();
+      if (comps.length > 0 && this._selectedComponentId() === null) {
+        this._selectedComponentId.set(comps[0].id);
+      }
+    }, { allowSignalWrites: true });
   }
 
   selectComponent(componentId: number): void {
@@ -205,8 +180,6 @@ export class GradeService {
   }
 
   reset(): void {
-    this._students.set([]);
-    this._components.set([]);
     this._selectedComponentId.set(null);
     this._grades.set(new Map());
     this._savingState.set(new Map());

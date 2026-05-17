@@ -23,7 +23,7 @@ export interface ComponentRequest {
   planId: number;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class EvaluationPlanService {
   private readonly api = inject(ApiService);
 
@@ -86,6 +86,27 @@ export class EvaluationPlanService {
       }),
       catchError(error => {
         this._error.set(error.error?.message ?? 'Error al agregar el componente');
+        return of(null);
+      }),
+    );
+  }
+
+  updateComponent(componentId: number, request: ComponentRequest): Observable<ComponentResponse | null> {
+    this._error.set(null);
+
+    return this.api.put<ComponentResponse>(`/components/${componentId}`, request).pipe(
+      map(response => response.data),
+      tap(updatedComponent => {
+        const current = this._plan();
+        if (current) {
+          this._plan.set({
+            ...current,
+            components: current.components.map(c => c.id === componentId ? updatedComponent : c),
+          });
+        }
+      }),
+      catchError(error => {
+        this._error.set(error.error?.message ?? 'Error al actualizar el componente');
         return of(null);
       }),
     );

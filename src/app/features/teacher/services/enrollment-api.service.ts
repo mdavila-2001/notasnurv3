@@ -36,10 +36,9 @@ export interface MySubjectResponse {
 export class EnrollmentApiService {
   private readonly api = inject(ApiService);
 
-  getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
-    return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subject/${subjectId}`);
+getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
+    return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subjects/${subjectId}/students`);
   }
-
   getMySubjects(): Observable<ApiResponse<MySubjectResponse[]>> {
     return this.api.get<MySubjectResponse[]>('/enrollments/my-subjects');
   }
@@ -52,3 +51,8 @@ export class EnrollmentApiService {
     return this.api.delete<void>(`/enrollments/${enrollmentId}`);
   }
 }
+//getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
+
+  //  return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subject/${subjectId}`);
+
+ // }

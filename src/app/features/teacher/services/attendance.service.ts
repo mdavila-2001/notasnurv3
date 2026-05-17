@@ -1,8 +1,9 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
-import { EnrollmentApiService, StudentEnrolledResponse } from './enrollment-api.service';
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 
 export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'JUSTIFIED';
 
@@ -21,12 +22,13 @@ export interface AttendanceBulkRequest {
   records: { enrollmentId: string; status: AttendanceStatus }[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class AttendanceService {
   private readonly api = inject(ApiService);
-  private readonly enrollmentApi = inject(EnrollmentApiService);
+  private readonly operationalService = inject(SubjectOperationalService);
+  private readonly route = inject(ActivatedRoute);
 
-  private readonly _students = signal<StudentEnrolledResponse[]>([]);
+  // Estados reactivos con Signals Únicas
   private readonly _records = signal<Map<string, AttendanceStatus>>(new Map());
   private readonly _date = signal<string>(this.todayISO());
   private readonly _isLoading = signal(false);
@@ -34,19 +36,21 @@ export class AttendanceService {
   private readonly _error = signal<string | null>(null);
   private readonly _successMessage = signal<string | null>(null);
 
+  // Selectores reactivos públicos
   readonly date = computed(() => this._date());
   readonly isLoading = computed(() => this._isLoading());
   readonly isSaving = computed(() => this._isSaving());
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
 
-  readonly attendanceRecords = computed<StudentAttendanceRecord[]>(() =>
-    this._students().map(student => ({
-      enrollmentId: student.studentId,
+readonly attendanceRecords = computed<StudentAttendanceRecord[]>(() =>
+    this.operationalService.students().map(student => ({
+      // Volvemos a studentId para que compile, ya que StudentOperational solo tiene esa propiedad
+      enrollmentId: student.studentId, 
       fullName: student.fullName,
-      ci: student.ci,
-      email: student.email,
-      degreeName: student.degreeName,
+      ci: student.ci ?? '',
+      email: student.email ?? '',
+      degreeName: student.degreeName ?? '',
       status: this._records().get(student.studentId) ?? 'PRESENT',
     }))
   );
@@ -61,30 +65,43 @@ export class AttendanceService {
     };
   });
 
-  readonly isReady = computed(() =>
-    this._students().length > 0 && !!this._date() && this.attendanceRecords().length > 0
-  );
+  readonly isFutureDate = computed(() => this.isFuture(this._date()));
 
-  loadData(subjectId: string): Observable<void> {
+  // Estado de depuración unificado y corregido
+  readonly debugReadyState = computed(() => {
+    const hasStudents = this.operationalService.students().length > 0;
+    const hasDate = !!this._date();
+    const isNotFuture = !this.isFutureDate();
+    const hasRecords = this.attendanceRecords().length > 0;
+    
+    // Intenta recuperar el ID de manera híbrida
+    const subjectIdFromOperational = this.operationalService.subject()?.id;
+    const subjectIdFromRoute = this.route.snapshot.paramMap.get('id');
+    const hasSubject = !!(subjectIdFromOperational || subjectIdFromRoute);
+    
+    const isNotLoadingOperational = !this.operationalService.isLoading();
+    
+    return {
+      hasStudents,
+      hasDate,
+      isNotFuture,
+      hasRecords,
+      hasSubject,
+      isNotLoadingOperational,
+      allReady: hasStudents && hasDate && isNotFuture && hasRecords && hasSubject && isNotLoadingOperational
+    };
+  });
+
+  readonly isReady = computed(() => this.debugReadyState().allReady);
+
+  loadData(): void {
     this._isLoading.set(true);
     this._error.set(null);
     this._successMessage.set(null);
 
-    return this.enrollmentApi.getStudentsBySubject(subjectId).pipe(
-      map(r => r.data ?? []),
-      tap(students => {
-        this._students.set(students);
-        this._records.set(new Map());
-        this._date.set(this.todayISO());
-        this._isLoading.set(false);
-      }),
-      map(() => void 0),
-      catchError(() => {
-        this._error.set('Error al cargar los estudiantes');
-        this._isLoading.set(false);
-        return of(void 0);
-      }),
-    );
+    this._records.set(new Map());
+    this._date.set(this.todayISO());
+    this._isLoading.set(false);
   }
 
   setDate(date: string): void {
@@ -103,9 +120,43 @@ export class AttendanceService {
     this._successMessage.set(null);
   }
 
-  submit(subjectId: string): Observable<boolean> {
+  submit(): Observable<boolean> {
+    const subjectIdFromOperational = this.operationalService.subject()?.id;
+    const subjectIdFromRoute = this.route.snapshot.paramMap.get('id');
+    const subjectId = subjectIdFromOperational || subjectIdFromRoute;
+
+    const hasStudents = this.operationalService.students().length > 0;
+    const hasDate = !!this._date();
+    const hasSubject = !!subjectId;
+    const isLoadingOperational = this.operationalService.isLoading();
+
+    if (isLoadingOperational) {
+      this._error.set('Cargando datos de la materia. Por favor espere...');
+      return of(false);
+    }
+
+    if (!hasSubject) {
+      this._error.set('No se encontró el ID de la materia. Recargue la página.');
+      return of(false);
+    }
+
+    if (!hasStudents) {
+      this._error.set('No hay estudiantes inscritos en la materia.');
+      return of(false);
+    }
+
+    if (!hasDate) {
+      this._error.set('Seleccione una fecha para la asistencia.');
+      return of(false);
+    }
+
+    if (this.isFutureDate()) {
+      this._error.set('No puede registrar asistencia para una fecha futura.');
+      return of(false);
+    }
+
     if (!this.isReady()) {
-      this._error.set('No hay registros para enviar');
+      this._error.set('No hay registros para enviar o falta contexto de la materia');
       return of(false);
     }
 
@@ -137,7 +188,6 @@ export class AttendanceService {
   }
 
   reset(): void {
-    this._students.set([]);
     this._records.set(new Map());
     this._date.set(this.todayISO());
     this._isLoading.set(false);
@@ -156,5 +206,16 @@ export class AttendanceService {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${d.getFullYear()}-${month}-${day}`;
+  }
+
+  private isFuture(dateString: string): boolean {
+    try {
+      const selectedDate = new Date(dateString + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selectedDate > today;
+    } catch {
+      return false;
+    }
   }
 }

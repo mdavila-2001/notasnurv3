@@ -1,0 +1,51 @@
+<div class="subject-detail">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <span class="material-symbols-outlined spinning">progress_activity</span>
+      <p>Cargando materia...</p>
+    </div>
+  } @else {
+    <header class="detail-header">
+      <div>
+        <h1>{{ subject()?.name }}</h1>
+        <p class="subject-meta">
+          {{ subject()?.code }} · {{ subject()?.semesterName }}
+        </p>
+      </div>
+    </header>
+
+    <nav class="tab-bar">
+      @for (tab of tabs; track tab.id) {
+        <app-button
+          variant="tertiary"
+          class="tab-btn"
+          [class.active]="activeTab() === tab.id"
+          (clicked)="activeTab.set(tab.id)"
+        >
+          <span class="material-symbols-outlined">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </app-button>
+      }
+    </nav>
+
+    <section class="tab-content">
+      @switch (activeTab()) {
+        @case ('students') {
+          <app-students-tab />
+        }
+        @case ('evaluation-plan') {
+          <app-evaluation-plan-tab />
+        }
+        @case ('grades') {
+          <app-grade-entry-tab />
+        }
+        @case ('attendance') {
+          <app-attendance-tab />
+        }
+        @case ('reports') {
+          <app-reports-tab />
+        }
+      }
+    </section>
+  }
+</div>

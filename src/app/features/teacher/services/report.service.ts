@@ -15,9 +15,12 @@ export interface ReportOption {
   mimeType: string;
 }
 
-@Injectable({ providedIn: 'root' })
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
+
+@Injectable()
 export class ReportService {
   private readonly api = inject(ApiService);
+  private readonly operationalService = inject(SubjectOperationalService);
 
   private readonly _isDownloading = signal<ReportType | null>(null);
   private readonly _error = signal<string | null>(null);
@@ -48,9 +51,10 @@ export class ReportService {
     },
   ];
 
-  download(subjectId: string, reportType: ReportType): Observable<boolean> {
+  download(reportType: ReportType): Observable<boolean> {
+    const subjectId = this.operationalService.subject()?.id?.toString();
     const option = this.reportOptions.find(r => r.type === reportType);
-    if (!option) return of(false);
+    if (!option || !subjectId) return of(false);
 
     this._isDownloading.set(reportType);
     this._error.set(null);

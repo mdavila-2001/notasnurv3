@@ -1,0 +1,127 @@
+<div class="plan-tab">
+    <div class="tab-header">
+        <h2>Plan de Evaluación</h2>
+        @if (service.hasPlan()) {
+            <span class="weight-badge" [class.valid]="service.canActivate()" [class.invalid]="!service.canActivate()">
+                Peso total: {{ service.weightSum() }}%
+            </span>
+        }
+    </div>
+
+    @if (service.error(); as errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    @if (service.isLoading()) {
+        <div class="loading-state">
+            <span class="material-symbols-outlined spinning">progress_activity</span>
+            <p>Cargando...</p>
+        </div>
+    } @else if (!service.hasPlan()) {
+        <div class="empty-state">
+            <span class="material-symbols-outlined">assignment_add</span>
+            <p>Esta materia aún no tiene un plan de evaluación</p>
+            
+            @if (isAdmin()) {
+                <app-button variant="primary" (clicked)="handleCreate()">Crear Plan de Evaluación</app-button>
+            } @else {
+                <p class="empty-desc">Comunícate con el administrador para que asigne los componentes de esta materia.</p>
+            }
+        </div>
+    } @else {
+        <div class="components-list">
+            <div class="list-header">
+                <span class="col-name">Componente</span>
+                <span class="col-weight">Peso</span>
+                <span class="col-desc">Descripción</span>
+                <span class="col-action" style="text-align: center;">Acciones</span>
+            </div>
+
+            @for (component of service.components(); track component.id) {
+                <div class="component-row" [class.editing-row]="editingId() === component.id">
+                    <span class="col-name">{{ component.name }}</span>
+                    <span class="col-weight">{{ component.weight }}%</span>
+                    <span class="col-desc">{{ component.description || '—' }}</span>
+                    <span class="col-action" style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <app-button variant="tertiary" (clicked)="startEdit(component)">
+                            <span class="material-symbols-outlined">edit</span>
+                        </app-button>
+                        
+                        @if (isAdmin()) {
+                            <app-button variant="tertiary" (clicked)="handleDelete(component.id)">
+                                <span class="material-symbols-outlined">delete</span>
+                            </app-button>
+                        }
+                    </span>
+                </div>
+            } @empty {
+                <div class="empty-components">
+                    <p>Sin componentes. Agregue al menos un componente.</p>
+                </div>
+            }
+        </div>
+
+        @if (isAdmin() || editingId() !== null) {
+            <div class="add-component-section">
+                <h3>{{ editingId() ? 'Editar Componente' : 'Agregar Componente' }}</h3>
+                
+                <div class="add-form" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    
+                    <app-input
+                        ngDefaultControl
+                        [ngModel]="newName()"
+                        (ngModelChange)="newName.set($event)"
+                        placeholder="Nombre del componente"
+                        class="input-field"
+                        [disabled]="!isAdmin()" 
+                    ></app-input>
+                    
+                    <app-input
+                        ngDefaultControl
+                        type="number"
+                        [ngModel]="newWeight()"
+                        (ngModelChange)="newWeight.set($event)"
+                        placeholder="Peso (%)"
+                        class="input-field weight-input"
+                    ></app-input>
+                    
+                    <app-input
+                        ngDefaultControl
+                        [ngModel]="newDescription()"
+                        (ngModelChange)="newDescription.set($event)"
+                        placeholder="Descripción (opcional)"
+                        class="input-field"
+                        [disabled]="!isAdmin()"
+                    ></app-input>
+
+                    <app-button
+                        variant="secondary"
+                        [disabled]="!newName() || !newWeight()"
+                        (clicked)="handleSaveComponent()"
+                    >
+                        {{ editingId() ? 'Actualizar' : 'Agregar' }}
+                    </app-button>
+
+                    @if (editingId()) {
+                        <app-button
+                            variant="tertiary"
+                            (clicked)="cancelEdit()"
+                        >
+                            Cancelar
+                        </app-button>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="actions-section">
+            <app-button
+                variant="primary"
+                [disabled]="!service.canActivate() || editingId() !== null"
+                (clicked)="handleActivate()"
+            >
+            {{ service.canActivate() ? 'Activar Plan' : 'Los componentes deben sumar 100%' }}
+            </app-button>
+        </div>
+    }
+</div>

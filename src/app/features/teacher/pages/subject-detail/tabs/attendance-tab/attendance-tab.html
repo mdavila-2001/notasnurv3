@@ -1,0 +1,146 @@
+<div class="attendance-tab">
+    <div class="tab-header">
+        <h2>Registro de Asistencia</h2>
+        @if (service.recordCounts(); as counts) {
+            <div class="counts-row">
+                <span class="count present">{{ counts.present }} Presentes</span>
+                <span class="count absent">{{ counts.absent }} Ausentes</span>
+                <span class="count justified">{{ counts.justified }} Justificados</span>
+                <span class="count total">{{ counts.total }} Total</span>
+            </div>
+        }
+    </div>
+
+    @if (showSuccessToast()) {
+        <app-toast
+            type="success"
+            title="Éxito"
+            [message]="service.successMessage() || 'Asistencia registrada correctamente'"
+            (closed)="showSuccessToast.set(false)"
+        ></app-toast>
+    }
+
+    @if (showErrorToast()) {
+        <app-toast
+            type="error"
+            title="Error"
+            [message]="service.error() || 'Error al registrar la asistencia'"
+            (closed)="showErrorToast.set(false)"
+        ></app-toast>
+    }
+
+    <div class="date-picker-row">
+        <app-input
+            type="date"
+            label="Fecha"
+            [value]="service.date()"
+            (valueChange)="handleDateChange($event)"
+            [errorMessage]="service.isFutureDate() ? 'No se puede seleccionar una fecha futura' : ''"
+            [showErrors]="service.isFutureDate()"
+        ></app-input>
+    </div>
+
+    @if (service.isLoading() || operationalService.isLoading()) {
+        <div class="loading-state">
+            <app-loader [showLabel]="true" label="Cargando información de la materia..." [centered]="true"></app-loader>
+        </div>
+    } @else if (service.attendanceRecords().length === 0) {
+        <div class="empty-state-notice">
+            <p>No hay estudiantes cargados. Recargue la página.</p>
+        </div>
+    } @else {
+        <div class="bulk-actions">
+            <app-button variant="secondary" (clicked)="setAll('PRESENT')">Todos Presentes</app-button>
+            <app-button variant="secondary" (clicked)="setAll('ABSENT')">Todos Ausentes</app-button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Estudiante</th>
+                        <th>CI</th>
+                        <th>Carrera</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of service.attendanceRecords(); track row.enrollmentId; let i = $index) {
+                        <tr>
+                            <td class="row-number">{{ i + 1 }}</td>
+                            <td class="student-name">{{ row.fullName }}</td>
+                            <td>{{ row.ci }}</td>
+                            <td>{{ row.degreeName || '—' }}</td>
+                            <td>
+                                <div class="status-selector">
+                                    <app-button
+                                        [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
+                                    >P</app-button>
+                                    <app-button
+                                        [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
+                                    >A</app-button>
+                                    <app-button
+                                        [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
+                                    >J</app-button>
+                                </div>
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="5" class="empty-cell">
+                                <div class="empty-state">
+                                    <span class="material-symbols-outlined">group_off</span>
+                                    <p>No hay estudiantes inscritos</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="submit-section">
+            <app-button
+                variant="primary"
+                [disabled]="service.isSaving() || !service.isReady()"
+                (clicked)="handleSubmit()"
+            >
+                @if (service.isSaving()) {
+                    <span class="material-symbols-outlined spinning" style="margin-right: 8px;">progress_activity</span>
+                    Guardando...
+                } @else {
+                    Guardar Asistencia
+                }
+            </app-button>
+
+            @if (!service.isReady() && !service.isLoading()) {
+                <div class="debug-info">
+                    @if (operationalService.error()) {
+                        <div class="error-banner">
+                            <strong>Error operacional:</strong> {{ operationalService.error() }}
+                        </div>
+                    }
+                    @if (service.debugReadyState(); as state) {
+                        <details open>
+                            <summary>ℹ️ Estado de validación del formulario:</summary>
+                            <ul>
+                                <li [class.fail]="!state.hasStudents">✓ Estudiantes cargados: {{ state.hasStudents ? 'Sí (' + (operationalService.students().length || 0) + ')' : 'NO' }}</li>
+                                <li [class.fail]="!state.hasDate">✓ Fecha seleccionada: {{ state.hasDate ? service.date() : 'NO' }}</li>
+                                <li [class.fail]="!state.isNotFuture">✓ Fecha no futura: {{ state.isNotFuture ? 'Sí' : 'NO (fecha futura)' }}</li>
+                                <li [class.fail]="!state.hasRecords">✓ Registros: {{ state.hasRecords ? 'Sí (' + service.attendanceRecords().length + ')' : 'NO' }}</li>
+                                <li [class.fail]="!state.hasSubject">
+                                    ✓ Materia Detectada: {{ state.hasSubject ? 'Sí (ID: ' + (operationalService.subject()?.id || route.snapshot.paramMap.get('id')) + ')' : 'NO' }}
+                                </li>
+                                <li [class.fail]="!state.isNotLoadingOperational">✓ Carga completa: {{ state.isNotLoadingOperational ? 'Sí' : 'NO (cargando)' }}</li>
+                            </ul>
+                        </details>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

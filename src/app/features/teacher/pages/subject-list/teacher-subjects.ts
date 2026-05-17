@@ -1,82 +1,72 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
-import { AdminSubjectService, SubjectResponse } from '../../../admin/services/admin-subject.service';
+import { TeacherService } from '../../services/teacher.service';
+import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { EnrollmentApiService, StudentEnrolledResponse } from '../../services/enrollment-api.service';
+import { SubjectContextService } from '../../../../core/services/subject-context/subject-context.service';
+
+// Importamos solo los Átomos que SÍ existen
+import { Table } from '../../../../shared/components/table/table';
+import { Button } from '../../../../shared/components/button/button';
+import { Loader } from '../../../../shared/components/loader/loader';
 
 @Component({
   selector: 'app-teacher-subjects',
   standalone: true,
-  imports: [CommonModule],
+  // Quitamos Badge de aquí también
+  imports: [CommonModule, Table, Button, Loader],
   templateUrl: './teacher-subjects.html',
   styleUrl: './teacher-subjects.css',
 })
-export class TeacherSubjectsComponent implements OnInit {
+export class TeacherSubjects implements OnInit {
+  // Inyecciones
   private readonly authService = inject(AuthService);
-  private readonly adminSubjectService = inject(AdminSubjectService);
+  private readonly teacherService = inject(TeacherService);
   private readonly enrollmentApi = inject(EnrollmentApiService);
+  private readonly router = inject(Router);
+  private readonly contextService = inject(SubjectContextService);
 
-  readonly allSubjects = signal<SubjectResponse[]>([]);
+  // Signals
+  readonly mySubjects = signal<SubjectResponse[]>([]); 
   readonly selectedSubject = signal<SubjectResponse | null>(null);
   readonly enrolledStudents = signal<StudentEnrolledResponse[]>([]);
 
   readonly isLoading = signal(false);
   readonly isLoadingStudents = signal(false);
-  readonly isResolvingProfile = signal(true);
   readonly errorMessage = signal('');
 
-  readonly currentTeacherId = signal('');
-
-  readonly mySubjects = computed(() =>
-    this.currentTeacherId()
-      ? this.allSubjects().filter(s => s.teacherId === this.currentTeacherId())
-      : []
-  );
+  // Columnas para la tabla de pre-visualización
+  readonly previewColumns = [
+    { key: 'fullName', label: 'Nombre Completo' },
+    { key: 'ci', label: 'C.I.' }
+  ];
 
   ngOnInit() {
-    this.resolveTeacherContext();
-  }
-
-  resolveTeacherContext() {
-    this.isResolvingProfile.set(true);
-    this.errorMessage.set('');
-
-    this.authService.getCurrentUserProfile().subscribe({
-      next: (response) => {
-        this.currentTeacherId.set(response.data.id);
-        this.loadSubjects();
-      },
-      error: () => {
-        this.isResolvingProfile.set(false);
-        this.errorMessage.set('No se pudo identificar al docente autenticado.');
-      },
-    });
+    this.loadSubjects();
   }
 
   loadSubjects() {
-    if (!this.currentTeacherId()) {
-      this.resolveTeacherContext();
-      return;
-    }
-
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.adminSubjectService.getAll()
-      .pipe(finalize(() => {
-        this.isLoading.set(false);
-        this.isResolvingProfile.set(false);
-      }))
+    this.teacherService.getMySubjects()
+      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: (response) => this.allSubjects.set(response.data ?? []),
-        error: () => this.errorMessage.set('Error al cargar las materias.'),
+        next: (subjects) => {
+          this.mySubjects.set(subjects || []);
+        },
+        error: () => {
+          this.errorMessage.set('Error al cargar las materias asignadas.');
+        },
       });
   }
 
   selectSubject(subject: SubjectResponse) {
     this.selectedSubject.set(subject);
-    this.loadStudents(subject.id);
+    this.loadStudents(String(subject.id));
   }
 
   loadStudents(subjectId: string) {
@@ -87,5 +77,21 @@ export class TeacherSubjectsComponent implements OnInit {
         next: (response) => this.enrolledStudents.set(response.data ?? []),
         error: () => this.enrolledStudents.set([]),
       });
+  }
+
+  goToFullNomina() {
+    const currentSubj = this.selectedSubject();
+    if (!currentSubj) return;
+
+    this.contextService.setSubject({
+      id: currentSubj.id,
+      name: currentSubj.name,
+      code: currentSubj.code,
+      modality: currentSubj.modality,
+      studentCount: currentSubj.capacity ?? 0,
+      semesterName: currentSubj.semesterName ?? '',
+    });
+
+    this.router.navigate(['/teacher/subject', currentSubj.id, 'students']);
   }
 }
