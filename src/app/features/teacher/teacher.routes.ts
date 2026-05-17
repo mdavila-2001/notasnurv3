@@ -17,6 +17,10 @@ export const teacherRoutes: Routes = [
         loadComponent: () => import('./pages/subject-list/teacher-subjects').then(m => m.TeacherSubjects),
       },
       {
+        path: 'subject/:subjectId/grades',
+        loadComponent: () => import('./pages/subject-grades/grade-grid.component').then(m => m.GradeGridComponent),
+      },
+      {
         path: 'subject/:id',
         loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetail),
       },

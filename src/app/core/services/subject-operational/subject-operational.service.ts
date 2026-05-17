@@ -1,11 +1,11 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { forkJoin, finalize, of, catchError } from 'rxjs';
-import { EnrollmentApiService } from '../../../features/teacher/services/enrollment-api.service';
+import { forkJoin, finalize, of, catchError, firstValueFrom, map } from 'rxjs';
+import { EnrollmentApiService, StudentEnrolledResponse } from '../../../features/teacher/services/enrollment-api.service';
 import { EvaluationPlanService } from '../../../features/teacher/services/evaluation-plan.service';
 import { AdminSubjectService, SubjectResponse } from '../../../features/admin/services/admin-subject.service';
 import { StudentOperational } from '../../models/operational.model';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class SubjectOperationalService {
   private readonly enrollmentService = inject(EnrollmentApiService);
   private readonly evaluationService = inject(EvaluationPlanService);
@@ -14,35 +14,55 @@ export class SubjectOperationalService {
   private readonly _subject = signal<SubjectResponse | null>(null);
   private readonly _students = signal<StudentOperational[]>([]);
   private readonly _isLoading = signal<boolean>(false);
+  private readonly _studentsLoading = signal<boolean>(false);
   private readonly _error = signal<string | null>(null);
+  private readonly _studentsError = signal<string | null>(null);
+  private readonly _loadedSubjectContextId = signal<string | null>(null);
+  private readonly _loadedStudentsSubjectId = signal<string | null>(null);
 
   readonly subject = computed(() => this._subject());
   readonly students = computed(() => this._students());
+  readonly currentSubjectId = computed(() => this._subject()?.id?.toString() ?? null);
   readonly evaluationPlan = this.evaluationService.plan;
   readonly isLoading = computed(() => this._isLoading());
+  readonly studentsLoading = computed(() => this._studentsLoading());
   readonly error = computed(() => this._error());
+  readonly studentsError = computed(() => this._studentsError());
 
-  /**
-   * Inyecta la materia directamente sin hacer petición HTTP.
-   * Útil cuando ya tenemos los datos de la materia (ej. desde la lista de "Mis Materias").
-   */
+  private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
+    const studentId = student.studentId ?? student.id ?? '';
+    const fullName = student.fullName
+      ?? student.name
+      ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
+      ?? '';
+
+    return {
+      studentId,
+      fullName,
+      ci: student.ci,
+      email: student.email,
+      degreeName: student.degreeName ?? student.degreeNameDto,
+    };
+  }
+
   setSubjectDirectly(subject: SubjectResponse) {
     this._subject.set(subject);
   }
 
   loadSubjectContext(subjectId: string) {
+    if (this._loadedSubjectContextId() === subjectId && this._subject()) {
+      return;
+    }
+
     this._isLoading.set(true);
     this._error.set(null);
 
     forkJoin({
       subject: this._subject()
-        ? of(null) // Ya tenemos la materia, no re-pedirla
+        ? of(null)
         : this.adminSubjectService.getById(subjectId).pipe(
             catchError((err) => { console.warn('Error cargando materia:', err); return of(null); })
           ),
-      students: this.enrollmentService.getStudentsBySubject(subjectId).pipe(
-        catchError((err) => { console.warn('Error cargando estudiantes:', err); return of(null); })
-      ),
       plan: this.evaluationService.fetchPlan(subjectId).pipe(
         catchError((err) => { console.warn('Error cargando plan:', err); return of(null); })
       )
@@ -53,9 +73,8 @@ export class SubjectOperationalService {
         if (res.subject && 'data' in res.subject) {
           this._subject.set(res.subject.data ?? null);
         }
-        if (res.students && 'data' in res.students) {
-          this._students.set(res.students.data ?? []);
-        }
+
+        this._loadedSubjectContextId.set(subjectId);
       },
       error: (err) => {
         this._error.set('No se pudo cargar la información de la materia.');
@@ -64,9 +83,58 @@ export class SubjectOperationalService {
     });
   }
 
+  async loadStudents(subjectId: string, force = false) {
+    if (!subjectId) {
+      this._students.set([]);
+      this._studentsError.set(null);
+      this._loadedStudentsSubjectId.set(null);
+      return;
+    }
+
+    if (!force && this._studentsLoading()) {
+      return;
+    }
+
+    if (!force && this._loadedStudentsSubjectId() === subjectId) {
+      return;
+    }
+
+    this._studentsLoading.set(true);
+    this._studentsError.set(null);
+
+    try {
+      const students = await firstValueFrom(
+        this.enrollmentService.getStudentsBySubject(subjectId).pipe(
+          map((response) => response.data ?? []),
+          catchError((error) => {
+            console.error('Error cargando estudiantes de la materia:', error);
+            this._studentsError.set('No se pudieron cargar los estudiantes de esta materia.');
+            return of([] as StudentEnrolledResponse[]);
+          }),
+        ),
+      );
+
+      const mappedStudents = students.map((student) => this.mapStudentResponse(student));
+
+      this._students.set(mappedStudents);
+      this._loadedStudentsSubjectId.set(subjectId);
+    } finally {
+      this._studentsLoading.set(false);
+    }
+  }
+
+  setStudentsDirectly(students: StudentOperational[]) {
+    this._students.set(students);
+    this._studentsError.set(null);
+  }
+
   clearStore() {
     this._subject.set(null);
     this._students.set([]);
+    this._studentsLoading.set(false);
+    this._studentsError.set(null);
+    this._loadedSubjectContextId.set(null);
+    this._loadedStudentsSubjectId.set(null);
     this.evaluationService.reset();
   }
 }

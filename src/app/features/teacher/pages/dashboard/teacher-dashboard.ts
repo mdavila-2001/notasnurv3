@@ -94,4 +94,8 @@ export class TeacherDashboard implements OnInit {
     });
     this.router.navigate(['/teacher/subject', subject.id, 'students']);
   }
+
+  openGrades(subject: SubjectResponse) {
+    this.router.navigate(['/teacher/subject', subject.id, 'grades']);
+  }
 }

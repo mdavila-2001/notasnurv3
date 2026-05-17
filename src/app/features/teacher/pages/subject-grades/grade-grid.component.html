@@ -1,0 +1,125 @@
+<div class="grade-grid-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">US-10 · Registro de notas</p>
+      <h1 class="page-title">Cuadrícula dinámica de calificaciones</h1>
+      <p class="page-subtitle">
+        {{ currentSubjectId() ? 'Materia #' + currentSubjectId() : 'Cargando materia...' }}
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <app-button variant="secondary" [disabled]="isLoading() || isSaving()" (clicked)="openSaveModal()">
+        @if (isSaving()) {
+          Guardando...
+        } @else {
+          Guardar Notas
+        }
+      </app-button>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <section class="loading-shell">
+      <app-loader [centered]="true" label="Cargando estudiantes, plan de evaluación y notas..." />
+    </section>
+  } @else {
+    @if (loadErrorMessage()) {
+      <section class="error-banner">
+        <span class="material-symbols-outlined">warning</span>
+        <p>{{ loadErrorMessage() }}</p>
+      </section>
+    }
+
+    <section class="summary-section">
+      <div class="summary-card">
+        <div class="summary-head">
+          <h2>Plan de evaluación</h2>
+          <span>{{ components().length }} componente(s)</span>
+        </div>
+
+        @if (hasComponents()) {
+          <app-table [columns]="componentColumns()" [data]="componentRows()" />
+        } @else {
+          <p class="empty-helper">No hay componentes configurados para esta materia.</p>
+        }
+      </div>
+    </section>
+
+    <section class="grid-section">
+      <div class="grid-head">
+        <div>
+          <h2>Registro por estudiante</h2>
+          <p>Escribe una nota entre 0 y 100 en cada celda editable.</p>
+        </div>
+        <div class="grid-meta">
+          <span>{{ gradeRows().length }} estudiante(s)</span>
+          <span>{{ saveableGradeCount() }} nota(s) listas para guardar</span>
+        </div>
+      </div>
+
+      @if (students().length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined">group_off</span>
+          <p>No hay estudiantes matriculados para esta materia.</p>
+        </div>
+      } @else if (!hasComponents()) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined">assignment_late</span>
+          <p>Primero debes configurar el plan de evaluación.</p>
+        </div>
+      } @else {
+        <div class="grid-table" [style.gridTemplateColumns]="gridColumns()">
+          <div class="grid-header cell sticky-left">Estudiante</div>
+          @for (component of components(); track component.id) {
+            <div class="grid-header cell">
+              <strong>{{ component.name }}</strong>
+              <span>{{ component.weight }}%</span>
+            </div>
+          }
+          <div class="grid-header cell final-header">Nota final</div>
+
+          @for (row of gradeRows(); track row.studentId) {
+            <div class="cell student-cell sticky-left">
+              <span class="student-name">{{ row.studentName }}</span>
+              <span class="student-id">Matrícula {{ row.studentId }}</span>
+            </div>
+
+            @for (cell of row.cells; track cell.componentId) {
+              <div class="cell score-cell">
+                <app-input
+                  type="number"
+                  [min]="0"
+                  [max]="100"
+                  [disabled]="isSaving()"
+                  [value]="getCellValue(row.enrollmentId, cell.componentId)"
+                  [class.invalid]="isInvalidCell(row.enrollmentId, cell.componentId)"
+                  (valueChange)="onGradeChange(row.enrollmentId, cell.componentId, $event)"
+                />
+              </div>
+            }
+
+            <div class="cell final-cell">{{ row.finalGrade | number:'1.2-2' }}</div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <app-modal [isOpen]="isSaveModalOpen()" title="Confirmar guardado" (closed)="closeSaveModal()">
+    <p class="modal-copy">
+      Vas a guardar {{ saveableGradeCount() }} nota(s) válidas para {{ gradeRows().length }} estudiante(s).
+    </p>
+
+    <div modal-actions class="modal-actions">
+      <app-button variant="secondary" [disabled]="isSaving()" (clicked)="closeSaveModal()">Cancelar</app-button>
+      <app-button variant="primary" [disabled]="isSaving()" (clicked)="confirmSave()">
+        @if (isSaving()) {
+          Guardando...
+        } @else {
+          Sí, guardar
+        }
+      </app-button>
+    </div>
+  </app-modal>
+</div>

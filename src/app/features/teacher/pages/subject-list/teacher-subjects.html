@@ -14,14 +14,13 @@
 
       @if (isLoading() || isResolvingProfile()) {
         <div class="loading-state">
-          <span class="material-symbols-outlined spinning">progress_activity</span>
-          <p>Cargando materias...</p>
+          <app-loader [centered]="true" label="Cargando materias..." />
         </div>
       } @else if (errorMessage()) {
         <div class="error-state">
           <span class="material-symbols-outlined">error_outline</span>
           <p>{{ errorMessage() }}</p>
-          <button class="btn-retry" (click)="loadSubjects()">Reintentar</button>
+          <app-button variant="secondary" (clicked)="loadSubjects()">Reintentar</app-button>
         </div>
       } @else if (mySubjects().length === 0) {
         <div class="empty-state">
@@ -66,9 +65,12 @@
               {{ selectedSubject()!.code }} · {{ selectedSubject()!.semesterName }} · Gestión —
             </p>
           </div>
-          <div class="cupos-info">
-            <span class="material-symbols-outlined">group</span>
-            Cupos disponibles: <strong>{{ selectedSubject()!.capacity }}</strong>
+          <div class="panel-actions">
+            <div class="cupos-info">
+              <span class="material-symbols-outlined">group</span>
+              Cupos disponibles: <strong>{{ selectedSubject()!.capacity }}</strong>
+            </div>
+            <app-button variant="primary" (clicked)="openGrades(selectedSubject()!)">Notas</app-button>
           </div>
         </div>
 

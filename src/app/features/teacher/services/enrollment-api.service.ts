@@ -4,11 +4,16 @@ import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
 
 export interface StudentEnrolledResponse {
-  studentId: string;
-  fullName: string;
-  ci: string;
-  email: string;
-  degreeName: string;
+  studentId?: string;
+  id?: string;
+  fullName?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  ci?: string;
+  email?: string;
+  degreeName?: string;
+  degreeNameDto?: string;
 }
 
 export interface EnrollmentResponse {
