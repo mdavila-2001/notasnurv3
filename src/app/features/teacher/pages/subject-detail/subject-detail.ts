@@ -6,7 +6,8 @@ import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
 import { GradeService } from '../../services/grade.service';
 import { ReportService } from '../../services/report.service';
-import { StudentsTabComponent } from './tabs/students-tab/students-tab';
+
+import { StudentsTab } from './tabs/students-tab/students-tab';
 import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
 import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
 import { AttendanceTab } from './tabs/attendance-tab/attendance-tab';
@@ -28,7 +29,7 @@ interface Tab {
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
-  imports: [RouterModule, StudentsTabComponent, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
+  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
   templateUrl: './subject-detail.html',
   styleUrl: './subject-detail.css',
   providers: [
@@ -41,6 +42,7 @@ interface Tab {
 })
 export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
   private readonly subjectService = inject(AdminSubjectService);
@@ -62,8 +64,20 @@ export class SubjectDetail implements OnInit, OnDestroy {
   ngOnInit() {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
-      this.subjectService.getById(subjectId).subscribe();
+      // 1. Cargamos el contexto de alumnos y evaluaciones
       this.operationalService.loadSubjectContext(subjectId);
+
+      // 2. Pedimos la materia y la guardamos en el Store para sobrevivir al F5
+      this.subjectService.getById(subjectId).subscribe({
+        next: (response) => {
+          // Extraemos los datos dependiendo de la estructura de tu ApiResponse
+          const subjectData = (response as any).data || response;
+          this.operationalService.setSubjectDirectly(subjectData);
+        },
+        error: (err) => {
+          console.error('Error al recuperar la materia tras recargar:', err);
+        }
+      });
     }
   }
 

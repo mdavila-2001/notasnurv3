@@ -15,7 +15,7 @@ import { ToastService } from '../../../../../../shared/services/toast.service';
 @Component({
   selector: 'app-evaluation-plan-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button, Input],
+  imports: [CommonModule, FormsModule, Button],
   templateUrl: './evaluation-plan-tab.html',
   styleUrl: './evaluation-plan-tab.css',
 })

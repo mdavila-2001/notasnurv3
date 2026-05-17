@@ -12,7 +12,14 @@ import { Toast } from '../../../../../../shared/components/toast/toast';
 @Component({
   selector: 'app-attendance-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    Button, 
+    Input, 
+    Loader, 
+    Toast
+  ],
   templateUrl: './attendance-tab.html',
   styleUrl: './attendance-tab.css'
 })
@@ -34,8 +41,8 @@ export class AttendanceTab implements OnInit {
     this.attendanceService.initializeDraft();
   }
 
-  handleDateChange(date: string): void {
-    this.attendanceService.setDate(date);
+ handleDateChange(value: string | number): void {
+    this.attendanceService.setDate(String(value));
   }
 
   handleStatusChange(enrollmentId: string, status: AttendanceStatus): void {

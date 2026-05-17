@@ -26,7 +26,7 @@ export const teacherRoutes: Routes = [
           {
             path: 'students',
             // Asegúrate de que esta ruta llegue correctamente a donde creamos tu componente
-            loadComponent: () => import('../teacher/pages/subject-detail/tabs/students-tab/students-tab').then(m => m.StudentsTabComponent)
+          loadComponent: () => import('./pages/subject-detail/tabs/students-tab/students-tab').then(m => m.StudentsTab)
           }
         ]
       },

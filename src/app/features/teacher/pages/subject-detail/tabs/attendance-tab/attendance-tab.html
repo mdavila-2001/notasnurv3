@@ -12,20 +12,20 @@
     </div>
 
     @if (successMessage(); as msg) {
-        <div class="success-banner">{{ msg }}</div>
+        <app-toast type="success" title="Éxito" [message]="msg"></app-toast>
     }
 
     @if (error(); as errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
+        <app-toast type="error" title="Error" [message]="errorMessage"></app-toast>
     }
 
     <div class="date-picker-row">
-        <input
+        <app-input
             type="date"
-            class="date-input"
-            [ngModel]="date()"
-            (ngModelChange)="handleDateChange($event)"
-        />
+            label="Fecha"
+            [value]="date()"
+            (valueChange)="handleDateChange($event)"
+        ></app-input>
     </div>
 
     @if (isLoading()) {
@@ -68,14 +68,17 @@
                                         [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
                                     >P</app-button>
+                                    
                                     <app-button
                                         [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
                                     >A</app-button>
+                                    
                                     <app-button
-                                        [variant]="row.status === 'LATE' ? 'late' : 'tertiary'"
+                                        [variant]="row.status === 'LATE' ? 'secondary' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'LATE')"
                                     >R</app-button>
+                                    
                                     <app-button
                                         [variant]="row.status === 'JUSTIFIED' ? 'justified' : 'tertiary'"
                                         (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
@@ -104,6 +107,7 @@
                 (clicked)="handleSubmit()"
             >
                 @if (isSaving()) {
+                    <span class="material-symbols-outlined spinning" style="margin-right: 8px;">progress_activity</span>
                     Guardando...
                 } @else {
                     Guardar Asistencia
