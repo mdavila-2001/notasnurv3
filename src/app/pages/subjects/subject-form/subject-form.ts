@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { Subject, SubjectModality, SubjectRequest } from '../../../core/models/subject.model';
+import { SubjectModality, SubjectRequest, SubjectResponse } from '../../../core/models/subject.model';
 
 @Component({
   selector: 'app-subject-form',
@@ -13,7 +13,7 @@ import { Subject, SubjectModality, SubjectRequest } from '../../../core/models/s
   styleUrl: './subject-form.css',
 })
 export class SubjectFormComponent {
-  subject = input<Subject | null>(null);
+  subject = input<SubjectResponse | null>(null);
 
   semesterOptions = input<SelectOption[]>([]);
   teacherOptions = input<SelectOption[]>([]);

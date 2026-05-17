@@ -1,44 +1,112 @@
 <div class="reports-tab">
-    <div class="tab-header">
-        <h2>Reportes</h2>
+  <div class="tab-header">
+    <div>
+      <h2>Cierre de Actas y Reportes</h2>
+      <p>Consolida la materia y descarga los documentos oficiales generados por el backend.</p>
     </div>
 
-    @if (service.lastSuccess(); as msg) {
-        <div class="success-banner">{{ msg }}</div>
-    }
+    <span class="status-pill" [class.closed]="isSubjectClosed()">
+      {{ isSubjectClosed() ? 'Materia cerrada' : 'Materia abierta' }}
+    </span>
+  </div>
 
-    @if (service.error(); as errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
-    }
+  <div class="reports-grid">
+    @for (option of service.reportOptions; track option.type) {
+      <div class="report-card">
+        <div class="report-icon">
+          <span class="material-symbols-outlined">{{ option.icon }}</span>
+        </div>
 
-    <div class="reports-grid">
-        @for (option of service.reportOptions; track option.type) {
-            <div class="report-card">
-                <div class="report-icon">
-                    <span class="material-symbols-outlined">{{ option.icon }}</span>
-                </div>
-                <div class="report-info">
-                    <h3>{{ option.label }}</h3>
-                    <p>{{ option.description }}</p>
-                </div>
-                <app-button
-                    variant="secondary"
-                    [disabled]="service.isDownloading() !== null"
-                    (clicked)="handleDownload(option.type)"
-                >
-                    @if (service.isDownloading() === option.type) {
-                        <span class="downloading">
-                            <span class="material-symbols-outlined spinning">progress_activity</span>
-                            Descargando...
-                        </span>
-                    } @else {
-                        <span class="download-content">
-                            <span class="material-symbols-outlined">download</span>
-                            Descargar
-                        </span>
-                    }
-                </app-button>
-            </div>
+        <div class="report-info">
+          <h3>{{ option.label }}</h3>
+          <p>{{ option.description }}</p>
+        </div>
+
+        <app-button
+          variant="secondary"
+          [disabled]="isAnyReportDownloading() || service.isClosingSubject()"
+          (clicked)="handleDownload(option.type)"
+        >
+          @if (service.isDownloading() === option.type) {
+            <app-loader size="sm" label="Generando..." />
+          } @else {
+            <span class="action-content">
+              <span class="material-symbols-outlined">download</span>
+              Descargar
+            </span>
+          }
+        </app-button>
+      </div>
+    }
+  </div>
+
+  <section class="close-card">
+    <div class="close-info">
+      <div class="report-icon danger">
+        <span class="material-symbols-outlined">lock</span>
+      </div>
+
+      <div>
+        <h3>Cerrar Materia</h3>
+        <p>
+          Cierra la materia cuando las notas estén consolidadas. Luego no se podrán modificar
+          calificaciones ni configuración asociada.
+        </p>
+      </div>
+    </div>
+
+    <app-button
+      variant="absent"
+      [disabled]="isSubjectClosed() || service.isClosingSubject() || isAnyReportDownloading()"
+      (clicked)="openCloseSubjectModal()"
+    >
+      @if (service.isClosingSubject()) {
+        <app-loader size="sm" label="Cerrando..." />
+      } @else if (isSubjectClosed()) {
+        Materia cerrada
+      } @else {
+        Cerrar Materia
+      }
+    </app-button>
+  </section>
+
+  <app-modal
+    [isOpen]="isCloseModalOpen()"
+    title="Confirmar cierre de materia"
+    [disableBackdropClick]="service.isClosingSubject()"
+    (closed)="closeCloseSubjectModal()"
+  >
+    <div class="modal-warning">
+      <span class="material-symbols-outlined">warning</span>
+      <div>
+        <h3>Esta acción es irreversible</h3>
+        <p>
+          Al confirmar, la materia quedará cerrada y el estado se actualizará en el orquestador.
+          Verifica que las notas y reportes estén correctos antes de continuar.
+        </p>
+      </div>
+    </div>
+
+    <div modal-actions class="modal-actions">
+      <app-button
+        variant="tertiary"
+        [disabled]="service.isClosingSubject()"
+        (clicked)="closeCloseSubjectModal()"
+      >
+        Cancelar
+      </app-button>
+
+      <app-button
+        variant="absent"
+        [disabled]="service.isClosingSubject()"
+        (clicked)="confirmCloseSubject()"
+      >
+        @if (service.isClosingSubject()) {
+          <app-loader size="sm" label="Cerrando..." />
+        } @else {
+          Confirmar cierre
         }
+      </app-button>
     </div>
+  </app-modal>
 </div>

@@ -26,11 +26,11 @@ export class SubjectOperationalService {
    * Inyecta la materia directamente sin hacer petición HTTP.
    * Útil cuando ya tenemos los datos de la materia (ej. desde la lista de "Mis Materias").
    */
-  setSubjectDirectly(subject: SubjectResponse) {
+  setSubjectDirectly(subject: SubjectResponse): void {
     this._subject.set(subject);
   }
 
-  loadSubjectContext(subjectId: string) {
+  loadSubjectContext(subjectId: string): void {
     this._isLoading.set(true);
     this._error.set(null);
 
@@ -64,7 +64,7 @@ export class SubjectOperationalService {
     });
   }
 
-  clearStore() {
+  clearStore(): void {
     this._subject.set(null);
     this._students.set([]);
     this.evaluationService.reset();
