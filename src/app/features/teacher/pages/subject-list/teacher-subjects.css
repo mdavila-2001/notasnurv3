@@ -220,12 +220,11 @@
 
 .students-count {
   padding: 12px 24px;
-  margin-top: 15px;
+  margin: 15px 0 0;
   font-size: 0.78rem;
   color: var(--text-secondary, #94a3b8);
   border-top: 1px solid var(--border, rgba(255, 255, 255, 0.06));
   text-align: center;
-  margin: 0;
   flex-shrink: 0;
 }
 
