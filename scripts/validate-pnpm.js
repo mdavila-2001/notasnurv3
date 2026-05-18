@@ -35,6 +35,25 @@ if (!fs.existsSync(pnpmLockPath)) {
 }
 
 // 4. Verificar versión de pnpm
+/**
+ * Compara versiones semánticas (ej: 9.10 vs 10.4)
+ * Retorna true si actual >= requerida
+ */
+function isVersionSufficient(actual, required) {
+  const parseVersion = (v) => v.split('.').map(Number);
+  const actualParts = parseVersion(actual);
+  const requiredParts = parseVersion(required);
+  
+  for (let i = 0; i < Math.max(actualParts.length, requiredParts.length); i++) {
+    const actualPart = actualParts[i] || 0;
+    const requiredPart = requiredParts[i] || 0;
+    
+    if (actualPart > requiredPart) return true;
+    if (actualPart < requiredPart) return false;
+  }
+  return true;
+}
+
 const requiredVersion = '10.33.2';
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
@@ -42,7 +61,7 @@ const packageJson = JSON.parse(
 const versionMatch = packageJson.packageManager.match(/pnpm@([\d.]+)/);
 if (versionMatch && userAgent.includes('pnpm')) {
   const detectedVersion = userAgent.match(/pnpm\/([\d.]+)/)?.[1];
-  if (detectedVersion && detectedVersion < requiredVersion) {
+  if (detectedVersion && !isVersionSufficient(detectedVersion, requiredVersion)) {
     errors.push(`⚠️  WARNING: Se requiere pnpm ${requiredVersion}+, tienes ${detectedVersion}`);
   }
 }

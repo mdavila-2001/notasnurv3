@@ -31,14 +31,6 @@
       </div>
 
       <app-table [data]="filteredStudents()" [columns]="tableColumns"></app-table>
-
-      <div class="pagination-container">
-        <span class="showing-text">Mostrando {{ filteredStudents().length }} estudiantes</span>
-        <div class="pagination-actions">
-          <button class="icon-btn" disabled><span class="material-symbols-outlined">chevron_left</span></button>
-          <button class="icon-btn" disabled><span class="material-symbols-outlined">chevron_right</span></button>
-        </div>
-      </div>
     </section>
   } @else {
     <section class="card empty-state-section">

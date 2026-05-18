@@ -2,7 +2,6 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/auth.service';
 import { TeacherService } from '../../services/teacher.service';
 import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
@@ -26,7 +25,6 @@ import { EvaluationPlanTab } from '../subject-detail/tabs/evaluation-plan-tab/ev
 })
 export class TeacherSubjects implements OnInit {
   // Inyecciones (Eliminamos EnrollmentApiService para no hacer llamadas manuales)
-  private readonly authService = inject(AuthService);
   private readonly teacherService = inject(TeacherService);
   private readonly router = inject(Router);
   private readonly operationalService = inject(SubjectOperationalService);
@@ -38,7 +36,6 @@ export class TeacherSubjects implements OnInit {
   readonly activeTab = signal<'students' | 'evaluation'>('students');
 
   readonly isLoading = signal(false);
-  readonly isResolvingProfile = signal(false);
   readonly errorMessage = signal('');
 
   // 👇 CORRECCIÓN 2: Respetamos la regla de Marcelo.
@@ -65,7 +62,6 @@ export class TeacherSubjects implements OnInit {
     this.teacherService.getMySubjects()
       .pipe(finalize(() => {
         this.isLoading.set(false);
-        this.isResolvingProfile.set(false);
       }))
       .subscribe({
         next: (subjects) => {

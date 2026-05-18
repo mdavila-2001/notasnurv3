@@ -41,8 +41,7 @@
             <app-button variant="secondary" (clicked)="setAll('PRESENT')">Todos Presentes</app-button>
             <app-button variant="secondary" (clicked)="setAll('ABSENT')">Todos Ausentes</app-button>
             <app-button variant="secondary" (clicked)="setAll('LATE')">Todos Retardos</app-button>
-            
-            </div>
+        </div>
 
         <app-table 
             [columns]="[
@@ -76,8 +75,7 @@
                                 [variant]="row.status === 'LATE' ? 'secondary' : 'tertiary'"
                                 (clicked)="handleStatusChange(row.enrollmentId, 'LATE')"
                             >R</app-button>
-                            
-                            </div>
+                        </div>
                     </td>
                 </tr>
             </ng-template>

@@ -8,7 +8,6 @@ import {
   EvaluationPlanService,
 } from '../../../../services/evaluation-plan.service';
 import { Button } from '../../../../../../shared/components/button/button';
-import { Input } from '../../../../../../shared/components/input/input';
 import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 import { ToastService } from '../../../../../../shared/services/toast.service';
 
@@ -118,7 +117,7 @@ export class EvaluationPlanTab {
     });
   }
 
-  handleSaveComponent() {
+  handleAddComponent() {
     const plan = this.service.plan();
 
     if (!plan || this.isAddComponentDisabled()) {

@@ -1,14 +1,4 @@
 /* Variables de colores reemplazadas a mano para CSS puro */
-/* Importar Google Fonts y Material Icons */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
-
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 0;
-}
 .main-content {
   background-color: #f3f4f6;
   min-height: 100vh;
@@ -161,51 +151,6 @@ body {
   padding: 16px 12px;
   font-size: 14px;
   vertical-align: middle;
-}
-
-/* === ESTILOS DE PAGINACIÓN === */
-.pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.pagination-container .showing-text {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.pagination-container .pagination-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.pagination-container .pagination-actions .icon-btn {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  color: #6b7280;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pagination-container .pagination-actions .icon-btn:hover:not(:disabled) {
-  border-color: #1d68c5;
-  color: #1d68c5;
-  background-color: rgba(29, 104, 197, 0.05);
-}
-
-.pagination-container .pagination-actions .icon-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* === ESTILOS DEL ESTADO VACÍO === */
