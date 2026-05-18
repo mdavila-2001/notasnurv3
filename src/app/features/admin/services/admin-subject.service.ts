@@ -2,29 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
+import {
+  SubjectCreateUpdateRequest,
+  SubjectResponse,
+} from '../../../core/models/subject.model';
 
-export interface SubjectResponse {
-  id: string;
-  code: string;
-  name: string;
-  modality: string;
-  capacity: number;
-  semesterId: string;
-  teacherId: string;
-  semesterName?: string;
-  teacherName?: string;
-  recordStatus: string;
-  management?: string;
-}
-
-export interface SubjectRequest {
-  code: string;
-  name: string;
-  modality: string;
-  capacity: number;
-  semesterId: string;
-  teacherId: string;
-}
+export type { SubjectCreateUpdateRequest, SubjectResponse } from '../../../core/models/subject.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminSubjectService {
@@ -42,11 +25,11 @@ export class AdminSubjectService {
     return this.api.get<SubjectResponse>(`/subjects/${id}`);
   }
 
-  create(payload: SubjectRequest): Observable<ApiResponse<SubjectResponse>> {
+  create(payload: SubjectCreateUpdateRequest): Observable<ApiResponse<SubjectResponse>> {
     return this.api.post<SubjectResponse>('/subjects', payload);
   }
 
-  update(id: string, payload: Partial<SubjectRequest>): Observable<ApiResponse<SubjectResponse>> {
+  update(id: string, payload: Partial<SubjectCreateUpdateRequest>): Observable<ApiResponse<SubjectResponse>> {
     return this.api.put<SubjectResponse>(`/subjects/${id}`, payload);
   }
 

@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
-import { AdminSubjectService } from '../../../admin/services/admin-subject.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
 import { GradeService } from '../../services/grade.service';
@@ -45,7 +44,6 @@ export class SubjectDetail implements OnInit, OnDestroy {
   
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
-  private readonly subjectService = inject(AdminSubjectService);
 
   readonly tabs: Tab[] = [
     { id: 'students', label: 'Estudiantes', icon: 'group' },
@@ -64,20 +62,7 @@ export class SubjectDetail implements OnInit, OnDestroy {
   ngOnInit() {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
-      // 1. Cargamos el contexto de alumnos y evaluaciones
       this.operationalService.loadSubjectContext(subjectId);
-
-      // 2. Pedimos la materia y la guardamos en el Store para sobrevivir al F5
-      this.subjectService.getById(subjectId).subscribe({
-        next: (response) => {
-          // Extraemos los datos dependiendo de la estructura de tu ApiResponse
-          const subjectData = (response as any).data || response;
-          this.operationalService.setSubjectDirectly(subjectData);
-        },
-        error: (err) => {
-          console.error('Error al recuperar la materia tras recargar:', err);
-        }
-      });
     }
   }
 
