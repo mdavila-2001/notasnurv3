@@ -16,7 +16,7 @@
         <div class="error-state">
           <span class="material-symbols-outlined">error_outline</span>
           <p>{{ errorMessage() }}</p>
-          <app-button (click)="loadSubjects()">Reintentar</app-button>
+          <app-button (clicked)="loadSubjects()">Reintentar</app-button>
         </div>
       } @else if (mySubjects().length === 0) {
         <div class="empty-state">
