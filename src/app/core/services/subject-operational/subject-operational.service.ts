@@ -22,50 +22,27 @@ export class SubjectOperationalService {
 
   readonly subject = computed(() => this._subject());
   readonly students = computed(() => this._students());
-  readonly currentSubjectId = computed(() => this._subject()?.id?.toString() ?? null);
+  readonly currentSubjectId = computed(() => this._subject()?.id?.toString() ?? this._loadedSubjectContextId());
   readonly evaluationPlan = this.evaluationService.plan;
   readonly isLoading = computed(() => this._isLoading());
   readonly studentsLoading = computed(() => this._studentsLoading());
   readonly error = computed(() => this._error());
   readonly studentsError = computed(() => this._studentsError());
 
-  private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
-    const studentId = student.studentId ?? student.id ?? '';
-    const fullName = student.fullName
-      ?? student.name
-      ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
-      ?? '';
-
-    return {
-      studentId,
-      fullName,
-      ci: student.ci,
-      email: student.email,
-      degreeName: student.degreeName ?? student.degreeNameDto,
-    };
-  }
-
-<<<<<<< HEAD
-  setSubjectDirectly(subject: SubjectResponse) {
-    this._subject.set(subject);
-  }
-
-  loadSubjectContext(subjectId: string) {
-    if (this._loadedSubjectContextId() === subjectId && this._subject()) {
-      return;
-    }
-
-=======
   /**
    * Inyecta la materia directamente sin hacer petición HTTP.
-   * Útil cuando ya tenemos los datos de la materia (ej. desde la lista de "Mis Materias").
+   * Útil cuando ya tenemos los datos de la materia desde la lista de materias del docente.
    */
   setSubjectDirectly(subject: SubjectResponse): void {
     this._subject.set(subject);
+    this._loadedSubjectContextId.set(subject.id?.toString() ?? null);
   }
 
   loadSubjectContext(subjectId: string): void {
->>>>>>> origin/dev
+    if (this._loadedSubjectContextId() === subjectId && this.evaluationPlan()) {
+      return;
+    }
+
     this._isLoading.set(true);
     this._error.set(null);
 
@@ -73,17 +50,23 @@ export class SubjectOperationalService {
       subject: this._subject()
         ? of(null)
         : this.adminSubjectService.getById(subjectId).pipe(
-            catchError((err) => { console.warn('Error cargando materia:', err); return of(null); })
+            catchError((err) => {
+              console.warn('Error cargando materia:', err);
+              return of(null);
+            }),
           ),
       plan: this.evaluationService.fetchPlan(subjectId).pipe(
-        catchError((err) => { console.warn('Error cargando plan:', err); return of(null); })
-      )
+        catchError((err) => {
+          console.warn('Error cargando plan:', err);
+          return of(null);
+        }),
+      ),
     }).pipe(
-      finalize(() => this._isLoading.set(false))
+      finalize(() => this._isLoading.set(false)),
     ).subscribe({
       next: (res) => {
-        if (res.subject && 'data' in res.subject) {
-          this._subject.set(res.subject.data ?? null);
+        if (res.subject?.data) {
+          this._subject.set(res.subject.data);
         }
 
         this._loadedSubjectContextId.set(subjectId);
@@ -91,12 +74,11 @@ export class SubjectOperationalService {
       error: (err) => {
         this._error.set('No se pudo cargar la información de la materia.');
         console.error('Operational Error:', err);
-      }
+      },
     });
   }
 
-<<<<<<< HEAD
-  async loadStudents(subjectId: string, force = false) {
+  async loadStudents(subjectId: string, force = false): Promise<void> {
     if (!subjectId) {
       this._students.set([]);
       this._studentsError.set(null);
@@ -127,7 +109,9 @@ export class SubjectOperationalService {
         ),
       );
 
-      const mappedStudents = students.map((student) => this.mapStudentResponse(student));
+      const mappedStudents = students
+        .map((student) => this.mapStudentResponse(student))
+        .filter((student) => student.enrollmentId.trim().length > 0);
 
       this._students.set(mappedStudents);
       this._loadedStudentsSubjectId.set(subjectId);
@@ -136,21 +120,76 @@ export class SubjectOperationalService {
     }
   }
 
-  setStudentsDirectly(students: StudentOperational[]) {
+  setStudentsDirectly(students: StudentOperational[]): void {
     this._students.set(students);
     this._studentsError.set(null);
   }
 
-  clearStore() {
-=======
   clearStore(): void {
->>>>>>> origin/dev
     this._subject.set(null);
     this._students.set([]);
+    this._isLoading.set(false);
     this._studentsLoading.set(false);
+    this._error.set(null);
     this._studentsError.set(null);
     this._loadedSubjectContextId.set(null);
     this._loadedStudentsSubjectId.set(null);
     this.evaluationService.reset();
+  }
+
+  private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
+    const enrollmentId = this.toStringId(
+      student.enrollmentId
+        ?? student.id
+        ?? student.userDegreeId
+        ?? student.userDegree?.id
+        ?? student.studentId,
+    );
+
+    const studentId = this.toStringId(
+      student.studentId
+        ?? student.userId
+        ?? student.student?.id
+        ?? student.user?.id
+        ?? student.userDegree?.user?.id
+        ?? student.id,
+    );
+
+    const fullName = this.firstNonEmpty(
+      student.fullName,
+      student.studentName,
+      student.name,
+      student.student?.fullName,
+      student.student?.name,
+      student.user?.fullName,
+      student.user?.name,
+      student.userDegree?.user?.fullName,
+      student.userDegree?.user?.name,
+      this.joinName(student.firstName, student.lastName),
+      this.joinName(student.student?.firstName, student.student?.lastName),
+      this.joinName(student.user?.firstName, student.user?.lastName),
+      this.joinName(student.userDegree?.user?.firstName, student.userDegree?.user?.lastName),
+    );
+
+    return {
+      enrollmentId,
+      studentId: studentId || enrollmentId,
+      fullName: fullName || 'Estudiante sin nombre',
+      ci: this.firstNonEmpty(student.ci, student.studentCi, student.student?.ci, student.user?.ci, student.userDegree?.user?.ci),
+      email: this.firstNonEmpty(student.email, student.studentEmail, student.student?.email, student.user?.email, student.userDegree?.user?.email),
+      degreeName: this.firstNonEmpty(student.degreeName, student.degreeNameDto, student.careerName, student.degree?.name, student.userDegree?.degree?.name),
+    };
+  }
+
+  private toStringId(value: string | number | undefined): string {
+    return value === undefined || value === null ? '' : String(value);
+  }
+
+  private joinName(firstName?: string, lastName?: string): string {
+    return [firstName, lastName].filter((value) => !!value?.trim()).join(' ');
+  }
+
+  private firstNonEmpty(...values: Array<string | undefined>): string {
+    return values.find((value) => !!value?.trim())?.trim() ?? '';
   }
 }

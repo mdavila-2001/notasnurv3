@@ -32,7 +32,7 @@
                 (ngModelChange)="handleComponentChange($event)"
             >
                 @for (comp of service.components(); track comp.id) {
-                    <option [value]="comp.id">
+                    <option [ngValue]="comp.id">
                         {{ comp.name }} ({{ comp.weight }}%) — {{ comp.description || 'Sin descripción' }}
                     </option>
                 }
@@ -60,7 +60,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (row of service.studentRows(); track row.studentId; let i = $index) {
+                    @for (row of service.studentRows(); track row.enrollmentId; let i = $index) {
                         <tr>
                             <td class="row-number">{{ i + 1 }}</td>
                             <td class="student-name">{{ row.fullName }}</td>

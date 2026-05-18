@@ -51,7 +51,7 @@ export class AttendanceService {
     const students = this.operationalService.students();
 
     const initialDraft: AttendanceRowUi[] = students.map(student => ({
-      enrollmentId: student.studentId,
+      enrollmentId: student.enrollmentId,
       studentName: student.fullName,
       ci: student.ci ?? 'N/A',
       degreeName: student.degreeName,

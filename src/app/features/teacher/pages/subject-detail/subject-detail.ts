@@ -61,6 +61,7 @@ export class SubjectDetail implements OnInit, OnDestroy {
     const subjectId = this.route.snapshot.paramMap.get('id');
     if (subjectId) {
       this.operationalService.loadSubjectContext(subjectId);
+      void this.operationalService.loadStudents(subjectId);
     }
   }
 

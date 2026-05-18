@@ -153,7 +153,7 @@ export class GradeGridComponent {
     const values = this.cellValues();
 
     return this.students().map((student) => {
-      const enrollmentId = this.parseEnrollmentId(student.studentId);
+      const enrollmentId = this.parseEnrollmentId(student.enrollmentId);
       const cells = components.map((component) => {
         const key = this.buildCellKey(enrollmentId, component.id);
         const rawValue = values.get(key) ?? null;

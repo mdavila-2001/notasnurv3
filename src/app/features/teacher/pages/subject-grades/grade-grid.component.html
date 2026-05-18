@@ -79,10 +79,10 @@
           }
           <div class="grid-header cell final-header">Nota final</div>
 
-          @for (row of gradeRows(); track row.studentId) {
+          @for (row of gradeRows(); track row.enrollmentId) {
             <div class="cell student-cell sticky-left">
               <span class="student-name">{{ row.studentName }}</span>
-              <span class="student-id">Matrícula {{ row.studentId }}</span>
+              <span class="student-id">Matrícula {{ row.enrollmentId }}</span>
             </div>
 
             @for (cell of row.cells; track cell.componentId) {

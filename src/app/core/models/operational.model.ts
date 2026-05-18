@@ -1,4 +1,5 @@
 export interface StudentOperational {
+    enrollmentId: string;
     studentId: string;
     fullName: string;
     ci?: string;

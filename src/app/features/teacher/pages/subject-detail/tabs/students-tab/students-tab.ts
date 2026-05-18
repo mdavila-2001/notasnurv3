@@ -18,5 +18,5 @@ export class StudentsTab {
   private readonly operationalService = inject(SubjectOperationalService);
   // Los datos fluyen mágicamente desde el cerebro central
   readonly students = this.operationalService.students;
-  readonly isLoading = this.operationalService.isLoading;
+  readonly isLoading = this.operationalService.studentsLoading;
 }

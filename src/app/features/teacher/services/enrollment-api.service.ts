@@ -1,19 +1,62 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
 
 export interface StudentEnrolledResponse {
-  studentId?: string;
-  id?: string;
+  enrollmentId?: string | number;
+  id?: string | number;
+  userDegreeId?: string | number;
+  studentId?: string | number;
+  userId?: string | number;
   fullName?: string;
+  studentName?: string;
   name?: string;
   firstName?: string;
   lastName?: string;
   ci?: string;
+  studentCi?: string;
   email?: string;
+  studentEmail?: string;
   degreeName?: string;
   degreeNameDto?: string;
+  careerName?: string;
+  student?: {
+    id?: string | number;
+    fullName?: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    ci?: string;
+    email?: string;
+  };
+  user?: {
+    id?: string | number;
+    fullName?: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    ci?: string;
+    email?: string;
+  };
+  userDegree?: {
+    id?: string | number;
+    user?: {
+      id?: string | number;
+      fullName?: string;
+      name?: string;
+      firstName?: string;
+      lastName?: string;
+      ci?: string;
+      email?: string;
+    };
+    degree?: {
+      name?: string;
+    };
+  };
+  degree?: {
+    name?: string;
+  };
 }
 
 export interface EnrollmentResponse {
@@ -37,13 +80,16 @@ export interface MySubjectResponse {
   degreeName: string;
 }
 
+type StudentsEndpointResponse = ApiResponse<StudentEnrolledResponse[]> | StudentEnrolledResponse[];
+
 @Injectable({ providedIn: 'root' })
 export class EnrollmentApiService {
   private readonly api = inject(ApiService);
 
   getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
-    // Ruta corregida: el backend expone /enrollments/subjects/{id}/students (plural + /students)
-    return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subjects/${subjectId}/students`);
+    return this.getStudentsFromEndpoint(`/enrollments/subjects/${subjectId}/students`).pipe(
+      catchError(() => this.getStudentsFromEndpoint(`/enrollments/subject/${subjectId}`)),
+    );
   }
 
   getMySubjects(): Observable<ApiResponse<MySubjectResponse[]>> {
@@ -56,5 +102,26 @@ export class EnrollmentApiService {
 
   withdrawStudent(enrollmentId: string): Observable<ApiResponse<void>> {
     return this.api.delete<void>(`/enrollments/${enrollmentId}`);
+  }
+
+  private getStudentsFromEndpoint(endpoint: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
+    return this.api.getRaw<StudentsEndpointResponse>(endpoint).pipe(
+      map((response) => this.normalizeStudentsResponse(response)),
+    );
+  }
+
+  private normalizeStudentsResponse(response: StudentsEndpointResponse): ApiResponse<StudentEnrolledResponse[]> {
+    if (Array.isArray(response)) {
+      return {
+        success: true,
+        message: 'Estudiantes cargados correctamente',
+        data: response,
+      };
+    }
+
+    return {
+      ...response,
+      data: response.data ?? [],
+    };
   }
 }

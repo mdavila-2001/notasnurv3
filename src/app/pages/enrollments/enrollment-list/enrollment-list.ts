@@ -115,29 +115,29 @@ export class EnrollmentListComponent implements OnInit {
     });
   }
 
-  withdrawStudent(studentId: string | undefined, fullName: string | undefined): void {
-    if (!studentId) {
-      this.displayToast('No se pudo identificar al estudiante para darlo de baja', 'error');
-      return;
-    }
-
-    const studentName = fullName ?? 'Estudiante';
-
-    if (!confirm(`¿Dar de baja a ${studentName} de esta materia?`)) return;
-
-    this.enrollmentApi.withdrawStudent(studentId).subscribe({
-      next: () => {
-        this.displayToast(`${studentName} dado de baja correctamente`, 'success');
-        const subject = this.selectedSubject();
-        if (subject) this.loadEnrolledStudents(subject.id);
-        this.loadInitialData();
-      },
-      error: (err: any) => {
-        const msg = err?.error?.message || 'Error al dar de baja';
-        this.displayToast(msg, 'error');
-      },
-    });
+withdrawStudent(enrollmentId: string | number | undefined, fullName: string | undefined): void {
+  if (enrollmentId === undefined || enrollmentId === null || enrollmentId === '') {
+    this.displayToast('No se pudo identificar al estudiante para darlo de baja', 'error');
+    return;
   }
+
+  const studentName = fullName ?? 'Estudiante';
+
+  if (!confirm(`¿Dar de baja a ${studentName} de esta materia?`)) return;
+
+  this.enrollmentApi.withdrawStudent(String(enrollmentId)).subscribe({
+    next: () => {
+      this.displayToast(`${studentName} dado de baja correctamente`, 'success');
+      const subject = this.selectedSubject();
+      if (subject) this.loadEnrolledStudents(subject.id);
+      this.loadInitialData();
+    },
+    error: (err: any) => {
+      const msg = err?.error?.message || 'Error al dar de baja';
+      this.displayToast(msg, 'error');
+    },
+  });
+}
 
   displayToast(message: string, type: 'success' | 'error') {
     this.toastMessage.set(message);
