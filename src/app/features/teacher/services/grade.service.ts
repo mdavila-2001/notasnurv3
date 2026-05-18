@@ -2,40 +2,8 @@ import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
+import { GradeRequest, GradeResponse, StudentGradeRowUI } from '../../../core/models/grade.models';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
-
-export interface GradeRecord {
-  enrollmentId: string;
-  componentId: number;
-  score: number | null;
-  status: 'pending' | 'saving' | 'saved' | 'error';
-  errorMessage?: string;
-}
-
-export interface StudentGradeRow {
-  enrollmentId: string;
-  studentId: string;
-  fullName: string;
-  ci: string;
-  email: string;
-  degreeName: string;
-  score: number | null;
-  status: 'pending' | 'saving' | 'saved' | 'error';
-  errorMessage?: string;
-}
-
-interface GradeResponse {
-  id: string;
-  enrollmentId: string;
-  componentId: number;
-  score: number;
-}
-
-export interface GradeRequest {
-  enrollmentId: string;
-  componentId: number;
-  score: number;
-}
 
 @Injectable()
 export class GradeService {
@@ -58,7 +26,7 @@ export class GradeService {
     this.components().find(c => c.id === this._selectedComponentId()) ?? null
   );
 
-  readonly studentRows = computed<StudentGradeRow[]>(() => {
+  readonly studentRows = computed<StudentGradeRowUI[]>(() => {
     const componentId = this._selectedComponentId();
     if (!componentId) return [];
 
@@ -143,7 +111,7 @@ export class GradeService {
     });
 
     const request: GradeRequest = {
-      enrollmentId: studentId,
+      enrollmentId: Number(studentId),
       componentId,
       score,
     };

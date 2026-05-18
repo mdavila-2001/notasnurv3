@@ -4,37 +4,27 @@ import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { concat, firstValueFrom, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { GradeBulkRequest, GradeRequest, GradeResponse, GradeRowUI } from '../../../../core/models/grade.models';
+import { EvaluationComponent, StudentOperational } from '../../../../core/models/operational.model';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
-import { GradeApiService } from '../../services/grade-api.service';
-import { GradeBulkRequest, GradeRequest, GradeResponse } from '../../../../core/models/grade.models';
 import { Button } from '../../../../shared/components/button/button';
 import { Input } from '../../../../shared/components/input/input';
 import { Loader } from '../../../../shared/components/loader/loader';
 import { Modal } from '../../../../shared/components/modal/modal';
 import { Table, TableColumn } from '../../../../shared/components/table/table';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { GradeApiService } from '../../services/grade-api.service';
 
-interface GradeGridCellViewModel {
-  componentId: number;
-  rawValue: number | string | null;
-  parsedScore: number | null;
-  invalid: boolean;
-}
-
-interface GradeGridRowViewModel {
-  studentId: string;
-  enrollmentId: number;
-  studentName: string;
-  cells: GradeGridCellViewModel[];
-  finalGrade: number;
-}
-
-interface GradeLoadState {
+type GradeLoadState = {
   subjectId: string | null;
   status: 'idle' | 'loading' | 'success' | 'error';
   grades: GradeResponse[];
   message: string;
-}
+};
+
+type GradeGridRow = GradeRowUI & {
+  finalGrade: number;
+};
 
 @Component({
   selector: 'app-grade-grid',
@@ -59,35 +49,38 @@ export class GradeGridComponent {
   readonly components = computed(() => this.operationalService.evaluationPlan()?.components ?? []);
   readonly currentSubjectId = computed(() => this.operationalService.currentSubjectId());
   readonly studentsLoading = computed(() => this.operationalService.studentsLoading());
+  readonly subjectLoading = computed(() => this.operationalService.isLoading());
 
-  private readonly overrideCellValues = signal<Map<string, number | string | null>>(new Map());
+  private readonly gradeRowsDraft = signal<GradeRowUI[]>([]);
+  private readonly initializedSubjectId = signal<string | null>(null);
   readonly isSaving = signal(false);
   readonly isSaveModalOpen = signal(false);
 
-  readonly componentColumns = computed<TableColumn[]>(() => [
+  readonly summaryColumns = computed<TableColumn[]>(() => [
     { key: 'name', label: 'Componente' },
     { key: 'weight', label: 'Peso (%)' },
     { key: 'description', label: 'Descripción' },
   ]);
 
-  readonly componentRows = computed(() =>
+  readonly summaryRows = computed(() =>
     this.components().map((component) => ({
+      id: component.id,
       name: component.name,
       weight: `${component.weight}%`,
       description: component.description || '—',
     })),
   );
 
-  readonly gridColumns = computed(() => {
-    const componentColumns = this.components().length;
-    return `minmax(220px, 1.8fr) repeat(${componentColumns}, minmax(110px, 1fr)) minmax(140px, 0.9fr)`;
-  });
+  readonly gridColumns = computed<TableColumn[]>(() => [
+    { key: 'student', label: 'Estudiante' },
+    ...this.components().map((component) => ({
+      key: `component-${component.id}`,
+      label: component.name,
+    })),
+    { key: 'finalGrade', label: 'Promedio ponderado' },
+  ]);
 
-  readonly componentWeightMap = computed(
-    () => new Map(this.components().map((component) => [component.id, component.weight] as const)),
-  );
-
-  readonly gradeFetchState = toSignal(
+  readonly existingGradesState = toSignal(
     toObservable(this.routeSubjectId).pipe(
       distinctUntilChanged(),
       switchMap((subjectId) => {
@@ -117,8 +110,9 @@ export class GradeGridComponent {
           catchError((error) => {
             const message = this.extractErrorMessage(
               error,
-              'No se pudieron cargar las notas existentes. Solo se mostrarán las nuevas.',
+              'No se pudieron cargar las notas existentes. Se mostrarán las filas vacías.',
             );
+
             this.toast.warning(message, 'Notas existentes no disponibles');
 
             return of<GradeLoadState>({
@@ -143,7 +137,7 @@ export class GradeGridComponent {
     },
   );
 
-  readonly existingGrades = computed(() => this.gradeFetchState().grades);
+  readonly existingGrades = computed(() => this.existingGradesState().grades);
   readonly existingGradesMap = computed(() => {
     const map = new Map<string, number>();
 
@@ -154,73 +148,73 @@ export class GradeGridComponent {
     return map;
   });
 
-  readonly cellValues = computed(() => {
-    const mergedValues = new Map<string, number | string | null>(this.existingGradesMap());
-
-    for (const [key, value] of this.overrideCellValues()) {
-      mergedValues.set(key, value);
-    }
-
-    return mergedValues;
-  });
-
-  readonly gradeRows = computed<GradeGridRowViewModel[]>(() => {
+  readonly gradeRows = computed<GradeGridRow[]>(() => {
     const components = this.components();
-    const values = this.cellValues();
 
-    return this.students().map((student) => {
-      const enrollmentId = this.parseEnrollmentId(student.studentId);
-      const cells = components.map((component) => {
-        const key = this.buildCellKey(enrollmentId, component.id);
-        const rawValue = values.get(key) ?? null;
-        const parsedScore = this.parseScore(rawValue);
-
-        return {
-          componentId: component.id,
-          rawValue,
-          parsedScore,
-          invalid: this.isInvalidRawValue(rawValue),
-        };
-      });
-
-      return {
-        studentId: student.studentId,
-        enrollmentId,
-        studentName: student.fullName,
-        cells,
-        finalGrade: this.calculateFinalGrade(cells),
-      };
-    });
+    return this.gradeRowsDraft().map((row) => ({
+      ...row,
+      finalGrade: this.calculateFinalGrade(row.scores, components),
+    }));
   });
 
-  readonly isGradesLoading = computed(() => this.gradeFetchState().status === 'loading');
-  readonly isContextLoading = computed(() => this.operationalService.isLoading());
-  readonly isLoading = computed(() => this.isContextLoading() || this.studentsLoading() || this.isGradesLoading());
+  readonly hasComponents = computed(() => this.components().length > 0);
+  readonly hasStudents = computed(() => this.students().length > 0);
+  readonly isGradesLoading = computed(() => this.existingGradesState().status === 'loading');
+  readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading());
   readonly loadErrorMessage = computed(() => {
-    if (this.gradeFetchState().status === 'error') {
-      return this.gradeFetchState().message;
+    if (this.existingGradesState().status === 'error') {
+      return this.existingGradesState().message;
     }
 
     return this.operationalService.studentsError() ?? this.operationalService.error() ?? '';
   });
-  readonly hasValidEnrollmentIds = computed(() => this.gradeRows().every((row) => Number.isFinite(row.enrollmentId)));
-  readonly isAllValid = computed(() => this.gradeRows().every((row) => row.cells.every((cell) => !cell.invalid)));
+  readonly hasValidEnrollmentIds = computed(() => this.gradeRowsDraft().every((row) => Number.isFinite(row.enrollmentId)));
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
-  readonly hasComponents = computed(() => this.components().length > 0);
+  readonly canSave = computed(() =>
+    this.hasComponents() &&
+    this.hasStudents() &&
+    this.saveableGradeCount() > 0 &&
+    this.hasValidEnrollmentIds() &&
+    !this.isLoading() &&
+    !this.isSaving(),
+  );
 
   constructor() {
     effect(
       () => {
         const subjectId = this.routeSubjectId();
 
+        this.isSaveModalOpen.set(false);
+        this.gradeRowsDraft.set([]);
+        this.initializedSubjectId.set(null);
+
         if (!subjectId) {
           return;
         }
 
-        this.isSaveModalOpen.set(false);
-        this.overrideCellValues.set(new Map());
         this.operationalService.loadSubjectContext(subjectId);
         void this.operationalService.loadStudents(subjectId);
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const subjectId = this.routeSubjectId();
+        const students = this.students();
+        const components = this.components();
+        const gradeLoadState = this.existingGradesState();
+
+        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading') {
+          return;
+        }
+
+        if (this.initializedSubjectId() === subjectId) {
+          return;
+        }
+
+        this.gradeRowsDraft.set(this.buildDraftRows(students, components, this.existingGradesMap()));
+        this.initializedSubjectId.set(subjectId);
       },
       { allowSignalWrites: true },
     );
@@ -237,15 +231,15 @@ export class GradeGridComponent {
     );
   }
 
-  openSaveModal() {
-    if (!this.isAllValid() || !this.hasValidEnrollmentIds() || this.isSaving() || this.isLoading()) {
+  openSaveModal(): void {
+    if (!this.canSave()) {
       return;
     }
 
     this.isSaveModalOpen.set(true);
   }
 
-  closeSaveModal() {
+  closeSaveModal(): void {
     if (this.isSaving()) {
       return;
     }
@@ -253,8 +247,8 @@ export class GradeGridComponent {
     this.isSaveModalOpen.set(false);
   }
 
-  async confirmSave() {
-    if (!this.isAllValid() || !this.hasValidEnrollmentIds() || this.isSaving()) {
+  async confirmSave(): Promise<void> {
+    if (!this.canSave() || this.isSaving()) {
       return;
     }
 
@@ -269,61 +263,100 @@ export class GradeGridComponent {
 
     try {
       await firstValueFrom(this.gradeApi.saveGrades(payload));
-      this.toast.success('Notas guardadas correctamente', 'Notas guardadas');
+      this.toast.success('Las notas se guardaron correctamente.', 'Guardado masivo');
       this.isSaveModalOpen.set(false);
     } catch (error) {
-      this.toast.warning(this.extractErrorMessage(error, 'No se pudieron guardar las notas.'), 'Guardado fallido');
+      this.toast.error(this.extractErrorMessage(error, 'No se pudieron guardar las notas.'), 'Guardado fallido');
     } finally {
       this.isSaving.set(false);
     }
   }
 
-  onGradeChange(enrollmentId: number, componentId: number, value: string | number) {
-    const key = this.buildCellKey(enrollmentId, componentId);
+  onGradeChange(enrollmentId: number, componentId: number, value: string | number): void {
+    const normalizedScore = this.normalizeScoreValue(value);
 
-    this.overrideCellValues.update((currentValues) => {
-      const nextValues = new Map(currentValues);
-      nextValues.set(key, value === '' ? null : value);
-      return nextValues;
-    });
+    this.gradeRowsDraft.update((currentRows) =>
+      currentRows.map((row) =>
+        row.enrollmentId === enrollmentId
+          ? {
+              ...row,
+              scores: {
+                ...row.scores,
+                [componentId]: normalizedScore,
+              },
+            }
+          : row,
+      ),
+    );
   }
 
   getCellValue(enrollmentId: number, componentId: number): string | number {
-    const rawValue = this.cellValues().get(this.buildCellKey(enrollmentId, componentId)) ?? null;
+    const row = this.gradeRowsDraft().find((currentRow) => currentRow.enrollmentId === enrollmentId);
+    const rawValue = row?.scores[componentId] ?? null;
 
-    if (rawValue === null) {
-      return '';
-    }
-
-    if (typeof rawValue === 'number' && Number.isNaN(rawValue)) {
-      return '';
-    }
-
-    return rawValue;
+    return rawValue ?? '';
   }
 
-  isInvalidCell(enrollmentId: number, componentId: number): boolean {
-    const rawValue = this.cellValues().get(this.buildCellKey(enrollmentId, componentId)) ?? null;
-    return this.isInvalidRawValue(rawValue);
+  isCellInvalid(enrollmentId: number, componentId: number): boolean {
+    const row = this.gradeRowsDraft().find((currentRow) => currentRow.enrollmentId === enrollmentId);
+
+    if (!row) {
+      return false;
+    }
+
+    const value = row.scores[componentId];
+
+    return value !== null && (!Number.isFinite(value) || value < 0 || value > 100);
+  }
+
+  private buildDraftRows(
+    students: StudentOperational[],
+    components: EvaluationComponent[],
+    existingGradesMap: Map<string, number>,
+  ): GradeRowUI[] {
+    return students.map((student) => {
+      const enrollmentId = this.parseEnrollmentId(student.studentId);
+      const scores: Record<number, number | null> = {};
+
+      for (const component of components) {
+        const cellKey = this.buildCellKey(enrollmentId, component.id);
+        scores[component.id] = existingGradesMap.get(cellKey) ?? null;
+      }
+
+      return {
+        studentId: student.studentId,
+        enrollmentId,
+        studentName: student.fullName,
+        ci: student.ci,
+        degreeName: student.degreeName,
+        scores,
+      };
+    });
   }
 
   private buildSavePayload(): GradeBulkRequest {
     const grades: GradeRequest[] = [];
 
-    for (const row of this.gradeRows()) {
+    for (const row of this.gradeRowsDraft()) {
       if (!Number.isFinite(row.enrollmentId)) {
         continue;
       }
 
-      for (const cell of row.cells) {
-        if (cell.parsedScore === null) {
+      for (const [componentIdText, score] of Object.entries(row.scores)) {
+        if (score === null) {
+          continue;
+        }
+
+        const componentId = Number(componentIdText);
+
+        if (!Number.isFinite(componentId)) {
           continue;
         }
 
         grades.push({
           enrollmentId: row.enrollmentId,
-          componentId: cell.componentId,
-          score: cell.parsedScore,
+          componentId,
+          score,
         });
       }
     }
@@ -331,16 +364,15 @@ export class GradeGridComponent {
     return { grades };
   }
 
-  private calculateFinalGrade(cells: GradeGridCellViewModel[]): number {
-    const weightMap = this.componentWeightMap();
+  private calculateFinalGrade(scores: Record<number, number | null>, components: EvaluationComponent[]): number {
+    return components.reduce((total, component) => {
+      const score = scores[component.id];
 
-    return cells.reduce((total, cell) => {
-      if (cell.parsedScore === null) {
+      if (score === null || score === undefined) {
         return total;
       }
 
-      const weight = weightMap.get(cell.componentId) ?? 0;
-      return total + (cell.parsedScore * weight) / 100;
+      return total + (score * component.weight) / 100;
     }, 0);
   }
 
@@ -349,31 +381,18 @@ export class GradeGridComponent {
     return Number.isFinite(parsed) ? parsed : Number.NaN;
   }
 
-  private parseScore(value: number | string | null): number | null {
-    if (value === null || value === '') {
+  private normalizeScoreValue(value: string | number): number | null {
+    if (value === '') {
       return null;
     }
 
     const parsed = typeof value === 'number' ? value : Number(value);
 
-    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    if (!Number.isFinite(parsed)) {
       return null;
     }
 
-    return parsed;
-  }
-
-  private isInvalidRawValue(value: number | string | null): boolean {
-    if (value === null || value === '') {
-      return false;
-    }
-
-    if (typeof value === 'number') {
-      return Number.isNaN(value) || value < 0 || value > 100;
-    }
-
-    const parsed = Number(value);
-    return !Number.isFinite(parsed) || parsed < 0 || parsed > 100;
+    return Math.max(0, Math.min(100, parsed));
   }
 
   private buildCellKey(enrollmentId: number, componentId: number): string {
@@ -383,6 +402,7 @@ export class GradeGridComponent {
   private extractErrorMessage(error: unknown, fallback: string): string {
     if (typeof error === 'object' && error !== null && 'error' in error) {
       const backendError = (error as { error?: { message?: string } }).error;
+
       if (backendError?.message?.trim()) {
         return backendError.message;
       }

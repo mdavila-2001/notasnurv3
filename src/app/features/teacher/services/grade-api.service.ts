@@ -11,7 +11,7 @@ export class GradeApiService {
 
   getGradesBySubject(subjectId: string): Observable<GradeResponse[]> {
     return this.api.get<GradeResponse[]>(`/grades/subject/${subjectId}`).pipe(
-      map((response: ApiResponse<GradeResponse[]>) => response.data),
+      map((response: ApiResponse<GradeResponse[]>) => response.data ?? []),
     );
   }
 

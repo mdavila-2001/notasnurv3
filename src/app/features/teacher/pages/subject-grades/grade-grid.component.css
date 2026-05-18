@@ -114,87 +114,16 @@
   padding: 1rem;
 }
 
-.grid-table {
-  display: grid;
-  gap: 0.75rem;
-  overflow-x: auto;
-}
-
-.cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 76px;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-}
-
-.grid-header {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #f8fafc;
-  font-size: 0.825rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.grid-header strong {
-  font-size: 0.86rem;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-.grid-header span {
-  font-size: 0.72rem;
-  opacity: 0.72;
-}
-
-.sticky-left {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-}
-
-.student-cell {
-  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
-}
-
 .student-name {
   font-weight: 700;
   color: var(--text-primary, #0f172a);
 }
 
-.student-id {
+.student-meta,
+.row-number {
   font-size: 0.78rem;
   color: var(--text-secondary, #64748b);
   margin-top: 0.15rem;
-}
-
-.score-cell {
-  align-items: stretch;
-}
-
-.score-cell app-input {
-  display: block;
-}
-
-/* Borde rojo para celdas inválidas */
-:host ::ng-deep app-input.invalid .input-control {
-  border-color: var(--error, #ef4444) !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-}
-
-.final-cell {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #0f172a;
-  background: linear-gradient(135deg, #ecfeff 0%, #f0f9ff 100%);
-}
-
-.final-header {
-  align-items: center;
 }
 
 .grid-meta {
@@ -218,6 +147,48 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+}
+
+:host ::ng-deep app-table .grid-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 76px;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+:host ::ng-deep app-table .sticky-column {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+}
+
+:host ::ng-deep app-table .student-cell {
+  gap: 0.15rem;
+}
+
+:host ::ng-deep app-table .score-cell app-input {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep app-table .final-cell {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  background: linear-gradient(135deg, #ecfeff 0%, #f0f9ff 100%);
+}
+
+:host ::ng-deep app-table .final-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, #64748b);
+  margin-bottom: 0.2rem;
 }
 
 @media (max-width: 1024px) {
@@ -245,7 +216,7 @@
     padding: 0.85rem;
   }
 
-  .cell {
+  :host ::ng-deep app-table .grid-cell {
     min-height: 68px;
   }
 }
