@@ -12,7 +12,7 @@
         </thead>
 
         <tbody>
-          @for (row of data(); track row.id ?? $index; let index = $index) {
+          @for (row of data(); track trackRow(row, $index); let index = $index) {
             <tr (click)="onRowClick(row)">
               @if (customRowTemplate) {
                 <ng-container
@@ -21,18 +21,18 @@
                 />
               } @else {
                 @for (col of columns(); track col.key) {
-                  <td>{{ row[col.key] }}</td>
+                  <td>{{ getCellValue(row, col.key) }}</td>
                 }
 
                 @if (hasActions()) {
                   <td class="actions-cell">
                     @if (showEditAction()) {
-                      <app-button variant="primary" (clicked)="onEdit(row)">
+                      <app-button variant="primary" (clicked)="onEdit(row, $event)">
                         Editar
                       </app-button>
                     }
                     @if (showDeleteAction()) {
-                      <app-button variant="tertiary" (clicked)="onDelete(row)">
+                      <app-button variant="tertiary" (clicked)="onDelete(row, $event)">
                         Eliminar
                       </app-button>
                     }

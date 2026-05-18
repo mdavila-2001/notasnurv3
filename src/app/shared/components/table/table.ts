@@ -9,7 +9,6 @@ export interface TableColumn {
 
 export interface TableRow {
   id?: string | number;
-  [key: string]: unknown;
 }
 
 export interface CustomRowContext<T> {
@@ -27,7 +26,7 @@ export interface CustomRowContext<T> {
 })
 export class Table {
   columns = input.required<TableColumn[]>();
-  data = input.required<TableRow[]>();
+  data = input.required<any[]>();
 
   showActions = input<boolean>(false);
   showEditAction = input<boolean>(true);
@@ -35,21 +34,31 @@ export class Table {
 
   @ContentChild('customRow') customRowTemplate?: TemplateRef<CustomRowContext<TableRow>>;
 
-  rowClicked = output<TableRow>();
-  editClicked = output<TableRow>();
-  deleteClicked = output<TableRow>();
+  rowClicked = output<any>();
+  editClicked = output<any>();
+  deleteClicked = output<any>();
 
   readonly hasActions = () => this.showActions();
 
-  onRowClick(row: TableRow): void {
+  trackRow(row: any, index: number): string | number {
+    return row.id ?? index;
+  }
+
+  getCellValue(row: any, key: string): unknown {
+    return (row as Record<string, unknown>)[key];
+  }
+
+  onRowClick(row: any): void {
     this.rowClicked.emit(row);
   }
 
-  onEdit(row: TableRow): void {
+  onEdit(row: any, event?: MouseEvent): void {
+    event?.stopPropagation();
     this.editClicked.emit(row);
   }
 
-  onDelete(row: TableRow): void {
+  onDelete(row: any, event?: MouseEvent): void {
+    event?.stopPropagation();
     this.deleteClicked.emit(row);
   }
 }

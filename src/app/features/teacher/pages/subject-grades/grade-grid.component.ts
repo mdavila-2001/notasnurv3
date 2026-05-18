@@ -143,7 +143,7 @@ export class GradeGridComponent {
     const map = new Map<string, number>();
 
     for (const grade of this.existingGrades()) {
-      map.set(this.buildCellKey(grade.enrollmentId, grade.componentId), grade.score);
+      map.set(this.buildCellKey(String(grade.enrollmentId), grade.componentId), grade.score);
     }
 
     return map;
@@ -163,7 +163,7 @@ export class GradeGridComponent {
   readonly isGradesLoading = computed(() => this.existingGradesState().status === 'loading');
   readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading());
   readonly hasValidEnrollmentIds = computed(() =>
-    this.gradeRowsDraft().every((row) => row.enrollmentId !== null && Number.isFinite(row.enrollmentId)),
+    this.gradeRowsDraft().every((row) => row.enrollmentId !== null && row.enrollmentId.trim().length > 0),
   );
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
   readonly canSave = computed(() =>
@@ -295,7 +295,7 @@ export class GradeGridComponent {
     }
   }
 
-  onGradeChange(enrollmentId: number | null, componentId: number, value: string | number): void {
+  onGradeChange(enrollmentId: string | null, componentId: number, value: string | number): void {
     if (enrollmentId === null) {
       return;
     }
@@ -317,7 +317,7 @@ export class GradeGridComponent {
     );
   }
 
-  getCellValue(enrollmentId: number | null, componentId: number): string | number {
+  getCellValue(enrollmentId: string | null, componentId: number): string | number {
     if (enrollmentId === null) {
       return '';
     }
@@ -328,7 +328,7 @@ export class GradeGridComponent {
     return rawValue ?? '';
   }
 
-  isCellInvalid(enrollmentId: number | null, componentId: number): boolean {
+  isCellInvalid(enrollmentId: string | null, componentId: number): boolean {
     if (enrollmentId === null) {
       return false;
     }
@@ -352,7 +352,7 @@ export class GradeGridComponent {
     const invalidEnrollmentIds: string[] = [];
 
     const rows = students.map((student) => {
-      const enrollmentId = this.parseEnrollmentId(student.studentId);
+      const enrollmentId = this.resolveEnrollmentId(student);
       const scores: Record<number, number | null> = {};
 
       for (const component of components) {
@@ -381,7 +381,7 @@ export class GradeGridComponent {
     const grades: GradeRequest[] = [];
 
     for (const row of this.gradeRowsDraft()) {
-      if (row.enrollmentId === null || !Number.isFinite(row.enrollmentId)) {
+      if (row.enrollmentId === null || row.enrollmentId.trim().length === 0) {
         continue;
       }
 
@@ -419,9 +419,9 @@ export class GradeGridComponent {
     }, 0);
   }
 
-  private parseEnrollmentId(studentId: string): number | null {
-    const parsed = Number(studentId);
-    return Number.isFinite(parsed) ? parsed : null;
+  private resolveEnrollmentId(student: StudentOperational): string | null {
+    const enrollmentId = student.enrollmentId?.trim() || student.studentId?.trim();
+    return enrollmentId && enrollmentId.length > 0 ? enrollmentId : null;
   }
 
   private normalizeScoreValue(value: string | number): number | null {
@@ -438,7 +438,7 @@ export class GradeGridComponent {
     return Math.max(0, Math.min(100, parsed));
   }
 
-  private buildCellKey(enrollmentId: number, componentId: number): string {
+  private buildCellKey(enrollmentId: string, componentId: number): string {
     return `${enrollmentId}_${componentId}`;
   }
 

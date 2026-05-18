@@ -30,6 +30,7 @@ export class SubjectOperationalService {
 
   private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
     const studentId = student.studentId ?? student.id ?? '';
+    const enrollmentId = student.id ?? student.studentId ?? '';
     const fullName = student.fullName
       ?? student.name
       ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
@@ -37,6 +38,7 @@ export class SubjectOperationalService {
 
     return {
       studentId,
+      enrollmentId,
       fullName,
       ci: student.ci,
       email: student.email,

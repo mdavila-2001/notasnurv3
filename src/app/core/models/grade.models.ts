@@ -1,5 +1,5 @@
 export interface GradeRequest {
-  enrollmentId: string | number;
+  enrollmentId: string;
   componentId: number;
   score: number;
 }
@@ -10,14 +10,14 @@ export interface GradeBulkRequest {
 
 export interface GradeResponse {
   id: number;
-  enrollmentId: number;
+  enrollmentId: string | number;
   componentId: number;
   score: number;
 }
 
 export interface GradeRowUI {
   studentId: string;
-  enrollmentId: number | null;
+  enrollmentId: string | null;
   studentName: string;
   ci?: string;
   degreeName?: string;
