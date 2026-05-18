@@ -53,6 +53,7 @@ export class GradeGridComponent {
 
   private readonly gradeRowsDraft = signal<GradeRowUI[]>([]);
   private readonly initializedSubjectId = signal<string | null>(null);
+  private readonly invalidEnrollmentToastSignature = signal<string | null>(null);
   readonly isSaving = signal(false);
   readonly isSaveModalOpen = signal(false);
 
@@ -161,14 +162,9 @@ export class GradeGridComponent {
   readonly hasStudents = computed(() => this.students().length > 0);
   readonly isGradesLoading = computed(() => this.existingGradesState().status === 'loading');
   readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading());
-  readonly loadErrorMessage = computed(() => {
-    if (this.existingGradesState().status === 'error') {
-      return this.existingGradesState().message;
-    }
-
-    return this.operationalService.studentsError() ?? this.operationalService.error() ?? '';
-  });
-  readonly hasValidEnrollmentIds = computed(() => this.gradeRowsDraft().every((row) => Number.isFinite(row.enrollmentId)));
+  readonly hasValidEnrollmentIds = computed(() =>
+    this.gradeRowsDraft().every((row) => row.enrollmentId !== null && Number.isFinite(row.enrollmentId)),
+  );
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
   readonly canSave = computed(() =>
     this.hasComponents() &&
@@ -187,13 +183,13 @@ export class GradeGridComponent {
         this.isSaveModalOpen.set(false);
         this.gradeRowsDraft.set([]);
         this.initializedSubjectId.set(null);
+        this.invalidEnrollmentToastSignature.set(null);
 
         if (!subjectId) {
           return;
         }
 
         this.operationalService.loadSubjectContext(subjectId);
-        void this.operationalService.loadStudents(subjectId);
       },
       { allowSignalWrites: true },
     );
@@ -213,8 +209,34 @@ export class GradeGridComponent {
           return;
         }
 
-        this.gradeRowsDraft.set(this.buildDraftRows(students, components, this.existingGradesMap()));
+        const draft = this.buildDraftRows(students, components, this.existingGradesMap());
+        this.gradeRowsDraft.set(draft.rows);
+
+        if (draft.invalidEnrollmentIds.length > 0) {
+          const signature = draft.invalidEnrollmentIds.join('|');
+
+          if (this.invalidEnrollmentToastSignature() !== signature) {
+            this.toast.error(
+              `Se omitieron ${draft.invalidEnrollmentIds.length} estudiante(s) sin ID de matrícula válido: ${draft.invalidEnrollmentIds.join(', ')}`,
+              'Datos inválidos',
+            );
+            this.invalidEnrollmentToastSignature.set(signature);
+          }
+        }
+
         this.initializedSubjectId.set(subjectId);
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const contextError = this.operationalService.contextError();
+
+        if (contextError) {
+          this.toast.error(contextError, 'Carga de materia');
+          this.operationalService.clearContextError();
+        }
       },
       { allowSignalWrites: true },
     );
@@ -224,10 +246,11 @@ export class GradeGridComponent {
         const message = this.operationalService.studentsError();
 
         if (message) {
-          this.toast.warning(message, 'Carga de estudiantes');
+          this.toast.error(message, 'Carga de estudiantes');
+          this.operationalService.clearStudentsError();
         }
       },
-      { allowSignalWrites: false },
+      { allowSignalWrites: true },
     );
   }
 
@@ -272,7 +295,11 @@ export class GradeGridComponent {
     }
   }
 
-  onGradeChange(enrollmentId: number, componentId: number, value: string | number): void {
+  onGradeChange(enrollmentId: number | null, componentId: number, value: string | number): void {
+    if (enrollmentId === null) {
+      return;
+    }
+
     const normalizedScore = this.normalizeScoreValue(value);
 
     this.gradeRowsDraft.update((currentRows) =>
@@ -290,14 +317,22 @@ export class GradeGridComponent {
     );
   }
 
-  getCellValue(enrollmentId: number, componentId: number): string | number {
+  getCellValue(enrollmentId: number | null, componentId: number): string | number {
+    if (enrollmentId === null) {
+      return '';
+    }
+
     const row = this.gradeRowsDraft().find((currentRow) => currentRow.enrollmentId === enrollmentId);
     const rawValue = row?.scores[componentId] ?? null;
 
     return rawValue ?? '';
   }
 
-  isCellInvalid(enrollmentId: number, componentId: number): boolean {
+  isCellInvalid(enrollmentId: number | null, componentId: number): boolean {
+    if (enrollmentId === null) {
+      return false;
+    }
+
     const row = this.gradeRowsDraft().find((currentRow) => currentRow.enrollmentId === enrollmentId);
 
     if (!row) {
@@ -313,14 +348,20 @@ export class GradeGridComponent {
     students: StudentOperational[],
     components: EvaluationComponent[],
     existingGradesMap: Map<string, number>,
-  ): GradeRowUI[] {
-    return students.map((student) => {
+  ): { rows: GradeRowUI[]; invalidEnrollmentIds: string[] } {
+    const invalidEnrollmentIds: string[] = [];
+
+    const rows = students.map((student) => {
       const enrollmentId = this.parseEnrollmentId(student.studentId);
       const scores: Record<number, number | null> = {};
 
       for (const component of components) {
-        const cellKey = this.buildCellKey(enrollmentId, component.id);
-        scores[component.id] = existingGradesMap.get(cellKey) ?? null;
+        const cellKey = enrollmentId !== null ? this.buildCellKey(enrollmentId, component.id) : null;
+        scores[component.id] = cellKey !== null ? existingGradesMap.get(cellKey) ?? null : null;
+      }
+
+      if (enrollmentId === null) {
+        invalidEnrollmentIds.push(student.studentId);
       }
 
       return {
@@ -332,13 +373,15 @@ export class GradeGridComponent {
         scores,
       };
     });
+
+    return { rows, invalidEnrollmentIds };
   }
 
   private buildSavePayload(): GradeBulkRequest {
     const grades: GradeRequest[] = [];
 
     for (const row of this.gradeRowsDraft()) {
-      if (!Number.isFinite(row.enrollmentId)) {
+      if (row.enrollmentId === null || !Number.isFinite(row.enrollmentId)) {
         continue;
       }
 
@@ -376,9 +419,9 @@ export class GradeGridComponent {
     }, 0);
   }
 
-  private parseEnrollmentId(studentId: string): number {
+  private parseEnrollmentId(studentId: string): number | null {
     const parsed = Number(studentId);
-    return Number.isFinite(parsed) ? parsed : Number.NaN;
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   private normalizeScoreValue(value: string | number): number | null {

@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GradeService } from '../../../../services/grade.service';
 import { Button } from '../../../../../../shared/components/button/button';
+import { ToastService } from '../../../../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-grade-entry-tab',
@@ -13,6 +14,21 @@ import { Button } from '../../../../../../shared/components/button/button';
 })
 export class GradeEntryTab {
   readonly service = inject(GradeService);
+  private readonly toast = inject(ToastService);
+
+  constructor() {
+    effect(
+      () => {
+        const errorMessage = this.service.error();
+
+        if (errorMessage) {
+          this.toast.error(errorMessage, 'Guardado de notas');
+          this.service.clearError();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   handleComponentChange(componentId: number) {
     this.service.selectComponent(componentId);

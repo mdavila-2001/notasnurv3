@@ -15,9 +15,8 @@ export class SubjectOperationalService {
   private readonly _students = signal<StudentOperational[]>([]);
   private readonly _isLoading = signal<boolean>(false);
   private readonly _studentsLoading = signal<boolean>(false);
-  private readonly _error = signal<string | null>(null);
+  private readonly _contextError = signal<string | null>(null);
   private readonly _studentsError = signal<string | null>(null);
-  private readonly _loadedSubjectContextId = signal<string | null>(null);
   private readonly _loadedStudentsSubjectId = signal<string | null>(null);
 
   readonly subject = computed(() => this._subject());
@@ -26,7 +25,7 @@ export class SubjectOperationalService {
   readonly evaluationPlan = this.evaluationService.plan;
   readonly isLoading = computed(() => this._isLoading());
   readonly studentsLoading = computed(() => this._studentsLoading());
-  readonly error = computed(() => this._error());
+  readonly contextError = computed(() => this._contextError());
   readonly studentsError = computed(() => this._studentsError());
 
   private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
@@ -51,7 +50,9 @@ export class SubjectOperationalService {
 
   loadSubjectContext(subjectId: string): void {
     this._isLoading.set(true);
-    this._error.set(null);
+    this._contextError.set(null);
+
+    void this.loadStudents(subjectId);
 
     const shouldLoadSubject = this._subject()?.id?.toString() !== subjectId;
 
@@ -59,14 +60,16 @@ export class SubjectOperationalService {
       subject: shouldLoadSubject
         ? this.adminSubjectService.getById(subjectId).pipe(
             catchError((err) => {
-              console.warn('Error cargando materia:', err);
+              void err;
+              this._contextError.set('No se pudo cargar la materia de esta pantalla.');
               return of(null);
             }),
           )
         : of(null),
       plan: this.evaluationService.fetchPlan(subjectId).pipe(
         catchError((err) => {
-          console.warn('Error cargando plan:', err);
+          void err;
+          this._contextError.set('No se pudo cargar el plan de evaluación.');
           return of(null);
         }),
       ),
@@ -77,12 +80,10 @@ export class SubjectOperationalService {
           if (res.subject && 'data' in res.subject) {
             this._subject.set(res.subject.data ?? null);
           }
-
-          this._loadedSubjectContextId.set(subjectId);
         },
         error: (err) => {
-          this._error.set('No se pudo cargar la información de la materia.');
-          console.error('Operational Error:', err);
+          void err;
+          this._contextError.set('No se pudo cargar la información de la materia.');
         },
       });
   }
@@ -111,7 +112,6 @@ export class SubjectOperationalService {
         this.enrollmentService.getStudentsBySubject(subjectId).pipe(
           map((response) => response.data ?? []),
           catchError((error) => {
-            console.error('Error cargando estudiantes de la materia:', error);
             this._studentsError.set('No se pudieron cargar los estudiantes de esta materia.');
             return of([] as StudentEnrolledResponse[]);
           }),
@@ -132,14 +132,21 @@ export class SubjectOperationalService {
     this._studentsError.set(null);
   }
 
+  clearContextError(): void {
+    this._contextError.set(null);
+  }
+
+  clearStudentsError(): void {
+    this._studentsError.set(null);
+  }
+
   clearStore(): void {
     this._subject.set(null);
     this._students.set([]);
     this._isLoading.set(false);
     this._studentsLoading.set(false);
-    this._error.set(null);
+    this._contextError.set(null);
     this._studentsError.set(null);
-    this._loadedSubjectContextId.set(null);
     this._loadedStudentsSubjectId.set(null);
     this.evaluationService.reset();
   }

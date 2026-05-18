@@ -24,13 +24,6 @@
       <app-loader [centered]="true" label="Cargando estudiantes, plan de evaluación y notas..." />
     </section>
   } @else {
-    @if (loadErrorMessage()) {
-      <section class="error-banner">
-        <span class="material-symbols-outlined">warning</span>
-        <p>{{ loadErrorMessage() }}</p>
-      </section>
-    }
-
     <section class="summary-card">
       <div class="summary-head">
         <div>

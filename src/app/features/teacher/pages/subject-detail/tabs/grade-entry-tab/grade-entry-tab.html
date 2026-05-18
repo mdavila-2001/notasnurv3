@@ -9,10 +9,6 @@
         }
     </div>
 
-    @if (service.error(); as errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
-    }
-
     @if (service.isLoading()) {
         <div class="loading-state">
             <span class="material-symbols-outlined spinning">progress_activity</span>

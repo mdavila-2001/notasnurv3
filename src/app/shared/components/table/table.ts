@@ -27,7 +27,7 @@ export interface CustomRowContext<T> {
 })
 export class Table {
   columns = input.required<TableColumn[]>();
-  data = input.required<any[]>();
+  data = input.required<TableRow[]>();
 
   showActions = input<boolean>(false);
   showEditAction = input<boolean>(true);
@@ -35,11 +35,11 @@ export class Table {
 
   @ContentChild('customRow') customRowTemplate?: TemplateRef<CustomRowContext<TableRow>>;
 
-  rowClicked = output<any>();
-  editClicked = output<any>();
-  deleteClicked = output<any>();
+  rowClicked = output<TableRow>();
+  editClicked = output<TableRow>();
+  deleteClicked = output<TableRow>();
 
-  readonly hasActions = () => this.showActions() || this.showEditAction() || this.showDeleteAction();
+  readonly hasActions = () => this.showActions();
 
   onRowClick(row: TableRow): void {
     this.rowClicked.emit(row);

@@ -111,7 +111,7 @@ export class GradeService {
     });
 
     const request: GradeRequest = {
-      enrollmentId: Number(studentId),
+      enrollmentId: studentId,
       componentId,
       score,
     };
