@@ -1,9 +1,8 @@
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
-import { AdminSubjectService, SubjectResponse } from '../../../admin/services/admin-subject.service';
+import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { TeacherService } from '../../services/teacher.service';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
@@ -85,13 +84,17 @@ export class TeacherSubjects implements OnInit {
     this.errorMessage.set('');
 
     this.teacherService.getMySubjects()
-      .pipe(finalize(() => {
-        this.isLoading.set(false);
-        this.isResolvingProfile.set(false);
-      }))
       .subscribe({
         next: (response) => this.allSubjects.set(response ?? []),
-        error: () => this.errorMessage.set('Error al cargar las materias.'),
+        error: () => {
+          this.errorMessage.set('Error al cargar las materias.');
+          this.isLoading.set(false);
+          this.isResolvingProfile.set(false);
+        },
+        complete: () => {
+          this.isLoading.set(false);
+          this.isResolvingProfile.set(false);
+        },
       });
   }
 

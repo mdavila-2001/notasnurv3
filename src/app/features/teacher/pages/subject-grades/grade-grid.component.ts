@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { concat, firstValueFrom, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
-import { of, firstValueFrom } from 'rxjs';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
 import { GradeApiService } from '../../services/grade-api.service';
 import { GradeBulkRequest, GradeRequest, GradeResponse } from '../../../../core/models/grade.models';
@@ -42,7 +42,7 @@ interface GradeLoadState {
   imports: [CommonModule, Button, Input, Loader, Modal, Table],
   templateUrl: './grade-grid.component.html',
   styleUrl: './grade-grid.component.css',
-  providers: [GradeApiService] // SubjectOperationalService ya es root
+  providers: [GradeApiService],
 })
 export class GradeGridComponent {
   private readonly route = inject(ActivatedRoute);
@@ -83,6 +83,10 @@ export class GradeGridComponent {
     return `minmax(220px, 1.8fr) repeat(${componentColumns}, minmax(110px, 1fr)) minmax(140px, 0.9fr)`;
   });
 
+  readonly componentWeightMap = computed(
+    () => new Map(this.components().map((component) => [component.id, component.weight] as const)),
+  );
+
   readonly gradeFetchState = toSignal(
     toObservable(this.routeSubjectId).pipe(
       distinctUntilChanged(),
@@ -96,7 +100,14 @@ export class GradeGridComponent {
           });
         }
 
-        return this.gradeApi.getGradesBySubject(subjectId).pipe(
+        const loadingState: GradeLoadState = {
+          subjectId,
+          status: 'loading',
+          grades: [],
+          message: '',
+        };
+
+        const grades$ = this.gradeApi.getGradesBySubject(subjectId).pipe(
           map((grades) => ({
             subjectId,
             status: 'success' as const,
@@ -104,7 +115,10 @@ export class GradeGridComponent {
             message: '',
           })),
           catchError((error) => {
-            const message = this.extractErrorMessage(error, 'No se pudieron cargar las notas existentes. Solo se mostrarán las nuevas.');
+            const message = this.extractErrorMessage(
+              error,
+              'No se pudieron cargar las notas existentes. Solo se mostrarán las nuevas.',
+            );
             this.toast.warning(message, 'Notas existentes no disponibles');
 
             return of<GradeLoadState>({
@@ -115,6 +129,8 @@ export class GradeGridComponent {
             });
           }),
         );
+
+        return concat(of<GradeLoadState>(loadingState), grades$);
       }),
     ),
     {
@@ -316,13 +332,14 @@ export class GradeGridComponent {
   }
 
   private calculateFinalGrade(cells: GradeGridCellViewModel[]): number {
+    const weightMap = this.componentWeightMap();
+
     return cells.reduce((total, cell) => {
       if (cell.parsedScore === null) {
         return total;
       }
 
-      const component = this.components().find((item) => item.id === cell.componentId);
-      const weight = component?.weight ?? 0;
+      const weight = weightMap.get(cell.componentId) ?? 0;
       return total + (cell.parsedScore * weight) / 100;
     }, 0);
   }

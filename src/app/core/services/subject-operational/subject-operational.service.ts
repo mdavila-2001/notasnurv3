@@ -45,58 +45,49 @@ export class SubjectOperationalService {
     };
   }
 
-<<<<<<< HEAD
-  setSubjectDirectly(subject: SubjectResponse) {
-    this._subject.set(subject);
-  }
-
-  loadSubjectContext(subjectId: string) {
-    if (this._loadedSubjectContextId() === subjectId && this._subject()) {
-      return;
-    }
-
-=======
-  /**
-   * Inyecta la materia directamente sin hacer petición HTTP.
-   * Útil cuando ya tenemos los datos de la materia (ej. desde la lista de "Mis Materias").
-   */
   setSubjectDirectly(subject: SubjectResponse): void {
     this._subject.set(subject);
   }
 
   loadSubjectContext(subjectId: string): void {
->>>>>>> origin/dev
     this._isLoading.set(true);
     this._error.set(null);
 
-    forkJoin({
-      subject: this._subject()
-        ? of(null)
-        : this.adminSubjectService.getById(subjectId).pipe(
-            catchError((err) => { console.warn('Error cargando materia:', err); return of(null); })
-          ),
-      plan: this.evaluationService.fetchPlan(subjectId).pipe(
-        catchError((err) => { console.warn('Error cargando plan:', err); return of(null); })
-      )
-    }).pipe(
-      finalize(() => this._isLoading.set(false))
-    ).subscribe({
-      next: (res) => {
-        if (res.subject && 'data' in res.subject) {
-          this._subject.set(res.subject.data ?? null);
-        }
+    const shouldLoadSubject = this._subject()?.id?.toString() !== subjectId;
 
-        this._loadedSubjectContextId.set(subjectId);
-      },
-      error: (err) => {
-        this._error.set('No se pudo cargar la información de la materia.');
-        console.error('Operational Error:', err);
-      }
-    });
+    forkJoin({
+      subject: shouldLoadSubject
+        ? this.adminSubjectService.getById(subjectId).pipe(
+            catchError((err) => {
+              console.warn('Error cargando materia:', err);
+              return of(null);
+            }),
+          )
+        : of(null),
+      plan: this.evaluationService.fetchPlan(subjectId).pipe(
+        catchError((err) => {
+          console.warn('Error cargando plan:', err);
+          return of(null);
+        }),
+      ),
+    })
+      .pipe(finalize(() => this._isLoading.set(false)))
+      .subscribe({
+        next: (res) => {
+          if (res.subject && 'data' in res.subject) {
+            this._subject.set(res.subject.data ?? null);
+          }
+
+          this._loadedSubjectContextId.set(subjectId);
+        },
+        error: (err) => {
+          this._error.set('No se pudo cargar la información de la materia.');
+          console.error('Operational Error:', err);
+        },
+      });
   }
 
-<<<<<<< HEAD
-  async loadStudents(subjectId: string, force = false) {
+  async loadStudents(subjectId: string, force = false): Promise<void> {
     if (!subjectId) {
       this._students.set([]);
       this._studentsError.set(null);
@@ -136,18 +127,17 @@ export class SubjectOperationalService {
     }
   }
 
-  setStudentsDirectly(students: StudentOperational[]) {
+  setStudentsDirectly(students: StudentOperational[]): void {
     this._students.set(students);
     this._studentsError.set(null);
   }
 
-  clearStore() {
-=======
   clearStore(): void {
->>>>>>> origin/dev
     this._subject.set(null);
     this._students.set([]);
+    this._isLoading.set(false);
     this._studentsLoading.set(false);
+    this._error.set(null);
     this._studentsError.set(null);
     this._loadedSubjectContextId.set(null);
     this._loadedStudentsSubjectId.set(null);
