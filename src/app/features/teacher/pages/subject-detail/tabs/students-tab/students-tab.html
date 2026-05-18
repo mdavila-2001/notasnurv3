@@ -20,19 +20,7 @@
 
   @if (isLoading()) {
     <app-loader></app-loader>
-  } @else if (students().length > 0) {
-    <section class="card data-section">
-      <div class="card-header">
-        <div class="title-with-total">
-          <span class="material-symbols-outlined card-icon">group_add</span>
-          <h2 class="card-title">Estudiantes Inscritos</h2>
-          <span class="total-tag">Total: {{ filteredStudents().length }}</span>
-        </div>
-      </div>
-
-      <app-table [data]="filteredStudents()" [columns]="tableColumns"></app-table>
-    </section>
-  } @else {
+  } @else if (students().length === 0) {
     <section class="card empty-state-section">
       <div class="empty-state">
         <span class="material-symbols-outlined empty-icon">group_off</span>
@@ -45,6 +33,32 @@
           Actualizar Lista
         </app-button>
       </div>
+    </section>
+  } @else if (filteredStudents().length === 0) {
+    <section class="card empty-state-section">
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-icon">search_off</span>
+        <h3 class="empty-title">Sin resultados</h3>
+        <p class="empty-desc">No se encontraron estudiantes que coincidan con "{{ searchTerm() }}". Intenta con otro término de búsqueda.</p>
+        
+        <app-button 
+          icon="clear" 
+          (click)="updateSearch('')">
+          Limpiar Búsqueda
+        </app-button>
+      </div>
+    </section>
+  } @else {
+    <section class="card data-section">
+      <div class="card-header">
+        <div class="title-with-total">
+          <span class="material-symbols-outlined card-icon">group_add</span>
+          <h2 class="card-title">Estudiantes Inscritos</h2>
+          <span class="total-tag">Total: {{ filteredStudents().length }}</span>
+        </div>
+      </div>
+
+      <app-table [data]="filteredStudents()" [columns]="tableColumns"></app-table>
     </section>
   }
 </div>

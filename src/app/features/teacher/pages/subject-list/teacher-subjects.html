@@ -52,7 +52,7 @@
           <p>Selecciona una materia a la izquierda para ver los detalles</p>
         </div>
       } @else {
-        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="panel-header">
           <div>
             <h2 class="panel-title">{{ selectedSubject()!.name }}</h2>
             <p class="panel-subtitle">
@@ -95,7 +95,7 @@
               [columns]="previewColumns">
             </app-table>
           </div>
-          <p class="students-count" style="margin-top: 15px; text-align: center;">
+          <p class="students-count">
             Mostrando pre-visualización. Para usar el buscador, filtros y tabla inteligente, haz clic en el botón superior azul.
           </p>
         }
