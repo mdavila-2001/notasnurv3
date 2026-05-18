@@ -7,10 +7,6 @@ export interface TableColumn {
   label: string;
 }
 
-export interface TableRow {
-  id?: string | number;
-}
-
 export interface CustomRowContext<T> {
   $implicit: T;
   row: T;
@@ -24,40 +20,41 @@ export interface CustomRowContext<T> {
   templateUrl: './table.html',
   styleUrl: './table.css',
 })
-export class Table {
+export class Table<T extends object = Record<string, unknown>> {
   columns = input.required<TableColumn[]>();
-  data = input.required<any[]>();
+  data = input.required<T[]>();
 
   showActions = input<boolean>(false);
   showEditAction = input<boolean>(true);
   showDeleteAction = input<boolean>(false);
 
-  @ContentChild('customRow') customRowTemplate?: TemplateRef<CustomRowContext<TableRow>>;
+  @ContentChild('customRow') customRowTemplate?: TemplateRef<CustomRowContext<T>>;
 
-  rowClicked = output<any>();
-  editClicked = output<any>();
-  deleteClicked = output<any>();
+  rowClicked = output<T>();
+  editClicked = output<T>();
+  deleteClicked = output<T>();
 
   readonly hasActions = () => this.showActions();
 
-  trackRow(row: any, index: number): string | number {
-    return row.id ?? index;
+  trackRow(row: T, index: number): string | number {
+    const candidate = row as { id?: string | number };
+    return candidate.id ?? index;
   }
 
-  getCellValue(row: any, key: string): unknown {
+  getCellValue(row: T, key: string): unknown {
     return (row as Record<string, unknown>)[key];
   }
 
-  onRowClick(row: any): void {
+  onRowClick(row: T): void {
     this.rowClicked.emit(row);
   }
 
-  onEdit(row: any, event?: MouseEvent): void {
+  onEdit(row: T, event?: MouseEvent): void {
     event?.stopPropagation();
     this.editClicked.emit(row);
   }
 
-  onDelete(row: any, event?: MouseEvent): void {
+  onDelete(row: T, event?: MouseEvent): void {
     event?.stopPropagation();
     this.deleteClicked.emit(row);
   }

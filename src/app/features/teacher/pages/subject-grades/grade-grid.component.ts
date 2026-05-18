@@ -163,7 +163,7 @@ export class GradeGridComponent {
   readonly isGradesLoading = computed(() => this.existingGradesState().status === 'loading');
   readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading());
   readonly hasValidEnrollmentIds = computed(() =>
-    this.gradeRowsDraft().every((row) => row.enrollmentId !== null && row.enrollmentId.trim().length > 0),
+    this.gradeRowsDraft().every((row) => (row.enrollmentId?.trim().length ?? 0) > 0),
   );
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
   readonly canSave = computed(() =>
@@ -381,7 +381,9 @@ export class GradeGridComponent {
     const grades: GradeRequest[] = [];
 
     for (const row of this.gradeRowsDraft()) {
-      if (row.enrollmentId === null || row.enrollmentId.trim().length === 0) {
+      const enrollmentId = row.enrollmentId?.trim();
+
+      if (!enrollmentId) {
         continue;
       }
 
@@ -397,7 +399,7 @@ export class GradeGridComponent {
         }
 
         grades.push({
-          enrollmentId: row.enrollmentId,
+          enrollmentId,
           componentId,
           score,
         });
@@ -421,7 +423,7 @@ export class GradeGridComponent {
 
   private resolveEnrollmentId(student: StudentOperational): string | null {
     const enrollmentId = student.enrollmentId?.trim() || student.studentId?.trim();
-    return enrollmentId && enrollmentId.length > 0 ? enrollmentId : null;
+    return enrollmentId || null;
   }
 
   private normalizeScoreValue(value: string | number): number | null {
