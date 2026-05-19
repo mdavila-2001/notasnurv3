@@ -58,7 +58,7 @@ const requiredVersion = '10.33.2';
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
 );
-const versionMatch = packageJson.packageManager.match(/pnpm@([\d.]+)/);
+const versionMatch = packageJson.packageManager?.match(/pnpm@([\d.]+)/);
 if (versionMatch && userAgent.includes('pnpm')) {
   const detectedVersion = userAgent.match(/pnpm\/([\d.]+)/)?.[1];
   if (detectedVersion && !isVersionSufficient(detectedVersion, requiredVersion)) {
