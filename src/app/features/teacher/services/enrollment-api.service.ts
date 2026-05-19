@@ -5,6 +5,7 @@ import { ApiResponse } from '../../../core/models/api.models';
 
 export interface StudentEnrolledResponse {
   studentId: string;
+  enrollmentId: string; // 👈 ¡LISTO! Angular ya sabe que debe atrapar el ID de inscripción
   fullName: string;
   ci: string;
   email: string;

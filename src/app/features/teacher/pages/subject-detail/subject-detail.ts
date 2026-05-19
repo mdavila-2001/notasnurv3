@@ -5,6 +5,7 @@ import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
 import { GradeService } from '../../services/grade.service';
 import { ReportService } from '../../services/report.service';
+
 import { StudentsTab } from './tabs/students-tab/students-tab';
 import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
 import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
@@ -40,6 +41,7 @@ interface Tab {
 })
 export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
 
