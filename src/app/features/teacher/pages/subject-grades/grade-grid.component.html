@@ -66,33 +66,35 @@
       } @else {
         <app-table [columns]="gridColumns()" [data]="gradeRows()">
           <ng-template #customRow let-row let-index="index">
-            <td class="grid-cell sticky-column student-cell">
-              <span class="row-number">{{ index + 1 }}</span>
-              <span class="student-name">{{ row.studentName }}</span>
-              <span class="student-meta">Matrícula {{ row.studentId }}</span>
-              @if (row.degreeName) {
-                <span class="student-meta">{{ row.degreeName }}</span>
-              }
-            </td>
-
-            @for (component of components(); track component.id) {
-              <td class="grid-cell score-cell">
-                <app-input
-                  type="number"
-                  [min]="0"
-                  [max]="100"
-                  [showErrors]="true"
-                  [disabled]="isSaving()"
-                  [value]="getCellValue(row.enrollmentId, component.id)"
-                  (valueChange)="onGradeChange(row.enrollmentId, component.id, $event)"
-                />
+            <tr>
+              <td class="grid-cell sticky-column student-cell">
+                <span class="row-number">{{ index + 1 }}</span>
+                <span class="student-name">{{ row.studentName }}</span>
+                <span class="student-meta">Matrícula {{ row.enrollmentId || row.studentId }}</span>
+                @if (row.degreeName) {
+                  <span class="student-meta">{{ row.degreeName }}</span>
+                }
               </td>
-            }
 
-            <td class="grid-cell final-cell">
-              <span class="final-label">Promedio ponderado</span>
-              <strong>{{ row.finalGrade | number:'1.2-2' }}</strong>
-            </td>
+              @for (component of components(); track component.id) {
+                <td class="grid-cell score-cell">
+                  <app-input
+                    type="number"
+                    [min]="0"
+                    [max]="100"
+                    [showErrors]="true"
+                    [disabled]="isSaving()"
+                    [value]="getCellValue(row.enrollmentId, component.id)"
+                    (valueChange)="onGradeChange(row.enrollmentId, component.id, $event)"
+                  />
+                </td>
+              }
+
+              <td class="grid-cell final-cell">
+                <span class="final-label">Promedio ponderado</span>
+                <strong>{{ row.finalGrade | number:'1.2-2' }}</strong>
+              </td>
+            </tr>
           </ng-template>
         </app-table>
       }

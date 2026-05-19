@@ -18,19 +18,22 @@ export class SubjectOperationalService {
   private readonly _contextError = signal<string | null>(null);
   private readonly _studentsError = signal<string | null>(null);
   private readonly _loadedStudentsSubjectId = signal<string | null>(null);
+  private _studentsRequestId = 0;
+  private _studentsRequestedSubjectId: string | null = null;
 
   readonly subject = computed(() => this._subject());
   readonly students = computed(() => this._students());
   readonly currentSubjectId = computed(() => this._subject()?.id?.toString() ?? null);
   readonly evaluationPlan = this.evaluationService.plan;
-  readonly isLoading = computed(() => this._isLoading());
+  readonly isLoading = computed(() => this._isLoading() || this._studentsLoading());
   readonly studentsLoading = computed(() => this._studentsLoading());
   readonly contextError = computed(() => this._contextError());
   readonly studentsError = computed(() => this._studentsError());
 
   private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
     const studentId = student.studentId ?? student.id ?? '';
-    const enrollmentId = student.id ?? student.studentId ?? '';
+    const rawEnrollmentId = student.id ?? student.studentId;
+    const enrollmentId = rawEnrollmentId?.trim() ? rawEnrollmentId.trim() : undefined;
     const fullName = student.fullName
       ?? student.name
       ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
@@ -99,13 +102,20 @@ export class SubjectOperationalService {
     }
 
     if (!force && this._studentsLoading()) {
-      return;
+      if (this._studentsRequestedSubjectId === subjectId) {
+        return;
+      }
     }
 
-    if (!force && this._loadedStudentsSubjectId() === subjectId) {
-      return;
+    if (!force && this._studentsLoading() && this._studentsRequestedSubjectId !== subjectId) {
+      this._studentsError.set(null);
     }
 
+    if (!force && this._loadedStudentsSubjectId() === subjectId && !this._studentsError()) {
+      return;
+    }
+    const requestId = ++this._studentsRequestId;
+    this._studentsRequestedSubjectId = subjectId;
     this._studentsLoading.set(true);
     this._studentsError.set(null);
 
@@ -113,19 +123,32 @@ export class SubjectOperationalService {
       const students = await firstValueFrom(
         this.enrollmentService.getStudentsBySubject(subjectId).pipe(
           map((response) => response.data ?? []),
-          catchError((error) => {
-            this._studentsError.set('No se pudieron cargar los estudiantes de esta materia.');
-            return of([] as StudentEnrolledResponse[]);
-          }),
         ),
       );
+
+      if (requestId !== this._studentsRequestId) {
+        return;
+      }
 
       const mappedStudents = students.map((student) => this.mapStudentResponse(student));
 
       this._students.set(mappedStudents);
       this._loadedStudentsSubjectId.set(subjectId);
+    } catch (error) {
+      void error;
+
+      if (requestId !== this._studentsRequestId) {
+        return;
+      }
+
+      this._students.set([]);
+      this._studentsError.set('No se pudieron cargar los estudiantes de esta materia.');
+      this._loadedStudentsSubjectId.set(null);
     } finally {
-      this._studentsLoading.set(false);
+      if (requestId === this._studentsRequestId) {
+        this._studentsLoading.set(false);
+        this._studentsRequestedSubjectId = null;
+      }
     }
   }
 

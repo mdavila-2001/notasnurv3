@@ -115,8 +115,8 @@ export class EnrollmentListComponent implements OnInit {
     });
   }
 
-  withdrawStudent(studentId: string | undefined, fullName: string | undefined): void {
-    if (!studentId) {
+  withdrawStudent(enrollmentId: string | undefined, fullName: string | undefined): void {
+    if (!enrollmentId) {
       this.displayToast('No se pudo identificar al estudiante para darlo de baja', 'error');
       return;
     }
@@ -125,7 +125,7 @@ export class EnrollmentListComponent implements OnInit {
 
     if (!confirm(`¿Dar de baja a ${studentName} de esta materia?`)) return;
 
-    this.enrollmentApi.withdrawStudent(studentId).subscribe({
+    this.enrollmentApi.withdrawStudent(enrollmentId).subscribe({
       next: () => {
         this.displayToast(`${studentName} dado de baja correctamente`, 'success');
         const subject = this.selectedSubject();
