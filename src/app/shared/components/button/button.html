@@ -1,9 +1,6 @@
 <button
-  class="btn"
-  [ngClass]="'btn btn-' + variant()"
+  [class]="'btn btn-' + variant()"
   [type]="type()"
-  title="Boton"
-  aria-label="Boton"
   [disabled]="disabled()"
   (click)="handleClick($event)"
 >

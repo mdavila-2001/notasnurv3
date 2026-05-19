@@ -1,0 +1,42 @@
+<app-modal [isOpen]="isOpen()" title="Nuevo Componente" (closed)="onClose()">
+  <div class="form-grid">
+    <app-input
+      label="Nombre del componente"
+      placeholder="Ej. Examen Final"
+      [required]="true"
+      [showErrors]="true"
+      [value]="form.controls.name.value"
+      [errorMessage]="form.controls.name.invalid && form.controls.name.touched ? 'Ingrese un nombre válido.' : ''"
+      (valueChange)="onNameChange($event)"
+    />
+
+    <app-input
+      type="number"
+      label="Peso (%)"
+      placeholder="Ej. 40"
+      [required]="true"
+      [min]="1"
+      [max]="100"
+      [showErrors]="true"
+      [value]="form.controls.weight.value ?? ''"
+      [errorMessage]="form.controls.weight.invalid && form.controls.weight.touched ? 'El peso debe estar entre 1 y 100.' : ''"
+      (valueChange)="onWeightChange($event)"
+    />
+
+    <app-input
+      label="Descripción"
+      placeholder="Descripción opcional"
+      [value]="form.controls.description.value"
+      (valueChange)="onDescriptionChange($event)"
+    />
+
+    <p class="hint-text">
+      Edición deshabilitada: por ahora solo se puede crear y eliminar componentes.
+    </p>
+  </div>
+
+  <div modal-actions>
+    <app-button variant="tertiary" (clicked)="onClose()">Cancelar</app-button>
+    <app-button variant="primary" [disabled]="!canSave()" (clicked)="onSubmit()">Guardar</app-button>
+  </div>
+</app-modal>

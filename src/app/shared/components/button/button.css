@@ -40,3 +40,18 @@
   background-color: var(--tertiary-color);
   color: var(--secondary-color);
 }
+
+.btn-present {
+  background-color: var(--primary-color);
+  color: #FFFFFF;
+}
+
+.btn-absent {
+  background-color: #ef4444;
+  color: #FFFFFF;
+}
+
+.btn-justified {
+  background-color: #f97316;
+  color: #FFFFFF;
+}

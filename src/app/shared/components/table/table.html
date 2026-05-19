@@ -5,33 +5,44 @@
             @for (col of columns(); track col.key) {
               <th>{{ col.label }}</th>
             }
-            @if (showActions()) {
+            @if (hasActions()) {
               <th class="actions-column">Acciones</th>
             }
           </tr>
         </thead>
 
         <tbody>
-          @for (row of data(); track row.id || $index) {
-            <tr>
-              @for (col of columns(); track col.key) {
-                <td>{{ row[col.key] }}</td>
-              }
-              
-              @if (showActions()) {
-                <td class="actions-cell">
-                  <app-button variant="primary" (clicked)="editClicked.emit(row)">
-                    Editar
-                  </app-button>
-                  <app-button variant="tertiary" (clicked)="deleteClicked.emit(row)">
-                    Eliminar
-                  </app-button>
-                </td>
-              }
-            </tr>
+          @for (row of data(); track trackRow(row, $index); let index = $index) {
+            @if (customRowTemplate) {
+              <ng-container
+                [ngTemplateOutlet]="customRowTemplate"
+                [ngTemplateOutletContext]="{ $implicit: row, row: row, index: index }"
+              />
+            } @else {
+              <tr (click)="onRowClick(row)">
+                @for (col of columns(); track col.key) {
+                  <td>{{ getCellValue(row, col.key) }}</td>
+                }
+
+                @if (hasActions()) {
+                  <td class="actions-cell">
+                    @if (showEditAction()) {
+                      <app-button variant="primary" (clicked)="onEdit(row, $event)">
+                        Editar
+                      </app-button>
+                    }
+                    @if (showDeleteAction()) {
+                      <app-button variant="tertiary" (clicked)="onDelete(row, $event)">
+                        Eliminar
+                      </app-button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
           } @empty {
             <tr>
-              <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)" class="empty-state">
+              <td [attr.colspan]="columns().length + (hasActions() ? 1 : 0)" class="empty-state">
                 No se encontraron registros para mostrar.
               </td>
             </tr>
