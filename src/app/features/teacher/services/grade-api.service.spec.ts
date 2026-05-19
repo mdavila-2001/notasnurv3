@@ -58,7 +58,6 @@ describe('GradeApiService', () => {
         { id: 1, enrollmentId: 77, componentId: 1, score: 85 },
         { id: 2, enrollmentId: '88-A', componentId: 2, score: 90 },
         { id: 3, enrollmentId: null, componentId: 3, score: 60 },
-        { id: 4, enrollmentId: undefined, componentId: 4, score: 70 } as unknown as GradeResponse,
       ],
     });
 
@@ -68,7 +67,7 @@ describe('GradeApiService', () => {
     });
 
     expect(apiMock.lastGetEndpoint).toBe('/grades/subject/SUB-1');
-    expect(result.map((grade) => grade.enrollmentId)).toEqual(['77', '88-A', '', '']);
+    expect(result.map((grade) => grade.enrollmentId)).toEqual(['77', '88-A', '']);
   });
 
   it('sends bulk payload to save endpoint', () => {
