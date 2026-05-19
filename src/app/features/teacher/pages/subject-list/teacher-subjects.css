@@ -18,7 +18,7 @@
 
 .panel-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
@@ -228,10 +228,11 @@
 
 .students-count {
   padding: 12px 24px;
+  margin: 15px 0 0;
   font-size: 0.78rem;
   color: var(--text-secondary, #94a3b8);
   border-top: 1px solid var(--border, rgba(255, 255, 255, 0.06));
-  margin: 0;
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -288,10 +289,6 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.centered {
-  min-height: 300px;
-}
-
 .spinning {
   animation: spin 1s linear infinite;
 }
@@ -300,4 +297,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.centered {
+  min-height: 300px;
 }

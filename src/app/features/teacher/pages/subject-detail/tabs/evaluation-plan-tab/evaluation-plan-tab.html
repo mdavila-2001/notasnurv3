@@ -44,49 +44,49 @@
     @for (component of service.components(); track component.id) {
     @if (editingComponentId() === component.id) {
     <div class="component-row editing-row">
-                        <span class="col-name">
-                            <input
-                              [ngModel]="editName()"
-                              (ngModelChange)="editName.set($event)"
-                              placeholder="Nombre"
-                              class="input-field"
-                            />
-                        </span>
+      <span class="col-name">
+        <input
+          [ngModel]="editName()"
+          (ngModelChange)="editName.set($event)"
+          placeholder="Nombre"
+          class="input-field"
+        />
+      </span>
 
       <span class="col-weight">
-                            <input
-                              type="number"
-                              [ngModel]="editWeight()"
-                              (ngModelChange)="setEditWeight($event)"
-                              placeholder="Peso (%)"
-                              class="input-field weight-input"
-                              min="1"
-                              max="100"
-                            />
-                        </span>
+        <input
+          type="number"
+          [ngModel]="editWeight()"
+          (ngModelChange)="setEditWeight($event)"
+          placeholder="Peso (%)"
+          class="input-field weight-input"
+          min="1"
+          max="100"
+        />
+      </span>
 
       <span class="col-desc">
-                            <input
-                              [ngModel]="editDescription()"
-                              (ngModelChange)="editDescription.set($event)"
-                              placeholder="Descripción"
-                              class="input-field"
-                            />
-                        </span>
+        <input
+          [ngModel]="editDescription()"
+          (ngModelChange)="editDescription.set($event)"
+          placeholder="Descripción"
+          class="input-field"
+        />
+      </span>
 
       <span class="col-action action-buttons">
-                            <app-button
-                              variant="primary"
-                              [disabled]="isEditComponentDisabled()"
-                              (clicked)="handleSaveEdit()"
-                            >
-                                Guardar
-                            </app-button>
+        <app-button
+          variant="primary"
+          [disabled]="isEditComponentDisabled()"
+          (clicked)="handleSaveEdit()"
+        >
+          Guardar
+        </app-button>
 
-                            <app-button variant="tertiary" (clicked)="cancelEdit()">
-                                Cancelar
-                            </app-button>
-                        </span>
+        <app-button variant="tertiary" (clicked)="cancelEdit()">
+          Cancelar
+        </app-button>
+      </span>
     </div>
     } @else {
     <div class="component-row">
@@ -95,16 +95,16 @@
       <span class="col-desc">{{ component.description || '—' }}</span>
 
       <span class="col-action action-buttons">
-                            <app-button variant="secondary" (clicked)="startEdit(component)">
-                                <span class="material-symbols-outlined">edit</span>
-                                Editar
-                            </app-button>
+        <app-button variant="secondary" (clicked)="startEdit(component)">
+          <span class="material-symbols-outlined">edit</span>
+          Editar
+        </app-button>
 
-                            <app-button variant="tertiary" (clicked)="handleDelete(component)">
-                                <span class="material-symbols-outlined">delete</span>
-                                Eliminar
-                            </app-button>
-                        </span>
+        <app-button variant="tertiary" (clicked)="handleDelete(component)">
+          <span class="material-symbols-outlined">delete</span>
+          Eliminar
+        </app-button>
+      </span>
     </div>
     }
     } @empty {

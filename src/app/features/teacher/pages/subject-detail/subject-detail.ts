@@ -3,11 +3,11 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
-import { GradeService } from '../../services/grade.service';
 import { ReportService } from '../../services/report.service';
+
 import { StudentsTab } from './tabs/students-tab/students-tab';
 import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
-import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
+import { GradeGridComponent } from '../subject-grades/grade-grid.component';
 import { AttendanceTab } from './tabs/attendance-tab/attendance-tab';
 import { ReportsTab } from './tabs/reports-tab/reports-tab';
 import { Button } from '../../../../shared/components/button/button';
@@ -28,19 +28,19 @@ interface Tab {
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
-  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
+  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeGridComponent, AttendanceTab, ReportsTab, Button],
   templateUrl: './subject-detail.html',
   styleUrl: './subject-detail.css',
   providers: [
     SubjectOperationalService,
     EvaluationPlanService,
     AttendanceService,
-    GradeService,
     ReportService
   ]
 })
 export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
   private readonly toast = inject(ToastService);

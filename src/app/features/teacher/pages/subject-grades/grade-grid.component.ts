@@ -41,7 +41,7 @@ export class GradeGridComponent {
   private readonly toast = inject(ToastService);
 
   readonly routeSubjectId = toSignal(
-    this.route.paramMap.pipe(map((params) => params.get('subjectId'))),
+    this.route.paramMap.pipe(map((params) => params.get('subjectId') ?? params.get('id'))),
     { initialValue: null as string | null },
   );
 

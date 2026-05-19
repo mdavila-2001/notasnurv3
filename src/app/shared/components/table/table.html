@@ -13,13 +13,13 @@
 
         <tbody>
           @for (row of data(); track trackRow(row, $index); let index = $index) {
-            <tr (click)="onRowClick(row)">
-              @if (customRowTemplate) {
-                <ng-container
-                  [ngTemplateOutlet]="customRowTemplate"
-                  [ngTemplateOutletContext]="{ $implicit: row, row: row, index: index }"
-                />
-              } @else {
+            @if (customRowTemplate) {
+              <ng-container
+                [ngTemplateOutlet]="customRowTemplate"
+                [ngTemplateOutletContext]="{ $implicit: row, row: row, index: index }"
+              />
+            } @else {
+              <tr (click)="onRowClick(row)">
                 @for (col of columns(); track col.key) {
                   <td>{{ getCellValue(row, col.key) }}</td>
                 }
@@ -38,8 +38,8 @@
                     }
                   </td>
                 }
-              }
-            </tr>
+              </tr>
+            }
           } @empty {
             <tr>
               <td [attr.colspan]="columns().length + (hasActions() ? 1 : 0)" class="empty-state">
