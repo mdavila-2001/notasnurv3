@@ -10,7 +10,7 @@ export interface GradeBulkRequest {
 
 export interface GradeResponse {
   id: number;
-  enrollmentId: string;
+  enrollmentId: string | number | null;
   componentId: number;
   score: number;
 }
