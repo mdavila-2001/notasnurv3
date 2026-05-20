@@ -14,8 +14,8 @@ describe('GradeService', () => {
   let operationalService: SubjectOperationalService;
 
   const mockStudents: StudentEnrolledResponse[] = [
-    { studentId: 'stu-1', enrollmentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
-    { studentId: 'stu-2', enrollmentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@test.com', degreeName: 'Lic.' },
+    { id: 'stu-1', studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
+    { id: 'stu-2', studentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@test.com', degreeName: 'Lic.' },
   ];
 
   const mockComponents = [
