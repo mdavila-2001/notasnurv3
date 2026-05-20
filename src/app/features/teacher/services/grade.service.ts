@@ -146,7 +146,7 @@ export class GradeService {
       return of(false);
     }
 
-    const key = `${studentId}${this.DTO_KEY_DELIMITER}${componentId}`;
+    const key = `${enrollmentId}${this.DTO_KEY_DELIMITER}${componentId}`;
     this._savingState.update(map => {
       const newMap = new Map(map);
       newMap.set(key, 'saving');
