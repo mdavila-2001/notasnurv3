@@ -24,6 +24,7 @@
             type="date"
             label="Fecha"
             [value]="date()"
+            [max]="todayDate()"
             (valueChange)="handleDateChange($event)"
         ></app-input>
     </div>

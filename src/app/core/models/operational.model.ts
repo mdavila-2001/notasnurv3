@@ -1,6 +1,6 @@
 export interface StudentOperational {
     studentId: string;
-    enrollmentId?: string;
+    enrollmentId: string;
     fullName: string;
     ci?: string;
     email?: string;

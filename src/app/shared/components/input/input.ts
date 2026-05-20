@@ -23,8 +23,8 @@ export class Input {
   disabled = input<boolean>(false);
   errorMessage = input<string>('');
   required = input<boolean>(false);
-  min = input<number | null>(null);
-  max = input<number | null>(null);
+  min = input<number | string | null>(null);
+  max = input<number | string | null>(null);
   minLength = input<number | null>(null);
   maxLength = input<number | null>(null);
   pattern = input<string>('');
@@ -133,11 +133,11 @@ export class Input {
     const min = this.min();
     const max = this.max();
 
-    if (min !== null && numericValue < min) {
+    if (min !== null && typeof min === 'number' && numericValue < min) {
       return `El valor mínimo es ${min}.`;
     }
 
-    if (max !== null && numericValue > max) {
+    if (max !== null && typeof max === 'number' && numericValue > max) {
       return `El valor máximo es ${max}.`;
     }
 
