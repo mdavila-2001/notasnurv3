@@ -33,7 +33,7 @@ export class SubjectOperationalService {
   private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
     const studentId = student.studentId ?? student.id ?? '';
     const rawEnrollmentId = student.id ?? student.studentId;
-    const enrollmentId = rawEnrollmentId?.trim() ? rawEnrollmentId.trim() : undefined;
+    const enrollmentId = rawEnrollmentId?.trim() || undefined;
     const fullName = student.fullName
       ?? student.name
       ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
@@ -102,11 +102,11 @@ export class SubjectOperationalService {
     }
 
     if (!force && this._studentsLoading()) {
+      this._studentsError.set(null);
+
       if (this._studentsRequestedSubjectId === subjectId) {
         return;
       }
-
-      this._studentsError.set(null);
     }
 
     if (!force && this._loadedStudentsSubjectId() === subjectId && !this._studentsError()) {
