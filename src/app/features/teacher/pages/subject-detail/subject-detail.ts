@@ -1,17 +1,17 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
-import { GradeService } from '../../services/grade.service';
 import { ReportService } from '../../services/report.service';
 
 import { StudentsTab } from './tabs/students-tab/students-tab';
 import { EvaluationPlanTab } from './tabs/evaluation-plan-tab/evaluation-plan-tab';
-import { GradeEntryTab } from './tabs/grade-entry-tab/grade-entry-tab';
+import { GradeGridComponent } from '../subject-grades/grade-grid.component';
 import { AttendanceTab } from './tabs/attendance-tab/attendance-tab';
 import { ReportsTab } from './tabs/reports-tab/reports-tab';
 import { Button } from '../../../../shared/components/button/button';
+import { ToastService } from '../../../../shared/services/toast.service';
 
 type TabId = 'students' | 'evaluation-plan' | 'grades' | 'attendance' | 'reports';
 
@@ -28,14 +28,13 @@ interface Tab {
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
-  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeEntryTab, AttendanceTab, ReportsTab, Button],
+  imports: [RouterModule, StudentsTab, EvaluationPlanTab, GradeGridComponent, AttendanceTab, ReportsTab, Button],
   templateUrl: './subject-detail.html',
   styleUrl: './subject-detail.css',
   providers: [
     SubjectOperationalService,
     EvaluationPlanService,
     AttendanceService,
-    GradeService,
     ReportService
   ]
 })
@@ -44,6 +43,7 @@ export class SubjectDetail implements OnInit, OnDestroy {
   
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
+  private readonly toast = inject(ToastService);
 
   readonly tabs: Tab[] = [
     { id: 'students', label: 'Estudiantes', icon: 'group' },
@@ -58,6 +58,32 @@ export class SubjectDetail implements OnInit, OnDestroy {
   // Exponemos las signals para el template padre
   readonly subject = this.operationalService.subject;
   readonly isLoading = this.operationalService.isLoading;
+
+  constructor() {
+    effect(
+      () => {
+        const contextError = this.operationalService.contextError();
+
+        if (contextError) {
+          this.toast.error(contextError, 'Carga de materia');
+          this.operationalService.clearContextError();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const studentsError = this.operationalService.studentsError();
+
+        if (studentsError) {
+          this.toast.error(studentsError, 'Carga de estudiantes');
+          this.operationalService.clearStudentsError();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   ngOnInit() {
     const subjectId = this.route.snapshot.paramMap.get('id');

@@ -62,7 +62,7 @@
 
           <app-button
             variant="primary"
-            (click)="goToFullNomina()">
+            (clicked)="goToFullNomina()">
             <span class="material-symbols-outlined">open_in_new</span>
             Ir a la Nómina Avanzada
           </app-button>
@@ -79,26 +79,26 @@
 
         @if (activeTab() === 'students') {
           @if (isLoadingStudents()) {
-          <div class="loading-state">
-            <span class="material-symbols-outlined spinning">progress_activity</span>
-            <p>Cargando alumnos...</p>
-          </div>
-        } @else if (enrolledStudents().length === 0) {
-          <div class="empty-state">
-            <span class="material-symbols-outlined">person_search</span>
-            <p>Aún no hay alumnos inscritos en esta materia.</p>
-          </div>
-        } @else {
-          <div class="students-table-wrapper">
-            <app-table 
-              [data]="enrolledStudents()" 
-              [columns]="previewColumns">
-            </app-table>
-          </div>
-          <p class="students-count">
-            Mostrando pre-visualización. Para usar el buscador, filtros y tabla inteligente, haz clic en el botón superior azul.
-          </p>
-        }
+            <div class="loading-state">
+              <span class="material-symbols-outlined spinning">progress_activity</span>
+              <p>Cargando alumnos...</p>
+            </div>
+          } @else if (enrolledStudents().length === 0) {
+            <div class="empty-state">
+              <span class="material-symbols-outlined">person_search</span>
+              <p>Aún no hay alumnos inscritos en esta materia.</p>
+            </div>
+          } @else {
+            <div class="students-table-wrapper">
+              <app-table 
+                [data]="enrolledStudents()" 
+                [columns]="previewColumns">
+              </app-table>
+            </div>
+            <p class="students-count">
+              Mostrando pre-visualización. Para usar el buscador, filtros y tabla inteligente, haz clic en el botón superior azul.
+            </p>
+          }
         } @else {
           <!-- Pestaña de Plan de Evaluación -->
           <div class="evaluation-tab-container">

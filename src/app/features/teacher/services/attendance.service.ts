@@ -52,7 +52,7 @@ export class AttendanceService {
 
     const initialDraft: AttendanceRowUi[] = students.map(student => ({
       // 👈 ¡CORRECCIÓN APLICADA AQUÍ! Ahora tomamos el enrollmentId real
-      enrollmentId: student.enrollmentId, 
+      enrollmentId: student.enrollmentId ?? student.studentId ?? '',
       studentName: student.fullName,
       ci: student.ci ?? 'N/A',
       degreeName: student.degreeName,
