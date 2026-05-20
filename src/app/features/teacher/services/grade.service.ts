@@ -64,7 +64,7 @@ export class GradeService {
 
     return this.students().map(student => {
       const score = this._grades().get(student.studentId)?.get(componentId) ?? null;
-      const key = `${student.studentId}-${componentId}`;
+      const key = `${student.studentId}${this.DTO_KEY_DELIMITER}${componentId}`;
       const statusEntry = this._savingState().get(key);
       return {
         enrollmentId: student.studentId,

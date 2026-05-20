@@ -49,9 +49,9 @@ describe('EvaluationPlanService', () => {
       expect(req.request.method).toBe('GET');
       req.flush({ success: true, message: 'Plan obtenido', data: mockPlan });
 
-      expect(service.hasPlan()).toBeTrue();
-      expect(service.weightSum()).toBe(100);
-      expect(service.canActivate()).toBeTrue();
+      expect(service.hasPlan()).toBe(true);
+      expect(service.componentsTotalWeight()).toBe(100);
+      expect(service.canActivate()).toBe(true);
       expect(service.components().length).toBe(3);
     });
 
@@ -63,8 +63,8 @@ describe('EvaluationPlanService', () => {
       const req = httpMock.expectOne('/api/evaluation-plans/subject/10');
       req.flush({ success: false, message: 'Plan no encontrado', data: null }, { status: 404, statusText: 'Not Found' });
 
-      expect(service.hasPlan()).toBeFalse();
-      expect(service.isLoading()).toBeFalse();
+      expect(service.hasPlan()).toBe(false);
+      expect(service.isLoading()).toBe(false);
     });
   });
 
@@ -78,7 +78,7 @@ describe('EvaluationPlanService', () => {
       expect(req.request.method).toBe('POST');
       req.flush({ success: true, message: 'Plan creado', data: mockPlan });
 
-      expect(service.hasPlan()).toBeTrue();
+      expect(service.hasPlan()).toBe(true);
     });
 
     it('should set error on failure', () => {
@@ -118,7 +118,7 @@ describe('EvaluationPlanService', () => {
       const componentCount = service.components().length;
 
       service.deleteComponent(1).subscribe(success => {
-        expect(success).toBeTrue();
+        expect(success).toBe(true);
       });
 
       const req = httpMock.expectOne('/api/components/1');
@@ -129,11 +129,11 @@ describe('EvaluationPlanService', () => {
     });
   });
 
-  describe('weightSum / canActivate', () => {
-    it('should compute weightSum correctly', () => {
+  describe('componentsTotalWeight / canActivate', () => {
+    it('should compute componentsTotalWeight correctly', () => {
       service['_plan'].set(mockPlan);
-      expect(service.weightSum()).toBe(100);
-      expect(service.canActivate()).toBeTrue();
+      expect(service.componentsTotalWeight()).toBe(100);
+      expect(service.canActivate()).toBe(true);
     });
 
     it('should not activate when sum is not 100', () => {
@@ -143,21 +143,21 @@ describe('EvaluationPlanService', () => {
           { id: 1, name: 'Parcial 1', weight: 50, description: '' },
         ],
       });
-      expect(service.weightSum()).toBe(50);
-      expect(service.canActivate()).toBeFalse();
+      expect(service.componentsTotalWeight()).toBe(50);
+      expect(service.canActivate()).toBe(false);
     });
 
     it('should return 0 for empty plan', () => {
       service['_plan'].set({ ...mockPlan, components: [] });
-      expect(service.weightSum()).toBe(0);
-      expect(service.canActivate()).toBeFalse();
+      expect(service.componentsTotalWeight()).toBe(0);
+      expect(service.canActivate()).toBe(false);
     });
   });
 
   describe('activatePlan', () => {
     it('should activate plan successfully', () => {
       service.activatePlan('10').subscribe(success => {
-        expect(success).toBeTrue();
+        expect(success).toBe(true);
       });
 
       const req = httpMock.expectOne('/api/evaluation-plans/subject/10/activate');
@@ -167,7 +167,7 @@ describe('EvaluationPlanService', () => {
 
     it('should set error on activation failure', () => {
       service.activatePlan('10').subscribe(success => {
-        expect(success).toBeFalse();
+        expect(success).toBe(false);
       });
 
       const req = httpMock.expectOne('/api/evaluation-plans/subject/10/activate');

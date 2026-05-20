@@ -55,8 +55,8 @@ describe('ApiService', () => {
 
       const req = httpMock.expectOne(r => r.url === '/api/users');
       expect(req.request.params.get('page')).toBe('0');
-      expect(req.request.params.has('name')).toBeFalse();
-      expect(req.request.params.has('email')).toBeFalse();
+      expect(req.request.params.has('name')).toBe(false);
+      expect(req.request.params.has('email')).toBe(false);
       req.flush(mockResponse);
     });
   });

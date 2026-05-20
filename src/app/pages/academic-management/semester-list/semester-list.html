@@ -12,7 +12,7 @@
       label="Filtrar por gestión"
       placeholder="Selecciona una gestión"
       [value]="filterManagementId()"
-      [options]="managementFilterOptions"
+      [options]="managementFilterOptions()"
       (valueChange)="onFilterChange($event)">
     </app-input>
   </div>

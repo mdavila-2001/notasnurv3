@@ -62,7 +62,9 @@ describe('AuthService', () => {
     });
 
     it('should not save session on failed login', () => {
-      service.login({ id: 'bad', password: 'bad' }).subscribe();
+      service.login({ id: 'bad', password: 'bad' }).subscribe({
+        error: () => {}
+      });
 
       httpMock.expectOne('/api/auth/login').flush(
         { success: false, message: 'Credenciales inválidas', data: null },
@@ -91,12 +93,12 @@ describe('AuthService', () => {
     it('should return token from localStorage', () => {
       localStorage.setItem('token', 'abc');
       expect(service.getToken()).toBe('abc');
-      expect(service.isAuthenticated()).toBeTrue();
+      expect(service.isAuthenticated()).toBe(true);
     });
 
     it('should return null when no token', () => {
       expect(service.getToken()).toBeNull();
-      expect(service.isAuthenticated()).toBeFalse();
+      expect(service.isAuthenticated()).toBe(false);
     });
   });
 
@@ -104,8 +106,8 @@ describe('AuthService', () => {
     it('should return role from localStorage', () => {
       localStorage.setItem('role', 'TEACHER');
       expect(service.getUserRole()).toBe('TEACHER');
-      expect(service.hasRole('TEACHER')).toBeTrue();
-      expect(service.hasRole('ADMIN')).toBeFalse();
+      expect(service.hasRole('TEACHER')).toBe(true);
+      expect(service.hasRole('ADMIN')).toBe(false);
     });
 
     it('should return null when no role saved', () => {

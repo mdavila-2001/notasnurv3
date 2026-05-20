@@ -4,16 +4,18 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { GradeService } from './grade.service';
 import { EvaluationPlanService } from './evaluation-plan.service';
 import { EnrollmentApiService, StudentEnrolledResponse } from './enrollment-api.service';
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 
 describe('GradeService', () => {
   let service: GradeService;
   let httpMock: HttpTestingController;
   let enrollmentApi: EnrollmentApiService;
   let evalPlanService: EvaluationPlanService;
+  let operationalService: SubjectOperationalService;
 
   const mockStudents: StudentEnrolledResponse[] = [
-    { studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
-    { studentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@test.com', degreeName: 'Lic.' },
+    { studentId: 'stu-1', enrollmentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
+    { studentId: 'stu-2', enrollmentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@test.com', degreeName: 'Lic.' },
   ];
 
   const mockComponents = [
@@ -28,6 +30,7 @@ describe('GradeService', () => {
         GradeService,
         EvaluationPlanService,
         EnrollmentApiService,
+        SubjectOperationalService,
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
@@ -36,6 +39,7 @@ describe('GradeService', () => {
     httpMock = TestBed.inject(HttpTestingController);
     enrollmentApi = TestBed.inject(EnrollmentApiService);
     evalPlanService = TestBed.inject(EvaluationPlanService);
+    operationalService = TestBed.inject(SubjectOperationalService);
     service.reset();
   });
 
@@ -44,40 +48,23 @@ describe('GradeService', () => {
     service.reset();
   });
 
-  describe('loadData', () => {
-    it('should load students and components, select first component', () => {
-      let completed = false;
-      service.loadData('10').subscribe(() => { completed = true; });
+  describe('reactive data loading via context services', () => {
+    it('should reactively expose students and components from operational services', () => {
+      evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
+      operationalService['_students'].set(mockStudents as any);
 
-      const studentsReq = httpMock.expectOne('/api/enrollments/subject/10');
-      expect(studentsReq.request.method).toBe('GET');
-      studentsReq.flush({ success: true, message: '', data: mockStudents });
+      TestBed.flushEffects();
 
-      const planReq = httpMock.expectOne('/api/evaluation-plans/subject/10');
-      expect(planReq.request.method).toBe('GET');
-      planReq.flush({ success: true, message: '', data: { id: 1, subjectId: 10, components: mockComponents } });
-
-      expect(completed).toBeTrue();
       expect(service.students().length).toBe(2);
       expect(service.components().length).toBe(3);
-      expect(service.selectedComponentId()).toBe(1);
-      expect(service.isLoading()).toBeFalse();
-    });
-
-    it('should handle empty components', () => {
-      service.loadData('10').subscribe();
-
-      httpMock.expectOne('/api/enrollments/subject/10').flush({ success: true, message: '', data: mockStudents });
-      httpMock.expectOne('/api/evaluation-plans/subject/10').flush({ success: true, message: '', data: null });
-
-      expect(service.components().length).toBe(0);
-      expect(service.selectedComponentId()).toBeNull();
+      expect(service.selectedComponentId()).toBe(1); // Auto-selected first component by effect
+      expect(service.isLoading()).toBe(false);
     });
   });
 
   describe('selectComponent', () => {
     it('should update selected component', () => {
-      service['_components'].set(mockComponents);
+      evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
       service.selectComponent(2);
       expect(service.selectedComponentId()).toBe(2);
       expect(service.selectedComponent()?.name).toBe('Parcial 2');
@@ -86,7 +73,7 @@ describe('GradeService', () => {
 
   describe('updateGrade / getGrade', () => {
     beforeEach(() => {
-      service['_components'].set(mockComponents);
+      evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
       service.selectComponent(1);
     });
 
@@ -120,8 +107,8 @@ describe('GradeService', () => {
 
   describe('studentRows', () => {
     beforeEach(() => {
-      service['_students'].set(mockStudents);
-      service['_components'].set(mockComponents);
+      operationalService['_students'].set(mockStudents as any);
+      evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
       service.selectComponent(1);
     });
 
@@ -150,7 +137,8 @@ describe('GradeService', () => {
 
   describe('saveGrade', () => {
     beforeEach(() => {
-      service['_components'].set(mockComponents);
+      evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
+      operationalService['_students'].set(mockStudents as any);
       service.selectComponent(1);
     });
 
@@ -164,7 +152,7 @@ describe('GradeService', () => {
       expect(req.request.body).toEqual({ enrollmentId: 'stu-1', componentId: 1, score: 25 });
       req.flush({ success: true, message: 'Guardado', data: { id: 'g-1', enrollmentId: 'stu-1', componentId: 1, score: 25 } });
 
-      expect(success).toBeTrue();
+      expect(success).toBe(true);
       const rows = service.studentRows();
       const alice = rows.find(r => r.studentId === 'stu-1');
       expect(alice?.status).toBe('saved');
@@ -178,14 +166,14 @@ describe('GradeService', () => {
       const req = httpMock.expectOne('/api/grades');
       req.flush({ success: false, message: 'La nota excede el peso del componente', data: null }, { status: 400, statusText: 'Bad Request' });
 
-      expect(success).toBeFalse();
+      expect(success).toBe(false);
       expect(service.error()).toBeTruthy();
     });
 
     it('should return false if no grade set', () => {
       let result: boolean | undefined;
       service.saveGrade('stu-1').subscribe(r => { result = r; });
-      expect(result).toBeFalse();
+      expect(result).toBe(false);
     });
   });
 });

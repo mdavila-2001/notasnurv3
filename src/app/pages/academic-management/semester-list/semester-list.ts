@@ -1,8 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import {
-  ApiError,
   Management,
   Semester,
   SemesterRequest,
@@ -12,6 +12,7 @@ import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { SemesterFormComponent } from '../semester-form/semester-form';
+import { ToastService } from '../../../shared/services/toast.service';
 
 interface SemesterTableRow {
   id: number;
@@ -39,6 +40,8 @@ const SEMESTER_COLUMNS: TableColumn[] = [
 })
 export class SemesterListComponent {
   private readonly academicManagementService = inject(AcademicManagementService);
+  private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly columns = SEMESTER_COLUMNS;
   readonly semesters = signal<Semester[]>([]);
@@ -63,15 +66,13 @@ export class SemesterListComponent {
   readonly isDeleteModalOpen = signal(false);
   readonly semesterToDelete = signal<Semester | null>(null);
 
+  readonly managementFilterOptions = computed<SelectOption[]>(() => [
+    { label: 'Todas', value: 'all' },
+    ...this.managements().map((item) => ({ label: String(item.year), value: String(item.id) })),
+  ]);
+
   constructor() {
     this.loadManagements();
-  }
-
-  get managementFilterOptions(): SelectOption[] {
-    return [
-      { label: 'Todas', value: 'all' },
-      ...this.managements().map((item) => ({ label: String(item.year), value: String(item.id) })),
-    ];
   }
 
   onFilterChange(value: string | number) {
@@ -88,16 +89,17 @@ export class SemesterListComponent {
         ? this.academicManagementService.getSemesters()
         : this.academicManagementService.getSemestersByManagement(Number(selectedManagement));
 
-    request$.subscribe({
-      next: (data) => {
-        this.semesters.set(data);
-        this.isLoading.set(false);
-      },
-      error: (error: ApiError) => {
-        this.isLoading.set(false);
-        this.showError(error, 'No se pudo cargar la lista de semestres.');
-      },
-    });
+    request$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.semesters.set(data);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   openNewModal() {
@@ -122,19 +124,18 @@ export class SemesterListComponent {
       ? this.academicManagementService.updateSemester(editing.id, payload)
       : this.academicManagementService.createSemester(payload);
 
-    action$.subscribe({
-      next: () => {
-        this.closeFormModal();
-        this.refreshSemesters();
-        alert(editing ? 'Semestre actualizado correctamente.' : 'Semestre creado correctamente.');
-      },
-      error: (error: ApiError) => {
-        this.showError(
-          error,
-          editing ? 'No se pudo actualizar el semestre.' : 'No se pudo crear el semestre.'
-        );
-      },
-    });
+    action$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.closeFormModal();
+          this.refreshSemesters();
+          this.toast.success(editing ? 'Semestre actualizado correctamente.' : 'Semestre creado correctamente.');
+        },
+        error: () => {
+          // El interceptor global ya maneja la visualización del error
+        },
+      });
   }
 
   askDelete(row: SemesterTableRow) {
@@ -153,31 +154,33 @@ export class SemesterListComponent {
       return;
     }
 
-    this.academicManagementService.deleteSemester(selected.id).subscribe({
-      next: () => {
-        this.cancelDelete();
-        this.refreshSemesters();
-        alert('Semestre eliminado correctamente.');
-      },
-      error: (error: ApiError) => {
-        this.cancelDelete();
-        this.showError(error, 'No se pudo eliminar el semestre.');
-      },
-    });
+    this.academicManagementService.deleteSemester(selected.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.cancelDelete();
+          this.refreshSemesters();
+          this.toast.success('Semestre eliminado correctamente.');
+        },
+        error: () => {
+          this.cancelDelete();
+        },
+      });
   }
 
   private loadManagements() {
-    this.academicManagementService.getManagements().subscribe({
-      next: (data) => {
-        this.managements.set(data);
-        this.refreshSemesters();
-      },
-      error: (error: ApiError) => {
-        this.showError(error, 'No se pudieron cargar las gestiones para el filtro.');
-      },
-    });
+    this.academicManagementService.getManagements()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.managements.set(data);
+          this.refreshSemesters();
+        },
+        error: () => {
+          // El interceptor global ya maneja la visualización del error
+        },
+      });
   }
-
 
   private formatDate(value?: string) {
     if (!value) {
@@ -185,11 +188,5 @@ export class SemesterListComponent {
     }
 
     return new Date(value).toLocaleDateString('es-BO');
-  }
-
-  private showError(error: ApiError, fallback: string) {
-    const message = error?.message?.trim() || fallback;
-    alert(message);
-    console.error(error);
   }
 }
