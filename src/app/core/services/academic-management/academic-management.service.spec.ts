@@ -33,8 +33,8 @@ describe('AcademicManagementService', () => {
   describe('Management CRUD', () => {
     it('should fetch managements and unwrap response', () => {
       const mockManagements: Management[] = [
-        { id: '1', year: 2024 },
-        { id: '2', year: 2025 },
+        { id: 1, year: 2024 },
+        { id: 2, year: 2025 },
       ];
       const mockResponse = { data: mockManagements };
 
@@ -50,7 +50,7 @@ describe('AcademicManagementService', () => {
 
     it('should create a management', () => {
       const payload = { year: 2026 };
-      const mockManagement: Management = { id: '3', ...payload };
+      const mockManagement: Management = { id: 3, ...payload };
       const mockResponse = { data: mockManagement };
 
       service.createManagement(payload).subscribe((management) => {
@@ -66,15 +66,15 @@ describe('AcademicManagementService', () => {
 
   describe('Semester CRUD', () => {
     it('should fetch semesters by management id', () => {
-      const managementId = '1';
+      const managementId = 1;
       const mockSemesters: Semester[] = [
-        { id: 's1', number: 1, startDate: '2024-02-01', endDate: '2024-06-30', managementId },
+        { id: 10, number: 1, startDate: '2024-02-01', endDate: '2024-06-30', managementId, managementYear: 2024 },
       ];
       const mockResponse = { data: mockSemesters };
 
       service.getSemestersByManagement(managementId).subscribe((semesters) => {
         expect(semesters.length).toBe(1);
-        expect(semesters[0].id).toBe('s1');
+        expect(semesters[0].id).toBe(10);
       });
 
       const req = httpMock.expectOne(`${baseUrl}/semesters/by-management/${managementId}`);
@@ -88,10 +88,12 @@ describe('AcademicManagementService', () => {
       const errorMessage = 'Invalid data';
       
       service.getManagements().subscribe({
-        next: () => fail('should have failed with an error'),
+        next: () => {
+          throw new Error('should have failed with an error');
+        },
         error: (error) => {
           expect(error.status).toBe(400);
-          expect(error.message).toBe(errorMessage);
+          expect(error.error.message).toBe(errorMessage);
         },
       });
 
