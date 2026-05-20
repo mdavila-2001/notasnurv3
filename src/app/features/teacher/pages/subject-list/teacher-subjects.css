@@ -57,6 +57,14 @@
   color: #a5b4fc;
 }
 
+.panel-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 /* ---- Tabs ---- */
 .subject-tabs {
   display: flex;
