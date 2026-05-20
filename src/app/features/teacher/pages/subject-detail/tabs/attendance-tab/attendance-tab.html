@@ -5,7 +5,7 @@
             <div class="counts-row">
                 <span class="count present">{{ counts.present }} Presentes</span>
                 <span class="count absent">{{ counts.absent }} Ausentes</span>
-                <span class="count late">{{ counts.late }} Retardos</span>
+                <span class="count late">{{ counts.late }} Atrasados</span>
                 <span class="count total">{{ counts.total }} Total</span>
             </div>
         }
@@ -40,7 +40,7 @@
         <div class="bulk-actions">
             <app-button variant="secondary" (clicked)="setAll('PRESENT')">Todos Presentes</app-button>
             <app-button variant="secondary" (clicked)="setAll('ABSENT')">Todos Ausentes</app-button>
-            <app-button variant="secondary" (clicked)="setAll('LATE')">Todos Retardos</app-button>
+            <app-button variant="secondary" (clicked)="setAll('LATE')">Todos Atrasados</app-button>
         </div>
 
         <app-table 
