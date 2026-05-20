@@ -178,5 +178,20 @@ describe('GradeService', () => {
       service.saveGrade('stu-1').subscribe(r => { result = r; });
       expect(result).toBe(false);
     });
+
+    it('should return false if the enrollment id is unavailable', () => {
+      operationalService.setStudentsDirectly([
+        { studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
+      ]);
+
+      service.updateGrade('stu-1', 25);
+
+      let result: boolean | undefined;
+      service.saveGrade('stu-1').subscribe(r => { result = r; });
+
+      httpMock.expectNone('/api/grades');
+      expect(result).toBe(false);
+      expect(service.error()).toBe('No se encontró la inscripción del estudiante.');
+    });
   });
 });
