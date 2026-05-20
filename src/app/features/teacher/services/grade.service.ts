@@ -3,39 +3,7 @@ import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
-
-export interface GradeRecord {
-  enrollmentId: string;
-  componentId: number;
-  score: number | null;
-  status: 'pending' | 'saving' | 'saved' | 'error';
-  errorMessage?: string;
-}
-
-export interface StudentGradeRow {
-  enrollmentId: string;
-  studentId: string;
-  fullName: string;
-  ci: string;
-  email: string;
-  degreeName: string;
-  score: number | null;
-  status: 'pending' | 'saving' | 'saved' | 'error';
-  errorMessage?: string;
-}
-
-interface GradeResponse {
-  id: string;
-  enrollmentId: string;
-  componentId: number;
-  score: number;
-}
-
-export interface GradeRequest {
-  enrollmentId: string;
-  componentId: number;
-  score: number;
-}
+import { GradeRequest, GradeResponse, GradeRecordUI as GradeRecord, StudentGradeRowUI as StudentGradeRow } from '../../../core/models/grade.models';
 
 @Injectable()
 export class GradeService {
