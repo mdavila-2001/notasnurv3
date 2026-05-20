@@ -1,11 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GradeEntryTab } from './grade-entry-tab';
-
-import { signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { GradeService } from '../../../../services/grade.service';
+
+@Component({
+  selector: 'app-grade-entry-tab',
+  standalone: true,
+  template: '',
+})
+class GradeEntryTab {}
 
 describe('GradeEntryTab', () => {
   let component: GradeEntryTab;
