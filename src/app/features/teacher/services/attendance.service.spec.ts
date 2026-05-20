@@ -11,9 +11,9 @@ describe('AttendanceService', () => {
   let operationalService: SubjectOperationalService;
 
   const mockStudents: StudentEnrolledResponse[] = [
-    { studentId: 'stu-1', enrollmentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@t.com', degreeName: 'Ing.' },
-    { studentId: 'stu-2', enrollmentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@t.com', degreeName: 'Lic.' },
-    { studentId: 'stu-3', enrollmentId: 'stu-3', fullName: 'Charlie', ci: '789', email: 'c@t.com', degreeName: 'Med.' },
+    { id: 'stu-1', studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@t.com', degreeName: 'Ing.' },
+    { id: 'stu-2', studentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@t.com', degreeName: 'Lic.' },
+    { id: 'stu-3', studentId: 'stu-3', fullName: 'Charlie', ci: '789', email: 'c@t.com', degreeName: 'Med.' },
   ];
 
   beforeEach(() => {
