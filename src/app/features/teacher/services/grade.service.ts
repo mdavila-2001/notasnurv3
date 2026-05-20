@@ -168,7 +168,7 @@ export class GradeService {
           newMap.set(key, 'error');
           return newMap;
         });
-        this._error.set(error.error?.message ?? 'Error al guardar la calificación');
+        this._error.set(error.message ?? error.details?.message ?? 'Error al guardar la calificación');
         return of(false);
       }),
     );
