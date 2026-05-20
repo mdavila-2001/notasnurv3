@@ -1,0 +1,35 @@
+<app-modal [isOpen]="isOpen()" title="Nuevo Hito" (closed)="onClose()">
+  <div class="form-grid">
+    <app-input
+      label="Nombre del hito"
+      placeholder="Ej. Parcial 1"
+      [required]="true"
+      [showErrors]="true"
+      [value]="form.controls.name.value"
+      [errorMessage]="form.controls.name.invalid && form.controls.name.touched ? 'Ingrese un nombre válido.' : ''"
+      (valueChange)="onNameChange($event)"
+    />
+
+    <app-input
+      type="number"
+      label="Peso (%)"
+      placeholder="Ej. 30"
+      [required]="true"
+      [min]="1"
+      [max]="100"
+      [showErrors]="true"
+      [value]="form.controls.weight.value ?? ''"
+      [errorMessage]="form.controls.weight.invalid && form.controls.weight.touched ? 'El peso debe estar entre 1 y 100.' : ''"
+      (valueChange)="onWeightChange($event)"
+    />
+
+    <p class="hint-text">
+      Nota: el backend actual no permite editar hitos, solo crear y eliminar.
+    </p>
+  </div>
+
+  <div modal-actions>
+    <app-button variant="tertiary" (clicked)="onClose()">Cancelar</app-button>
+    <app-button variant="primary" [disabled]="!canSave()" (clicked)="onSubmit()">Guardar</app-button>
+  </div>
+</app-modal>

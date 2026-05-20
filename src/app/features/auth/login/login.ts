@@ -1,100 +1,99 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth } from '../../../core/services/auth/auth';
+import { AuthService } from '../../../core/services/auth.service';
 import { Input } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Input, Button],
+  imports: [ReactiveFormsModule, Input, Button],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
-  private fb = inject(FormBuilder);
-  private authService = inject(Auth);
-  private router = inject(Router);
+export class Login implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  isLoading = signal<boolean>(false);
-  errorMessage = signal<string>('');
+  // UI State using Signals for optimal performance
+  readonly isLoading = signal<boolean>(false);
+  readonly errorMessage = signal<string>('');
 
-  loginForm = this.fb.group({
-    id: ['', Validators.required],
+  readonly loginForm = this.fb.group({
+    identifier: ['', Validators.required],
     password: ['', Validators.required],
     rememberMe: [false]
   });
 
-  onSubmit() {
+  ngOnInit(): void {
+    this.checkExistingSession();
+  }
+
+  private checkExistingSession(): void {
+    if (this.authService.isAuthenticated()) {
+      this.isLoading.set(true);
+      this.authService.getCurrentUserProfile().subscribe({
+        next: (response) => {
+          this.isLoading.set(false);
+          this.redirectByRole(response.data.role);
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.authService.logout();
+        }
+      });
+    }
+  }
+
+  onSubmit(): void {
     if (this.loginForm.invalid) {
-      this.errorMessage.set('Por favor, complete todos los campos.');
+      this.errorMessage.set('Please complete all required fields.');
       return;
     }
 
-    const id = this.loginForm.value.id?.trim() ?? '';
-    const password = this.loginForm.value.password?.trim() ?? '';
-
-    if (!id || !password) {
-      this.errorMessage.set('El identificador y la contraseña son obligatorios.');
-      return;
-    }
-
+    const { identifier, password } = this.loginForm.value;
+    
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    // Evita arrastrar sesión anterior mientras se intenta una nueva autenticación.
-    localStorage.removeItem('token');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('fullName');
-
-    const credentials = {
-      id,
-      password
-    };
-
-    this.authService.login(credentials).subscribe({
+    // Mapeo de formulario a DTO: 'identifier' (UI) -> 'id' (Backend Contract)
+    const loginDto = { id: identifier ?? '', password: password ?? '' };
+    
+    this.authService.login(loginDto).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        // Redirigir según el rol
-        if (response.data.role === 'ADMIN') {
-          this.router.navigate(['/admin/dashboard']);
-        } else if (response.data.role === 'TEACHER') {
-          this.router.navigate(['/teacher/dashboard']);
-        } else {
-          this.router.navigate(['/student/dashboard']);
-        }
+        const role = response.data?.role;
+        this.redirectByRole(role);
       },
       error: (err) => {
         this.isLoading.set(false);
-        if (err.status === 400) {
-          this.errorMessage.set(
-            err.error?.message ||
-            'Credenciales inválidas. Si eres estudiante usa CI; si eres docente/administrativo usa correo institucional.'
-          );
-          return;
-        }
-
-        if (err.status === 500) {
-          this.errorMessage.set('Error interno del servidor. Revisa el backend y su conexión a base de datos.');
-          return;
-        }
-
-        this.errorMessage.set(err.error?.message || 'Error al conectar con el servidor.');
+        // The ErrorInterceptor handles the message translation, 
+        // we just extract it from the thrown error
+        this.errorMessage.set(err.message || 'An unexpected error occurred');
       }
     });
   }
 
-  get idControl() { return this.loginForm.get('id'); }
+  private redirectByRole(role: string | undefined): void {
+    switch (role) {
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'TEACHER':
+        this.router.navigate(['/teacher/dashboard']);
+        break;
+      case 'STUDENT':
+        this.router.navigate(['/student/subjects']);
+        break;
+      default:
+        this.router.navigate(['/login']);
+        break;
+    }
+  }
+
+  // Getters for clean template access
+  get idControl() { return this.loginForm.get('identifier'); }
   get passwordControl() { return this.loginForm.get('password'); }
-
-  onIdChange(value: string | number) {
-    this.idControl?.setValue(String(value));
-  }
-
-  onPasswordChange(value: string | number) {
-    this.passwordControl?.setValue(String(value));
-  }
 }

@@ -1,13 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
-import { SubjectService } from '../../../core/services/subject/subject.service';
+import { finalize, map } from 'rxjs/operators';
+import { AdminSubjectService } from '../../../features/admin/services/admin-subject.service';
+import { AdminUserService } from '../../../features/admin/services/admin-user.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
-import { User as UserService } from '../../../core/services/user/user';
-import { Subject, SubjectRequest } from '../../../core/models/subject.model';
+import { SubjectModality, SubjectRecordStatus, SubjectRequest, SubjectResponse } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
-import { UserResponse } from '../../../core/models/user.model';
+import { UserResponse } from '../../../core/models/api.models';
 import { SubjectFormComponent } from '../subject-form/subject-form';
 import { Modal } from '../../../shared/components/modal/modal';
 import { Button } from '../../../shared/components/button/button';
@@ -15,25 +14,38 @@ import { SelectOption } from '../../../shared/components/input/input';
 import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Toast } from '../../../shared/components/toast/toast';
 
+const MODALITY_LABELS: Record<SubjectModality, string> = {
+  FACE_TO_FACE: 'Presencial',
+  BLENDED: 'Semi-presencial',
+  ONLINE: 'Virtual',
+};
+
+const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
+  DRAFT: 'Borrador',
+  PUBLISHED: 'Publicada',
+  INACTIVE: 'Inactiva',
+  CLOSED: 'Cerrada',
+};
+
 @Component({
   selector: 'app-subject-list',
   standalone: true,
-  imports: [CommonModule, SubjectFormComponent, Modal, Button, Table, Toast],
+  imports: [SubjectFormComponent, Modal, Button, Table, Toast],
   templateUrl: './subject-list.html',
   styleUrl: './subject-list.css',
 })
 export class SubjectListComponent implements OnInit {
-  private readonly subjectService = inject(SubjectService);
+  private readonly adminSubjectService = inject(AdminSubjectService);
+  private readonly adminUserService = inject(AdminUserService);
   private readonly academicService = inject(AcademicManagementService);
-  private readonly userService = inject(UserService);
 
-  readonly subjects = signal<Subject[]>([]);
+  readonly subjects = signal<SubjectResponse[]>([]);
   readonly semesters = signal<Semester[]>([]);
   readonly teachers = signal<UserResponse[]>([]);
 
   readonly isLoading = signal(false);
   readonly isFormModalOpen = signal(false);
-  readonly selectedSubject = signal<Subject | null>(null);
+  readonly selectedSubject = signal<SubjectResponse | null>(null);
 
   readonly showToast = signal(false);
   readonly toastMessage = signal('');
@@ -69,8 +81,8 @@ export class SubjectListComponent implements OnInit {
   readonly tableRows = computed(() =>
     this.subjects().map(sub => ({
       ...sub,
-      modalityDisplay: sub.modality === 'PRESENCIAL' ? 'Presencial' : 'Semi-presencial',
-      statusDisplay: sub.recordStatus === 'ACTIVE' ? 'Activa' : 'Borrador',
+      modalityDisplay: MODALITY_LABELS[sub.modality],
+      statusDisplay: STATUS_LABELS[sub.recordStatus],
     }))
   );
 
@@ -82,9 +94,11 @@ export class SubjectListComponent implements OnInit {
     this.isLoading.set(true);
 
     forkJoin({
-      subjects: this.subjectService.getSubjects(),
+      subjects: this.adminSubjectService.getAll().pipe(
+        map(r => Array.isArray(r) ? r : (r.data ?? []))
+      ),
       semesters: this.academicService.getSemesters(),
-      teachers: this.userService.getUsersByRole('TEACHER'),
+      teachers: this.adminUserService.getByRole('TEACHER').pipe(map(r => r.data ?? [])),
     })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
@@ -97,7 +111,7 @@ export class SubjectListComponent implements OnInit {
       });
   }
 
-  openFormModal(subject: Subject | null = null) {
+  openFormModal(subject: SubjectResponse | null = null) {
     this.selectedSubject.set(subject);
     this.isFormModalOpen.set(true);
   }
@@ -109,9 +123,10 @@ export class SubjectListComponent implements OnInit {
 
   onSave(payload: SubjectRequest) {
     const current = this.selectedSubject();
+    const servicePayload = { ...payload, semesterId: String(payload.semesterId) };
     const request$ = current
-      ? this.subjectService.updateSubject(current.id, payload)
-      : this.subjectService.createSubject(payload);
+      ? this.adminSubjectService.update(String(current.id), servicePayload)
+      : this.adminSubjectService.create(servicePayload);
 
     request$.subscribe({
       next: () => {
@@ -122,36 +137,55 @@ export class SubjectListComponent implements OnInit {
         this.closeFormModal();
         this.loadData();
       },
-      error: (err: any) => {
-        const msg = err?.error?.message || 'Error al guardar la materia';
+      error: (err: { error?: { message?: string } }) => {
+        const msg = err.error?.message || 'Error al guardar la materia';
         this.displayToast(msg, 'error');
       },
     });
   }
 
-  onActivate(subject: Subject) {
-    this.subjectService.activateSubject(subject.id).subscribe({
+  onActivate(subject: SubjectResponse) {
+    this.adminSubjectService.activate(String(subject.id)).subscribe({
       next: () => {
         this.displayToast('Materia activada correctamente', 'success');
         this.loadData();
       },
-      error: (err: any) => {
-        const msg = err?.error?.message || 'Error al activar la materia. Verifica que las ponderaciones sumen 100.';
+      error: (err: { error?: { message?: string } }) => {
+        const msg = err.error?.message || 'Error al activar la materia. Verifica que las ponderaciones sumen 100.';
         this.displayToast(msg, 'error');
       },
     });
   }
 
-  onDelete(subject: Subject) {
-    if (confirm(`¿Estás seguro de eliminar la materia "${subject.name}"?`)) {
-      this.subjectService.deleteSubject(subject.id).subscribe({
-        next: () => {
-          this.displayToast('Materia eliminada', 'success');
-          this.loadData();
-        },
-        error: () => this.displayToast('Error al eliminar la materia', 'error'),
-      });
-    }
+  // Delete confirmation modal state
+  readonly isDeleteModalOpen = signal(false);
+  readonly subjectToDelete = signal<SubjectResponse | null>(null);
+
+  onDelete(subject: SubjectResponse) {
+    this.subjectToDelete.set(subject);
+    this.isDeleteModalOpen.set(true);
+  }
+
+  closeDeleteModal() {
+    this.isDeleteModalOpen.set(false);
+    this.subjectToDelete.set(null);
+  }
+
+  confirmDelete() {
+    const subject = this.subjectToDelete();
+    if (!subject) return;
+
+    this.adminSubjectService.delete(String(subject.id)).subscribe({
+      next: () => {
+        this.displayToast('Materia eliminada', 'success');
+        this.loadData();
+        this.closeDeleteModal();
+      },
+      error: () => {
+        this.displayToast('Error al eliminar la materia', 'error');
+        this.closeDeleteModal();
+      },
+    });
   }
 
   displayToast(message: string, type: 'success' | 'error') {

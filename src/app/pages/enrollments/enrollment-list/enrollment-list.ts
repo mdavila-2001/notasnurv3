@@ -3,12 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { EnrollmentService } from '../../../core/services/enrollment/enrollment';
-import { SubjectService } from '../../../core/services/subject/subject.service';
-import { User as UserService } from '../../../core/services/user/user';
-import { Subject } from '../../../core/models/subject.model';
-import { UserResponse } from '../../../core/models/user.model';
-import { StudentResponseDTO } from '../../../core/models/enrollment.model';
+import { AdminSubjectService, SubjectResponse } from '../../../features/admin/services/admin-subject.service';
+import { AdminUserService } from '../../../features/admin/services/admin-user.service';
+import { EnrollmentApiService, StudentEnrolledResponse } from '../../../features/teacher/services/enrollment-api.service';
+import { UserResponse } from '../../../core/models/api.models';
 import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
 import { Toast } from '../../../shared/components/toast/toast';
@@ -21,39 +19,35 @@ import { Toast } from '../../../shared/components/toast/toast';
   styleUrl: './enrollment-list.css',
 })
 export class EnrollmentListComponent implements OnInit {
-  private readonly enrollmentService = inject(EnrollmentService);
-  private readonly subjectService = inject(SubjectService);
-  private readonly userService = inject(UserService);
+  private readonly enrollmentApi = inject(EnrollmentApiService);
+  private readonly subjectService = inject(AdminSubjectService);
+  private readonly userService = inject(AdminUserService);
 
-  // Estado principal
-  readonly subjects = signal<Subject[]>([]);
+  readonly subjects = signal<SubjectResponse[]>([]);
   readonly students = signal<UserResponse[]>([]);
-  readonly selectedSubject = signal<Subject | null>(null);
-  readonly enrolledStudents = signal<StudentResponseDTO[]>([]);
+  readonly selectedSubject = signal<SubjectResponse | null>(null);
+  readonly enrolledStudents = signal<StudentEnrolledResponse[]>([]);
 
   readonly isLoading = signal(false);
   readonly isLoadingStudents = signal(false);
 
-  // Modal matricular
   readonly isEnrollModalOpen = signal(false);
+  readonly isWithdrawModalOpen = signal(false);
   selectedStudentId = '';
   userDegreeId: number | null = null;
+  readonly pendingWithdrawEnrollmentId = signal<string | null>(null);
+  readonly pendingWithdrawStudentName = signal('Estudiante');
 
-  // Toast
   readonly showToast = signal(false);
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');
 
-
-  // Solo materias ACTIVE
-  readonly activeSubjects = computed(() =>
-    this.subjects().filter(s => s.recordStatus === 'ACTIVE')
-  );
-
-
-  // Opciones para el select de estudiantes en el modal
   readonly studentOptions = computed(() =>
     this.students().map(s => ({ value: s.id, label: `${s.fullName} (CI: ${s.ci})` }))
+  );
+
+  readonly activeSubjects = computed(() =>
+    this.subjects().filter(s => s.recordStatus === 'PUBLISHED')
   );
 
   ngOnInit() {
@@ -63,30 +57,30 @@ export class EnrollmentListComponent implements OnInit {
   loadInitialData() {
     this.isLoading.set(true);
     forkJoin({
-      subjects: this.subjectService.getSubjects(),
-      students: this.userService.getUsersByRole('STUDENT'),
+      subjects: this.subjectService.getAll().pipe(finalize(() => {})),
+      students: this.userService.getByRole('STUDENT').pipe(finalize(() => {})),
     })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: ({ subjects, students }) => {
-          this.subjects.set(subjects);
-          this.students.set(students);
+          this.subjects.set(subjects.data ?? []);
+          this.students.set(students.data ?? []);
         },
         error: () => this.displayToast('Error al cargar los datos', 'error'),
       });
   }
 
-  selectSubject(subject: Subject) {
+  selectSubject(subject: SubjectResponse) {
     this.selectedSubject.set(subject);
     this.loadEnrolledStudents(subject.id);
   }
 
-  loadEnrolledStudents(subjectId: number) {
+  loadEnrolledStudents(subjectId: string) {
     this.isLoadingStudents.set(true);
-    this.enrollmentService.getStudentsBySubject(subjectId)
+    this.enrollmentApi.getStudentsBySubject(subjectId)
       .pipe(finalize(() => this.isLoadingStudents.set(false)))
       .subscribe({
-        next: (students) => this.enrolledStudents.set(students),
+        next: (response) => this.enrolledStudents.set(response.data ?? []),
         error: () => this.displayToast('Error al cargar los alumnos matriculados', 'error'),
       });
   }
@@ -108,37 +102,57 @@ export class EnrollmentListComponent implements OnInit {
       return;
     }
 
-    this.enrollmentService.enrollStudent({
+    this.enrollmentApi.enrollStudent({
       userDegreeId: this.userDegreeId,
-      subjectId: subject.id,
+      subjectId: Number(subject.id),
     }).subscribe({
       next: (response) => {
         this.closeEnrollModal();
-        this.displayToast(`${response.studentName} matriculado en ${response.subjectName}`, 'success');
+        this.displayToast(`${response.data?.studentName ?? 'Alumno'} matriculado en ${subject.name}`, 'success');
         this.loadEnrolledStudents(subject.id);
-        this.loadInitialData(); // Refrescar cupos
+        this.loadInitialData();
       },
-      error: (err: any) => {
-        const msg = err?.error?.message || 'Error al realizar la matrícula';
-        this.displayToast(msg, 'error');
-      },
+      error: (error: unknown) => this.displayToast(this.extractErrorMessage(error, 'Error al realizar la matrícula'), 'error'),
     });
   }
 
-  withdrawStudent(enrollmentId: string, studentName: string) {
-    if (!confirm(`¿Dar de baja a ${studentName} de esta materia?`)) return;
+  requestWithdrawStudent(enrollmentId: string | undefined, fullName: string | undefined): void {
+    const normalizedEnrollmentId = enrollmentId?.trim();
 
-    this.enrollmentService.withdrawStudent(enrollmentId).subscribe({
+    if (!normalizedEnrollmentId) {
+      this.displayToast('No se pudo identificar la matrícula para dar de baja', 'error');
+      return;
+    }
+
+    this.pendingWithdrawEnrollmentId.set(normalizedEnrollmentId);
+    this.pendingWithdrawStudentName.set(fullName ?? 'Estudiante');
+    this.isWithdrawModalOpen.set(true);
+  }
+
+  closeWithdrawModal(): void {
+    this.isWithdrawModalOpen.set(false);
+    this.pendingWithdrawEnrollmentId.set(null);
+    this.pendingWithdrawStudentName.set('Estudiante');
+  }
+
+  confirmWithdrawStudent(): void {
+    const enrollmentId = this.pendingWithdrawEnrollmentId();
+    const studentName = this.pendingWithdrawStudentName();
+
+    if (!enrollmentId) {
+      this.displayToast('No se pudo identificar la matrícula para dar de baja', 'error');
+      return;
+    }
+
+    this.enrollmentApi.withdrawStudent(enrollmentId).subscribe({
       next: () => {
+        this.closeWithdrawModal();
         this.displayToast(`${studentName} dado de baja correctamente`, 'success');
         const subject = this.selectedSubject();
         if (subject) this.loadEnrolledStudents(subject.id);
         this.loadInitialData();
       },
-      error: (err: any) => {
-        const msg = err?.error?.message || 'Error al dar de baja';
-        this.displayToast(msg, 'error');
-      },
+      error: (error: unknown) => this.displayToast(this.extractErrorMessage(error, 'Error al dar de baja'), 'error'),
     });
   }
 
@@ -150,5 +164,15 @@ export class EnrollmentListComponent implements OnInit {
 
   onToastClosed() {
     this.showToast.set(false);
+  }
+
+  private extractErrorMessage(error: unknown, fallback: string): string {
+    if (typeof error === 'object' && error !== null && 'error' in error) {
+      const backendError = (error as { error?: { message?: string } }).error;
+      if (backendError?.message?.trim()) {
+        return backendError.message;
+      }
+    }
+    return fallback;
   }
 }
