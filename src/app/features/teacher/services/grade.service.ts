@@ -135,6 +135,7 @@ export class GradeService {
   saveGrade(studentId: string): Observable<boolean> {
     const componentId = this._selectedComponentId();
     const score = componentId ? this._grades().get(studentId)?.get(componentId) : undefined;
+    const enrollmentId = this.students().find(student => student.studentId === studentId)?.enrollmentId ?? studentId;
 
     if (!componentId || score === undefined || score === null) {
       return of(false);
@@ -148,7 +149,7 @@ export class GradeService {
     });
 
     const request: GradeRequest = {
-      enrollmentId: studentId,
+      enrollmentId,
       componentId,
       score,
     };

@@ -138,7 +138,10 @@ describe('GradeService', () => {
   describe('saveGrade', () => {
     beforeEach(() => {
       evalPlanService['_plan'].set({ id: 1, subjectId: 10, components: mockComponents });
-      operationalService['_students'].set(mockStudents as any);
+      operationalService.setStudentsDirectly([
+        { studentId: 'stu-1', enrollmentId: 'enr-1', fullName: 'Alice', ci: '123', email: 'a@test.com', degreeName: 'Ing.' },
+        { studentId: 'stu-2', enrollmentId: 'enr-2', fullName: 'Bob', ci: '456', email: 'b@test.com', degreeName: 'Lic.' },
+      ]);
       service.selectComponent(1);
     });
 
@@ -149,8 +152,8 @@ describe('GradeService', () => {
 
       const req = httpMock.expectOne('/api/grades');
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({ enrollmentId: 'stu-1', componentId: 1, score: 25 });
-      req.flush({ success: true, message: 'Guardado', data: { id: 'g-1', enrollmentId: 'stu-1', componentId: 1, score: 25 } });
+      expect(req.request.body).toEqual({ enrollmentId: 'enr-1', componentId: 1, score: 25 });
+      req.flush({ success: true, message: 'Guardado', data: { id: 'g-1', enrollmentId: 'enr-1', componentId: 1, score: 25 } });
 
       expect(success).toBe(true);
       const rows = service.studentRows();
