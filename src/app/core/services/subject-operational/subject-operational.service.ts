@@ -105,9 +105,7 @@ export class SubjectOperationalService {
       if (this._studentsRequestedSubjectId === subjectId) {
         return;
       }
-    }
 
-    if (!force && this._studentsLoading() && this._studentsRequestedSubjectId !== subjectId) {
       this._studentsError.set(null);
     }
 
@@ -134,9 +132,7 @@ export class SubjectOperationalService {
 
       this._students.set(mappedStudents);
       this._loadedStudentsSubjectId.set(subjectId);
-    } catch (error) {
-      void error;
-
+    } catch {
       if (requestId !== this._studentsRequestId) {
         return;
       }
