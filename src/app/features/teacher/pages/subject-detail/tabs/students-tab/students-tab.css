@@ -1,95 +1,326 @@
-.students-tab {
-    padding: 1rem 0;
+/* Variables de colores reemplazadas a mano para CSS puro */
+.main-content {
+  background-color: #f3f4f6;
+  min-height: 100vh;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.tab-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+/* === ESTILOS DE LA CABECERA === */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.tab-header h2 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--primary-color, #002131);
+.page-header .header-info .gestion-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d68c5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.count-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    background-color: #e0f2fe;
-    color: #0369a1;
+.page-header .header-info .page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #2f4858;
+  margin: 4px 0 8px;
 }
 
-.table-wrapper {
-    overflow-x: auto;
-    border-radius: 0.75rem;
-    border: 1px solid #e5e7eb;
+.page-header .header-info .subject-subinfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
 }
 
-.students-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
+.page-header .header-info .subject-subinfo span.material-icons-outlined {
+  font-size: 18px;
 }
 
-.students-table th {
-    text-align: left;
-    padding: 0.75rem 1rem;
-    background-color: #f9fafb;
-    color: #374151;
-    font-weight: 600;
-    border-bottom: 1px solid #e5e7eb;
+/* === ESTILOS DEL BUSCADOR === */
+.page-header .search-container {
+  position: relative;
+  width: 300px;
 }
 
-.students-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f3f4f6;
-    color: #4b5563;
+.page-header .search-container .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 20px;
 }
 
-.students-table tr:last-child td {
-    border-bottom: none;
+.page-header .search-container .search-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #2f4858;
+  transition: all 0.2s ease;
 }
 
-.students-table tr:hover td {
-    background-color: #f9fafb;
+.page-header .search-container .search-input:focus {
+  outline: none;
+  border-color: #1d68c5;
+  box-shadow: 0 0 0 3px rgba(29, 104, 197, 0.1);
 }
 
-.row-number {
-    color: #9ca3af;
-    width: 3rem;
+.page-header .search-container .search-input::placeholder {
+  color: #9ca3af;
 }
 
-.student-name {
-    font-weight: 500;
-    color: #111827;
+/* === ESTILOS DE LA TARJETA (DATA Y EMPTY) === */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
 }
 
-.loading-state,
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 4rem 0;
-    color: #9ca3af;
-    gap: 0.75rem;
+/* === ESTILOS DE LA TABLA === */
+.data-section .card-header {
+  margin-bottom: 24px;
 }
 
-.spinning {
-    animation: spin 1s linear infinite;
+.data-section .card-header .title-with-total {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
+.data-section .card-header .title-with-total .card-icon {
+  color: #1d68c5;
+  font-size: 22px;
+}
 
-    to {
-        transform: rotate(360deg);
-    }
+.data-section .card-header .title-with-total .card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2f4858;
+}
+
+.data-section .card-header .title-with-total .total-tag {
+  background-color: #dbeafe;
+  color: #1d68c5;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* Estilos globales para inyectar dentro de app-table */
+.data-section ::ng-deep app-table .table-responsive {
+  border: none;
+}
+
+.data-section ::ng-deep app-table .custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-section ::ng-deep app-table .custom-table thead th {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.data-section ::ng-deep app-table .custom-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.data-section ::ng-deep app-table .custom-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.data-section ::ng-deep app-table .custom-table tbody tr td {
+  padding: 16px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* === ESTILOS DEL ESTADO VACÍO === */
+.empty-state-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 64px 32px;
+}
+
+.empty-state-section .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+}
+
+.empty-state-section .empty-state .empty-icon {
+  font-size: 64px;
+  color: #d1d5db;
+  margin-bottom: 24px;
+}
+
+.empty-state-section .empty-state .empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2f4858;
+  margin-bottom: 12px;
+}
+
+.empty-state-section .empty-state .empty-desc {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* === ESTILOS GENERALES (Botones) === */
+.primary-btn {
+  background-color: #1d68c5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.primary-btn .material-icons {
+  font-size: 18px;
+}
+
+.primary-btn:hover {
+  background-color: #17549c;
+}
+
+.primary-btn:active {
+  transform: translateY(1px);
+}
+
+.ripple {
+  position: relative;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.ripple:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .5s, opacity 1s;
+}
+
+.ripple:active:after {
+  transform: scale(0, 0);
+  opacity: .3;
+  transition: 0s;
+}
+
+/* === ESTILOS PARA LAS ETIQUETAS DE ESTADO === */
+::ng-deep .status-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+::ng-deep .status-tag--regular {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
+::ng-deep .status-tag--condicional {
+  background-color: #fef3c7;
+  color: #f59e0b;
+}
+
+::ng-deep .status-tag--retirado {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+::ng-deep .status-tag::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* === ESTILOS PARA LA CELDA DE ESTUDIANTE === */
+::ng-deep .student-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+::ng-deep .student-cell .student-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+::ng-deep .student-cell .student-initials {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+::ng-deep .student-cell .student-info {
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep .student-cell .student-info .student-name {
+  font-weight: 600;
+  color: #2f4858;
+}
+
+::ng-deep .student-cell .student-info .student-id {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 1px;
 }

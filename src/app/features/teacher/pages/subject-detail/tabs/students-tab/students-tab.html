@@ -1,43 +1,64 @@
-<div class="students-tab">
-    <div class="tab-header">
-        <h2>Estudiantes Inscritos</h2>
-        <span class="count-badge">{{ students().length }} alumnos</span>
+<div class="main-content">
+  <header class="page-header">
+    <div class="header-info">
+      <span class="gestion-tag">GESTIÓN ACADÉMICA</span>
+      <h1 class="page-title">Nómina de Estudiantes</h1>
+      <div class="subject-subinfo">
+        <span class="material-symbols-outlined">assignment</span>
+        <span>Detalle de Materia</span>
+      </div>
     </div>
+    
+    <div class="search-container">
+      <app-input 
+        placeholder="Buscar por nombre o C.I..." 
+        [value]="searchTerm()"
+        (valueChange)="updateSearch($event)">
+      </app-input>
+    </div>
+  </header>
 
-    @if (isLoading()) {
-        <div class="loading-state">
-            <span class="material-symbols-outlined spinning">progress_activity</span>
-            <p>Cargando estudiantes...</p>
+  @if (isLoading()) {
+    <app-loader></app-loader>
+  } @else if (students().length === 0) {
+    <section class="card empty-state-section">
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-icon">group_off</span>
+        <h3 class="empty-title">No hay estudiantes inscritos</h3>
+        <p class="empty-desc">Actualmente no hay estudiantes registrados en la nómina de esta materia. Los estudiantes aparecerán aquí una vez que finalice su proceso de inscripción.</p>
+        
+        <app-button 
+          icon="refresh" 
+          (click)="refreshList()">
+          Actualizar Lista
+        </app-button>
+      </div>
+    </section>
+  } @else if (filteredStudents().length === 0) {
+    <section class="card empty-state-section">
+      <div class="empty-state">
+        <span class="material-symbols-outlined empty-icon">search_off</span>
+        <h3 class="empty-title">Sin resultados</h3>
+        <p class="empty-desc">No se encontraron estudiantes que coincidan con "{{ searchTerm() }}". Intenta con otro término de búsqueda.</p>
+        
+        <app-button 
+          icon="clear" 
+          (click)="updateSearch('')">
+          Limpiar Búsqueda
+        </app-button>
+      </div>
+    </section>
+  } @else {
+    <section class="card data-section">
+      <div class="card-header">
+        <div class="title-with-total">
+          <span class="material-symbols-outlined card-icon">group_add</span>
+          <h2 class="card-title">Estudiantes Inscritos</h2>
+          <span class="total-tag">Total: {{ filteredStudents().length }}</span>
         </div>
-    } @else if (students().length === 0) {
-        <div class="empty-state">
-            <span class="material-symbols-outlined">person_search</span>
-            <p>No hay estudiantes inscritos en esta materia</p>
-        </div>
-    } @else {
-        <div class="table-wrapper">
-            <table class="students-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre Completo</th>
-                        <th>CI</th>
-                        <th>Correo</th>
-                        <th>Carrera</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (student of students(); track student.studentId; let i = $index) {
-                        <tr>
-                            <td class="row-number">{{ i + 1 }}</td>
-                            <td class="student-name">{{ student.fullName }}</td>
-                            <td>{{ student.ci }}</td>
-                            <td>{{ student.email }}</td>
-                            <td>{{ student.degreeName || '—' }}</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+      </div>
+
+      <app-table [data]="filteredStudents()" [columns]="tableColumns"></app-table>
+    </section>
+  }
 </div>

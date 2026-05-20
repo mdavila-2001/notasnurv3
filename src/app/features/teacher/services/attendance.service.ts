@@ -3,7 +3,6 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
-
 import {
   AttendanceStatus,
   AttendanceRowUi,
@@ -36,10 +35,11 @@ export class AttendanceService {
     return {
       present: records.filter(r => r.status === 'PRESENT').length,
       absent: records.filter(r => r.status === 'ABSENT').length,
-      late: records.filter(r => r.status === 'LATE').length,
+      late: records.filter(r => r.status === 'LATE').length, // Ajustado a LATE si tu modelo lo requiere
       total: records.length,
     };
   });
+
   readonly isReadyToSubmit = computed(() =>
     !!this.operationalService.subject() && this._attendanceDraft().length > 0
   );
@@ -51,7 +51,8 @@ export class AttendanceService {
     const students = this.operationalService.students();
 
     const initialDraft: AttendanceRowUi[] = students.map(student => ({
-      enrollmentId: student.studentId,
+      // 👈 ¡CORRECCIÓN APLICADA AQUÍ! Ahora tomamos el enrollmentId real
+      enrollmentId: student.enrollmentId, 
       studentName: student.fullName,
       ci: student.ci ?? 'N/A',
       degreeName: student.degreeName,

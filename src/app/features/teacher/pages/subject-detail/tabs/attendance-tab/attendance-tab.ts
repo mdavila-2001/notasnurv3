@@ -5,11 +5,25 @@ import { AttendanceService } from '../../../../services/attendance.service';
 import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 import { AttendanceStatus } from '../../../../../../core/models/attendance';
 import { Button } from '../../../../../../shared/components/button/button';
+import { Input } from '../../../../../../shared/components/input/input';
+import { Loader } from '../../../../../../shared/components/loader/loader';
+import { Toast } from '../../../../../../shared/components/toast/toast';
+
+// 🚀 REGLA DE MARCELO CUMPLIDA: Usamos el componente central de tablas genéricas
+import { Table } from '../../../../../../shared/components/table/table';
 
 @Component({
   selector: 'app-attendance-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    Button, 
+    Input, 
+    Loader, 
+    Toast,
+    Table // 👈 ¡Inyectamos tu componente Table modificado!
+  ],
   templateUrl: './attendance-tab.html',
   styleUrl: './attendance-tab.css'
 })
@@ -31,8 +45,8 @@ export class AttendanceTab implements OnInit {
     this.attendanceService.initializeDraft();
   }
 
-  handleDateChange(date: string): void {
-    this.attendanceService.setDate(date);
+  handleDateChange(value: string | number): void {
+    this.attendanceService.setDate(String(value));
   }
 
   handleStatusChange(enrollmentId: string, status: AttendanceStatus): void {

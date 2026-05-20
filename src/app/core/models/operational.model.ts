@@ -1,5 +1,6 @@
 export interface StudentOperational {
     studentId: string;
+    enrollmentId: string; // 👈 ¡El nuevo campo clave para que la asistencia funcione!
     fullName: string;
     ci?: string;
     email?: string;

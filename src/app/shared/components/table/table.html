@@ -13,22 +13,26 @@
 
         <tbody>
           @for (row of data(); track row.id || $index) {
-            <tr>
-              @for (col of columns(); track col.key) {
-                <td>{{ row[col.key] }}</td>
-              }
-              
-              @if (showActions()) {
-                <td class="actions-cell">
-                  <app-button variant="primary" (clicked)="editClicked.emit(row)">
-                    Editar
-                  </app-button>
-                  <app-button variant="tertiary" (clicked)="deleteClicked.emit(row)">
-                    Eliminar
-                  </app-button>
-                </td>
-              }
-            </tr>
+            @if (customRowTemplate) {
+              <ng-container *ngTemplateOutlet="customRowTemplate; context: { $implicit: row, index: $index }"></ng-container>
+            } @else {
+              <tr>
+                @for (col of columns(); track col.key) {
+                  <td>{{ row[col.key] }}</td>
+                }
+                
+                @if (showActions()) {
+                  <td class="actions-cell">
+                    <app-button variant="primary" (clicked)="editClicked.emit(row)">
+                      Editar
+                    </app-button>
+                    <app-button variant="tertiary" (clicked)="deleteClicked.emit(row)">
+                      Eliminar
+                    </app-button>
+                  </td>
+                }
+              </tr>
+            }
           } @empty {
             <tr>
               <td [attr.colspan]="columns().length + (showActions() ? 1 : 0)" class="empty-state">
