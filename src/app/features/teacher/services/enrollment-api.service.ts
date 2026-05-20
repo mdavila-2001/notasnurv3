@@ -42,7 +42,7 @@ export class EnrollmentApiService {
   private readonly api = inject(ApiService);
 
   getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
-    // Ruta corregida: el backend expone /enrollments/subjects/{id}/students (plural + /students)
+    // El backend expone estudiantes de la materia en /enrollments/subjects/{id}/students.
     return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subjects/${subjectId}/students`);
   }
 

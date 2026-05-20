@@ -76,7 +76,7 @@ describe('AuthGuard', () => {
       expect(router.navigate).toHaveBeenCalledWith(['/teacher/dashboard']);
     });
 
-    it('should fallback to /dashboard when user has no recognized role', () => {
+    it('should fallback to /login when user has no recognized role', () => {
       authService.isAuthenticated.and.returnValue(true);
       authService.hasRole.and.returnValue(false);
       authService.getUserRole.and.returnValue(null);
@@ -85,7 +85,19 @@ describe('AuthGuard', () => {
       const result = authGuard(route, state);
 
       expect(result).toBeFalse();
-      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should fallback to /login when user role value is unknown', () => {
+      authService.isAuthenticated.and.returnValue(true);
+      authService.hasRole.and.returnValue(false);
+      authService.getUserRole.and.returnValue('UNKNOWN' as never);
+      const { route, state } = createRoute('ADMIN');
+
+      const result = authGuard(route, state);
+
+      expect(result).toBeFalse();
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
 
