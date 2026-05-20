@@ -95,7 +95,7 @@
                       <button
                         class="btn-withdraw"
                         title="Dar de baja"
-                        (click)="withdrawStudent(student.studentId, student.fullName)">
+                        (click)="requestWithdrawStudent(student.id, student.fullName)">
                         <span class="material-symbols-outlined">person_remove</span>
                         Dar de baja
                       </button>
@@ -159,6 +159,18 @@
       <span class="material-symbols-outlined btn-icon-left">how_to_reg</span>
       Confirmar Matrícula
     </app-button>
+  </div>
+</app-modal>
+
+<app-modal
+  [isOpen]="isWithdrawModalOpen()"
+  title="Confirmar baja de matrícula"
+  (closed)="closeWithdrawModal()">
+  <p>¿Dar de baja a {{ pendingWithdrawStudentName() }} de esta materia?</p>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" (clicked)="closeWithdrawModal()">Cancelar</app-button>
+    <app-button variant="primary" (clicked)="confirmWithdrawStudent()">Confirmar baja</app-button>
   </div>
 </app-modal>
 

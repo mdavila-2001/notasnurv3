@@ -23,7 +23,7 @@ export class SubjectOperationalService {
   readonly students = computed(() => this._students());
   readonly currentSubjectId = computed(() => this._subject()?.id?.toString() ?? null);
   readonly evaluationPlan = this.evaluationService.plan;
-  readonly isLoading = computed(() => this._isLoading());
+  readonly isLoading = computed(() => this._isLoading() || this._studentsLoading());
   readonly studentsLoading = computed(() => this._studentsLoading());
   readonly contextError = computed(() => this._contextError());
   readonly studentsError = computed(() => this._studentsError());
@@ -112,18 +112,21 @@ export class SubjectOperationalService {
     try {
       const students = await firstValueFrom(
         this.enrollmentService.getStudentsBySubject(subjectId).pipe(
-          map((response) => response.data ?? []),
+          map((response) => {
+            this._loadedStudentsSubjectId.set(subjectId);
+            return response.data ?? [];
+          }),
           catchError((error) => {
+            this._loadedStudentsSubjectId.set(null);
             this._studentsError.set('No se pudieron cargar los estudiantes de esta materia.');
-            return of([] as StudentEnrolledResponse[]);
+            return of(null);
           }),
         ),
       );
 
-      const mappedStudents = students.map((student) => this.mapStudentResponse(student));
+      const mappedStudents = (students ?? []).map((student) => this.mapStudentResponse(student));
 
       this._students.set(mappedStudents);
-      this._loadedStudentsSubjectId.set(subjectId);
     } finally {
       this._studentsLoading.set(false);
     }
