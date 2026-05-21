@@ -55,16 +55,14 @@ export class SecuritySettings {
         this.passwordForm.reset();
       },
       error: (err) => {
-        if (err.status === 404 || err.status === 500) {
-          setTimeout(() => {
-            this.toastService.success('Tu contraseña se ha cambiado exitosamente.');
-            this.isPasswordSaving.set(false);
-            this.passwordForm.reset();
-          }, 1000);
-        } else {
-          this.toastService.error(err.message || 'Error al cambiar contraseña.');
-          this.isPasswordSaving.set(false);
-        }
+        const errorMessage = err.status === 404
+          ? 'No se pudo procesar el cambio de contraseña.'
+          : err.status === 500
+            ? 'Ocurrió un error del servidor al cambiar la contraseña.'
+            : err.message || 'Error al cambiar contraseña.';
+
+        this.toastService.error(errorMessage);
+        this.isPasswordSaving.set(false);
       }
     });
   }
