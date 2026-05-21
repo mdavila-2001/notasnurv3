@@ -29,6 +29,18 @@ export const routes: Routes = [
         path: 'student',
         children: [
           { path: 'subjects', component: StudentSubjectsComponent },
+          {
+            path: 'dashboard',
+            loadComponent: () => import('./shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+          },
+          {
+            path: 'attendance',
+            loadComponent: () => import('./shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+          },
+          {
+            path: 'schedule',
+            loadComponent: () => import('./shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+          }
         ]
       },
 
@@ -36,6 +48,12 @@ export const routes: Routes = [
       // El authGuard en la ruta padre ya verificó autenticación;
       // la redirección se maneja en el login por rol.
       { path: 'dashboard', redirectTo: '/admin/dashboard', pathMatch: 'full' },
+
+      // === Settings ===
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
+      },
     ]
   },
 

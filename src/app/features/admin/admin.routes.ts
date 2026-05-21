@@ -22,6 +22,10 @@ export const adminRoutes: Routes = [
       { path: 'managements', component: ManagementListComponent },
       { path: 'semesters', component: SemesterListComponent },
       { path: 'enrollments', component: EnrollmentListComponent },
+      {
+        path: 'reports',
+        loadComponent: () => import('../../shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+      },
     ],
   },
 ];

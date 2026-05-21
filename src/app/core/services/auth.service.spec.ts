@@ -133,4 +133,18 @@ describe('AuthService', () => {
       req.flush({ success: true, message: '', data: mockProfileData });
     });
   });
+
+  describe('changePassword', () => {
+    it('should POST to /auth/change-password with dto', () => {
+      const dto = { currentPassword: '123', newPassword: '456' };
+      service.changePassword(dto).subscribe(response => {
+        expect(response.success).toBe(true);
+      });
+
+      const req = httpMock.expectOne('/api/auth/change-password');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(dto);
+      req.flush({ success: true, message: 'Password updated', data: null });
+    });
+  });
 });

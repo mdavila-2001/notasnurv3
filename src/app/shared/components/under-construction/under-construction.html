@@ -1,0 +1,34 @@
+<div class="under-construction-container">
+  <div class="glass-card">
+    <div class="icon-wrapper">
+      <span class="material-symbols-outlined animated-icon">{{ featureIcon() }}</span>
+      <span class="gear-icon material-symbols-outlined">settings</span>
+    </div>
+    
+    <h1 class="title">{{ featureName() }}</h1>
+    <p class="subtitle">Funcionalidad en Desarrollo</p>
+    
+    <div class="divider"></div>
+    
+    <p class="description">
+      {{ featureDescription() }}
+    </p>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-glow"></div>
+      <div class="progress-bar-fill"></div>
+    </div>
+
+    <div class="meta-info">
+      <span>Sprint 3 · Universidad NUR</span>
+      <span>v3.0-dev</span>
+    </div>
+
+    <div class="actions">
+      <app-button variant="primary" (clicked)="goBack()">
+        <span class="material-symbols-outlined btn-icon">arrow_back</span>
+        Volver al Inicio Seguró
+      </app-button>
+    </div>
+  </div>
+</div>
