@@ -28,6 +28,7 @@ export class AttendanceService {
   readonly isSaving = computed(() => this._isSaving());
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
+  readonly todayDate = computed(() => this.todayISO());
 
   // Selector derivado para las estadísticas del Header de la UI
   readonly recordCounts = computed(() => {
@@ -41,7 +42,7 @@ export class AttendanceService {
   });
 
   readonly isReadyToSubmit = computed(() =>
-    !!this.operationalService.subject() && this._attendanceDraft().length > 0
+    this._attendanceDraft().length > 0
   );
 
   initializeDraft(): void {
@@ -51,8 +52,7 @@ export class AttendanceService {
     const students = this.operationalService.students();
 
     const initialDraft: AttendanceRowUi[] = students.map(student => ({
-      // 👈 ¡CORRECCIÓN APLICADA AQUÍ! Ahora tomamos el enrollmentId real
-      enrollmentId: student.enrollmentId ?? student.studentId ?? '',
+      enrollmentId: student.enrollmentId || student.studentId,
       studentName: student.fullName,
       ci: student.ci ?? 'N/A',
       degreeName: student.degreeName,
@@ -91,11 +91,17 @@ export class AttendanceService {
 
   // --- Comunicación con el Backend ---
 
-  submit(): Observable<boolean> {
-    const subjectId = this.operationalService.subject()?.id;
+  submit(subjectIdFromRoute: string | null): Observable<boolean> {
+    const selectedDate = this._date();
     
-    if (!this.isReadyToSubmit() || !subjectId) {
-      this._error.set('No hay datos para guardar o falta el contexto de la materia.');
+    if (!this.isReadyToSubmit() || !subjectIdFromRoute) {
+      this._error.set('No hay datos para guardar o falta el identificador de la materia.');
+      return of(false);
+    }
+
+    // Validate that the selected date is not in the future
+    if (this.isFutureDate(selectedDate)) {
+      this._error.set('La fecha seleccionada no puede ser futura. Por favor, seleccione una fecha válida.');
       return of(false);
     }
 
@@ -103,8 +109,8 @@ export class AttendanceService {
     this.clearFeedback();
 
     const request: AttendanceBulkRequest = {
-      subjectId: Number(subjectId),
-      date: this._date(),
+      subjectId: parseInt(String(subjectIdFromRoute), 10),
+      date: selectedDate,
       records: this._attendanceDraft().map(row => ({
         enrollmentId: row.enrollmentId,
         status: row.status,
@@ -123,6 +129,19 @@ export class AttendanceService {
         return of(false);
       })
     );
+  }
+
+  /**
+   * Verifica si una fecha en formato YYYY-MM-DD es futura (después de hoy).
+   */
+  private isFutureDate(dateString: string): boolean {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+    const today = new Date();
+    // Normalize both dates to midnight for fair comparison
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    return selectedDate > today;
   }
 
   clearFeedback(): void {

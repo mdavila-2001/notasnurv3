@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AttendanceService } from '../../../../services/attendance.service';
 import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 import { AttendanceStatus } from '../../../../../../core/models/attendance';
@@ -30,12 +31,14 @@ import { Table } from '../../../../../../shared/components/table/table';
 export class AttendanceTab implements OnInit {
   private readonly attendanceService = inject(AttendanceService);
   private readonly operationalService = inject(SubjectOperationalService);
+  private readonly route = inject(ActivatedRoute);
 
   readonly isLoading = this.operationalService.isLoading;
   readonly attendanceDraft = this.attendanceService.attendanceDraft;
   readonly isReady = this.attendanceService.isReadyToSubmit;
 
   readonly date = this.attendanceService.date;
+  readonly todayDate = this.attendanceService.todayDate;
   readonly isSaving = this.attendanceService.isSaving;
   readonly recordCounts = this.attendanceService.recordCounts;
   readonly error = this.attendanceService.error;
@@ -58,6 +61,14 @@ export class AttendanceTab implements OnInit {
   }
 
   handleSubmit(): void {
-    this.attendanceService.submit().subscribe();
+    // Try to get subject ID from route parameters
+    let subjectId = this.route.snapshot.paramMap.get('id');
+    
+    // If not found, try parent route
+    if (!subjectId && this.route.parent) {
+      subjectId = this.route.parent.snapshot.paramMap.get('id');
+    }
+
+    this.attendanceService.submit(subjectId).subscribe();
   }
 }

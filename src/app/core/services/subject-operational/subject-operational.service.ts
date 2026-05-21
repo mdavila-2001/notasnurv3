@@ -30,10 +30,13 @@ export class SubjectOperationalService {
   readonly contextError = computed(() => this._contextError());
   readonly studentsError = computed(() => this._studentsError());
 
-  private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
+private mapStudentResponse(student: StudentEnrolledResponse): StudentOperational {
     const studentId = student.studentId ?? student.id ?? '';
-    const rawEnrollmentId = student.id ?? student.studentId;
-    const enrollmentId = rawEnrollmentId?.trim() || undefined;
+    
+    // 👇 CORRECCIÓN: Ahora sí extraemos el enrollmentId real que viene del backend
+    const rawEnrollmentId = student.enrollmentId ?? '';
+    const enrollmentId = rawEnrollmentId.trim();
+    
     const fullName = student.fullName
       ?? student.name
       ?? [student.firstName, student.lastName].filter(Boolean).join(' ')
@@ -41,7 +44,7 @@ export class SubjectOperationalService {
 
     return {
       studentId,
-      enrollmentId,
+      enrollmentId, // Aquí ya viaja el UUID correcto
       fullName,
       ci: student.ci,
       email: student.email,

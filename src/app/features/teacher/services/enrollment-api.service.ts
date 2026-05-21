@@ -5,6 +5,7 @@ import { ApiResponse } from '../../../core/models/api.models';
 
 export interface StudentEnrolledResponse {
   studentId?: string;
+  enrollmentId?: string;
   id?: string;
   fullName?: string;
   name?: string;
