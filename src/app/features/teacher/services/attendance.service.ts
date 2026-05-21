@@ -135,7 +135,8 @@ export class AttendanceService {
    * Verifica si una fecha en formato YYYY-MM-DD es futura (después de hoy).
    */
   private isFutureDate(dateString: string): boolean {
-    const selectedDate = new Date(dateString);
+    const [year, month, day] = dateString.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
     const today = new Date();
     // Normalize both dates to midnight for fair comparison
     today.setHours(0, 0, 0, 0);
