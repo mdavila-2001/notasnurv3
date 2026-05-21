@@ -1,0 +1,57 @@
+<div class="tab-panel animated-panel">
+  <h2 class="panel-title">Ajustes de Asistencia</h2>
+  <p class="panel-desc">Establezca el límite máximo de inasistencias (faltas) permitidas por cada modalidad de enseñanza.</p>
+  
+  <div class="divider"></div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loader variant="spinner" size="lg" label="Cargando configuración de asistencia..."></app-loader>
+    </div>
+  } @else {
+    <form [formGroup]="attendanceForm" (ngSubmit)="onSubmit()" class="settings-form">
+      <div class="form-grid">
+        <app-input
+          type="number"
+          label="Límite Máximo de Faltas - Presencial"
+          placeholder="Ej. 5"
+          [min]="0"
+          [value]="maxAbsencesPresencialControl?.value ?? ''"
+          (valueChange)="maxAbsencesPresencialControl?.setValue(+$event)"
+          [errorMessage]="maxAbsencesPresencialControl?.touched && maxAbsencesPresencialControl?.invalid ? 'Debe ser un número entero mayor o igual a 0.' : ''"
+          [disabled]="isSaving()">
+        </app-input>
+
+        <app-input
+          type="number"
+          label="Límite Máximo de Faltas - Semipresencial"
+          placeholder="Ej. 3"
+          [min]="0"
+          [value]="maxAbsencesSemiPresencialControl?.value ?? ''"
+          (valueChange)="maxAbsencesSemiPresencialControl?.setValue(+$event)"
+          [errorMessage]="maxAbsencesSemiPresencialControl?.touched && maxAbsencesSemiPresencialControl?.invalid ? 'Debe ser un número entero mayor o igual a 0.' : ''"
+          [disabled]="isSaving()">
+        </app-input>
+      </div>
+
+      <div class="form-actions">
+        <app-button 
+          variant="primary" 
+          type="submit" 
+          [disabled]="isSaving() || attendanceForm.invalid">
+          @if (isSaving()) {
+            <span class="btn-loader-wrapper">
+              <span class="material-symbols-outlined spin-icon">sync</span>
+              Guardando Ajustes...
+            </span>
+          } @else {
+            <span class="btn-content-wrapper">
+              <span class="material-symbols-outlined">save</span>
+              Guardar Configuración
+            </span>
+          }
+        </app-button>
+      </div>
+    </form>
+  }
+</div>
