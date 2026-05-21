@@ -1,0 +1,75 @@
+<div class="tab-panel animated-panel">
+  <h2 class="panel-title">Información de Perfil</h2>
+  <p class="panel-desc">Detalles oficiales y académicos de su cuenta en la Universidad NUR.</p>
+  
+  <div class="divider"></div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loader variant="spinner" size="lg" label="Cargando perfil..."></app-loader>
+    </div>
+  } @else {
+    <div class="profile-hero">
+      <div class="avatar-circle">
+        {{ userInitials() }}
+        <div class="avatar-ring"></div>
+      </div>
+      <div class="profile-meta">
+        <h3>{{ profile()?.fullName }}</h3>
+        <p class="profile-email-sub">{{ profile()?.email }}</p>
+        <div class="role-badge-container">
+          @switch (profile()?.role) {
+            @case ('ADMIN') { <span class="badge badge-admin">Administrador</span> }
+            @case ('TEACHER') { <span class="badge badge-teacher">Docente</span> }
+            @case ('STUDENT') { <span class="badge badge-student">Estudiante</span> }
+            @default { <span class="badge badge-neutral">Usuario</span> }
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <div class="info-card">
+        <div class="info-header">
+          <span class="material-symbols-outlined info-icon">badge</span>
+          <span class="info-label">ID de Usuario</span>
+        </div>
+        <p class="info-value">{{ profile()?.id }}</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="material-symbols-outlined info-icon">fingerprint</span>
+          <span class="info-label">Cédula de Identidad (CI)</span>
+        </div>
+        <p class="info-value">{{ profile()?.ci }}</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="material-symbols-outlined info-icon">mail</span>
+          <span class="info-label">Correo Electrónico</span>
+        </div>
+        <p class="info-value">{{ profile()?.email }}</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <span class="material-symbols-outlined info-icon">check_circle</span>
+          <span class="info-label">Estado de la Cuenta</span>
+        </div>
+        <p class="info-value">
+          @if (profile()?.status === 'ACTIVE') {
+            <span class="status-indicator active">
+              <span class="status-dot"></span> Activa
+            </span>
+          } @else {
+            <span class="status-indicator inactive">
+              <span class="status-dot"></span> Inactiva
+            </span>
+          }
+        </p>
+      </div>
+    </div>
+  }
+</div>

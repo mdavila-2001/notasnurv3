@@ -34,6 +34,14 @@ export const teacherRoutes: Routes = [
           }
         ]
       },
+      {
+        path: 'attendance',
+        loadComponent: () => import('../../shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+      },
+      {
+        path: 'actas',
+        loadComponent: () => import('../../shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+      },
     ],
   },
 ];

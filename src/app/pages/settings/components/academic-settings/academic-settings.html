@@ -1,0 +1,66 @@
+<div class="tab-panel animated-panel">
+  <h2 class="panel-title">Ajustes Académicos</h2>
+  <p class="panel-desc">Configure los parámetros de calificación, redondeo y fechas límite generales para la consolidación de actas.</p>
+  
+  <div class="divider"></div>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loader variant="spinner" size="lg" label="Cargando configuración académica..."></app-loader>
+    </div>
+  } @else {
+    <form [formGroup]="academicForm" (ngSubmit)="onSubmit()" class="settings-form">
+      <div class="form-grid">
+        <app-input
+          type="number"
+          label="Calificación Mínima Aprobatoria"
+          placeholder="Ej. 51"
+          [min]="0"
+          [max]="100"
+          [value]="minPassingGradeControl?.value ?? ''"
+          (valueChange)="minPassingGradeControl?.setValue(+$event)"
+          [errorMessage]="minPassingGradeControl?.touched && minPassingGradeControl?.invalid ? 'Debe ser un número entre 0 y 100.' : ''"
+          [disabled]="isSaving()">
+        </app-input>
+
+        <app-input
+          type="select"
+          label="Tipo de Redondeo de Notas"
+          [options]="roundingOptions"
+          [value]="roundingTypeControl?.value ?? ''"
+          (valueChange)="roundingTypeControl?.setValue($event.toString())"
+          [errorMessage]="roundingTypeControl?.touched && roundingTypeControl?.invalid ? 'El tipo de redondeo es obligatorio.' : ''"
+          [disabled]="isSaving()">
+        </app-input>
+
+        <app-input
+          type="date"
+          label="Fecha Límite de Registro de Notas"
+          [value]="globalGradesDeadlineControl?.value ?? ''"
+          (valueChange)="globalGradesDeadlineControl?.setValue($event.toString())"
+          [errorMessage]="globalGradesDeadlineControl?.touched && globalGradesDeadlineControl?.invalid ? 'La fecha límite es obligatoria.' : ''"
+          [disabled]="isSaving()">
+        </app-input>
+      </div>
+
+      <div class="form-actions">
+        <app-button 
+          variant="primary" 
+          type="submit" 
+          [disabled]="isSaving() || academicForm.invalid">
+          @if (isSaving()) {
+            <span class="btn-loader-wrapper">
+              <span class="material-symbols-outlined spin-icon">sync</span>
+              Guardando Ajustes...
+            </span>
+          } @else {
+            <span class="btn-content-wrapper">
+              <span class="material-symbols-outlined">save</span>
+              Guardar Configuración
+            </span>
+          }
+        </app-button>
+      </div>
+    </form>
+  }
+</div>

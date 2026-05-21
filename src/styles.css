@@ -106,3 +106,56 @@ body {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Transiciones globales para cambio de tema suave */
+body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content, .glass-card, input, select, textarea, button, td, th {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Redefinición de variables en modo oscuro */
+:root.dark-theme {
+  --neutral-color: #0b0f19;
+  --brand-navy: #f8fafc;
+  --bg-topbar: rgba(15, 23, 42, 0.85);
+  --bg-profile-card: rgba(30, 41, 59, 0.6);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --bg-sidebar: #0f172a;
+  --bg-sidebar-active: #1e293b;
+  --bg-sidebar-hover: rgba(30, 41, 59, 0.5);
+  --secondary-color: #cbd5e1;
+}
+
+:root.dark-theme body {
+  background-color: #0b0f19;
+  color: #f8fafc;
+}
+
+:root.dark-theme .page-content,
+:root.dark-theme .settings-content,
+:root.dark-theme .glass-card,
+:root.dark-theme .topbar {
+  background: #151e33 !important;
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-theme input, 
+:root.dark-theme select, 
+:root.dark-theme textarea {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+:root.dark-theme table,
+:root.dark-theme th,
+:root.dark-theme td {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:root.dark-theme tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}

@@ -8,14 +8,15 @@ module.exports = {
   hooks: {
     readPackage(pkg, context) {
       // Validar que no haya package-lock.json
-      const packageLockPath = path.join(context.projectDir, 'package-lock.json');
+      const projectDirectory = context.projectDir || process.cwd();
+      const packageLockPath = path.join(projectDirectory, 'package-lock.json');
       if (fs.existsSync(packageLockPath)) {
         context.log('❌ ERROR: package-lock.json detectado. Este archivo debe ser eliminado.');
         context.log('    Ejecuta: rm package-lock.json');
       }
 
       // Advertencia si hay archivos de yarn
-      const yarnLockPath = path.join(context.projectDir, 'yarn.lock');
+      const yarnLockPath = path.join(projectDirectory, 'yarn.lock');
       if (fs.existsSync(yarnLockPath)) {
         context.log('⚠️  WARNING: yarn.lock detectado. Se recomienda eliminar este archivo.');
       }
