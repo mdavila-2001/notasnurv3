@@ -92,7 +92,7 @@ describe('AttendanceService', () => {
       service.updateStudentStatus('stu-1', 'ABSENT');
 
       let result = false;
-      service.submit().subscribe(r => { result = r; });
+      service.submit('10').subscribe(r => { result = r; });
 
       const req = httpMock.expectOne('/api/attendance/bulk');
       expect(req.request.method).toBe('POST');
@@ -116,7 +116,7 @@ describe('AttendanceService', () => {
       service.setDate('2026-05-12');
 
       let result = true;
-      service.submit().subscribe(r => { result = r; });
+      service.submit('10').subscribe(r => { result = r; });
 
       const req = httpMock.expectOne('/api/attendance/bulk');
       req.flush(
@@ -131,7 +131,7 @@ describe('AttendanceService', () => {
     it('should not submit if no subject or students loaded', () => {
       service.resetModule();
       let result = true;
-      service.submit().subscribe(r => { result = r; });
+      service.submit(null).subscribe(r => { result = r; });
       expect(result).toBe(false);
     });
   });
