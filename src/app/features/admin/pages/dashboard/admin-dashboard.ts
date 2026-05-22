@@ -7,6 +7,7 @@ import { AdminDashboardService } from '../../services/admin-dashboard.service';
 import { Loader } from '../../../../shared/components/loader/loader';
 import { Button } from '../../../../shared/components/button/button';
 import { ToastService } from '../../../../shared/services/toast.service';
+import { Table, TableColumn } from '../../../../shared/components/table/table';
 
 interface DashboardCard {
   title: string;
@@ -19,7 +20,7 @@ interface DashboardCard {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, Loader, Button],
+  imports: [CommonModule, Loader, Button, Table],
   template: `
     <section class="admin-dashboard">
       <header class="dashboard-header">
@@ -97,6 +98,37 @@ interface DashboardCard {
               </div>
             </div>
           </div>
+        </section>
+
+        <section class="critical-subjects-panel">
+          <header class="panel-header">
+            <span class="eyebrow">Seguimiento de Riesgo</span>
+            <h2>Materias Críticas (Últimas 5)</h2>
+            <p>Asignaturas con mayor índice de reprobación en la última gestión.</p>
+          </header>
+
+          <app-table 
+            [columns]="criticalColumns()" 
+            [data]="summary()?.criticalSubjects ?? []">
+            
+            <ng-template #customRow let-row let-i="index">
+              <tr class="table-row">
+                <td class="code-cell"><code>{{ row.code }}</code></td>
+                <td class="name-cell"><strong>{{ row.name }}</strong></td>
+                <td>{{ row.teacherName }}</td>
+                <td class="rate-cell">
+                  <span class="rate-badge" [class.rate-badge--high]="row.failureRate >= 40">
+                    {{ row.failureRate }}%
+                  </span>
+                </td>
+                <td>
+                  <span class="status-indicator" [class]="'status-indicator--' + row.status.toLowerCase()">
+                    {{ row.status }}
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+          </app-table>
         </section>
       }
     </section>
@@ -285,6 +317,7 @@ interface DashboardCard {
       background: linear-gradient(135deg, #ffffff, #f5fbff);
       border: 1px solid rgba(195, 198, 209, 0.35);
       box-shadow: 0 20px 50px rgba(0, 33, 49, 0.04);
+      margin-bottom: 1.5rem;
     }
 
     @media (min-width: 900px) {
@@ -334,6 +367,79 @@ interface DashboardCard {
     .bar-fill--approved { background: #16a34a; }
     .bar-fill--failed { background: #dc2626; }
 
+    .critical-subjects-panel {
+      padding: 1.5rem;
+      border-radius: 1.25rem;
+      background: #ffffff;
+      border: 1px solid rgba(195, 198, 209, 0.35);
+      box-shadow: 0 20px 50px rgba(0, 33, 49, 0.04);
+    }
+
+    .panel-header {
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-header h2 {
+      font-size: 1.4rem;
+      color: var(--primary-color, #002131);
+      margin-bottom: 0.25rem;
+    }
+
+    .table-row {
+      transition: background 0.2s ease;
+    }
+
+    .table-row:hover {
+      background: rgba(198, 231, 255, 0.15);
+    }
+
+    .code-cell code {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 700;
+      color: #00658f;
+      background: rgba(0, 101, 143, 0.06);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+    }
+
+    .name-cell strong {
+      color: var(--primary-color, #002131);
+    }
+
+    .rate-badge {
+      display: inline-block;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      background: rgba(195, 198, 209, 0.25);
+      color: var(--primary-color, #002131);
+    }
+
+    .rate-badge--high {
+      background: rgba(220, 38, 38, 0.08);
+      color: #dc2626;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .status-indicator--activa {
+      background: rgba(22, 163, 74, 0.08);
+      color: #16a34a;
+    }
+
+    .status-indicator--cerrada {
+      background: rgba(95, 99, 104, 0.08);
+      color: #5f6368;
+    }
+
     @media (max-width: 700px) {
       .admin-dashboard {
         padding: 1rem;
@@ -356,6 +462,14 @@ export class AdminDashboard implements OnInit {
   readonly summary = signal<AdminDashboardSummary | null>(null);
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly criticalColumns = computed<TableColumn[]>(() => [
+    { key: 'code', label: 'Código' },
+    { key: 'name', label: 'Materia' },
+    { key: 'teacherName', label: 'Docente' },
+    { key: 'failureRate', label: '% Reprobación' },
+    { key: 'status', label: 'Estado' },
+  ]);
 
   readonly dashboardCards = computed<DashboardCard[]>(() => {
     const summary = this.summary();
@@ -441,6 +555,9 @@ export class AdminDashboard implements OnInit {
   private extractErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       return error.error?.message ?? error.message ?? 'No se pudo cargar el dashboard gerencial.';
+    }
+    if (error instanceof Error) {
+      return error.message;
     }
 
     return 'No se pudo cargar el dashboard gerencial.';

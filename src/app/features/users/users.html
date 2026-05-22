@@ -132,9 +132,11 @@
               <td class="td-estado">
                 <div class="estado-wrap">
                   <label class="toggle-switch">
-                    <input type="checkbox" 
-                           [checked]="user.status === 'ACTIVE'" 
-                           (change)="toggleEstado(user)">
+                    <input
+                      type="checkbox" 
+                      [checked]="user.status === 'ACTIVE'" 
+                      (change)="toggleEstado(user)"
+                    >
                     <span class="toggle-track"></span>
                   </label>
                   <span class="estado-text">{{ user.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</span>

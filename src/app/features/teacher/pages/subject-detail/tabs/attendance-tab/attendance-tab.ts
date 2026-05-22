@@ -9,8 +9,6 @@ import { Button } from '../../../../../../shared/components/button/button';
 import { Input } from '../../../../../../shared/components/input/input';
 import { Loader } from '../../../../../../shared/components/loader/loader';
 import { Toast } from '../../../../../../shared/components/toast/toast';
-
-// 🚀 REGLA DE MARCELO CUMPLIDA: Usamos el componente central de tablas genéricas
 import { Table } from '../../../../../../shared/components/table/table';
 
 @Component({
@@ -23,7 +21,7 @@ import { Table } from '../../../../../../shared/components/table/table';
     Input, 
     Loader, 
     Toast,
-    Table // 👈 ¡Inyectamos tu componente Table modificado!
+    Table
   ],
   templateUrl: './attendance-tab.html',
   styleUrl: './attendance-tab.css'

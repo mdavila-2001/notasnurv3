@@ -1,3 +1,28 @@
+export interface CriticalSubject {
+  id: string;
+  code: string;
+  name: string;
+  teacherName: string;
+  failureRate: number;
+  status: 'CERRADA' | 'ACTIVA';
+}
+
+export interface CriticalSubjectBackend {
+  id?: string | number;
+  code?: string;
+  codigo?: string;
+  name?: string;
+  nombre?: string;
+  materia?: string;
+  teacherName?: string;
+  docente?: string;
+  failureRate?: number | string;
+  indiceReprobacion?: number | string;
+  tasaReprobacion?: number | string;
+  status?: string;
+  estado?: string;
+}
+
 export interface AdminDashboardSummary {
   totalStudents: number;
   activeSubjects: number;
@@ -6,6 +31,7 @@ export interface AdminDashboardSummary {
   approvedStudents: number;
   failedStudents: number;
   totalEvaluated: number;
+  criticalSubjects: CriticalSubject[];
   generatedAt?: string;
 }
 
@@ -36,6 +62,8 @@ export interface AdminDashboardBackendResponse {
   totalEvaluated?: DashboardMetricValue;
   evaluatedStudents?: DashboardMetricValue;
   totalCalificados?: DashboardMetricValue;
+  criticalSubjects?: CriticalSubjectBackend[] | null;
+  materiasCriticas?: CriticalSubjectBackend[] | null;
   generatedAt?: string;
 }
 
@@ -47,3 +75,4 @@ export interface AdminDashboardApiEnvelope {
 
 export type AdminDashboardApiResponse = AdminDashboardBackendResponse | AdminDashboardApiEnvelope;
 export type DashboardMetricValue = number | string | null | undefined;
+
