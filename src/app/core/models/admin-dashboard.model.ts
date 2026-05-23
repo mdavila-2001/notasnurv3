@@ -1,78 +1,30 @@
-export interface CriticalSubject {
-  id: string;
-  code: string;
-  name: string;
-  teacherName: string;
-  failureRate: number;
-  status: 'CERRADA' | 'ACTIVA';
+export interface ManagementSummary {
+  id: number;
+  year: number;
+  status: ManagementStatus;
+  studentCount: number;
+  passRate: number;
 }
 
-export interface CriticalSubjectBackend {
-  id?: string | number;
-  code?: string;
-  codigo?: string;
-  name?: string;
-  nombre?: string;
-  materia?: string;
-  teacherName?: string;
-  docente?: string;
-  failureRate?: number | string;
-  indiceReprobacion?: number | string;
-  tasaReprobacion?: number | string;
-  status?: string;
-  estado?: string;
-}
+export type ManagementStatus = 'ACTIVE' | 'CLOSED' | 'CONFIGURING' | string;
 
-export interface AdminDashboardSummary {
+export interface DashboardAdminBackendResponse {
   totalStudents: number;
-  activeSubjects: number;
-  approvedRate: number;
-  failedRate: number;
-  approvedStudents: number;
-  failedStudents: number;
-  totalEvaluated: number;
-  criticalSubjects: CriticalSubject[];
-  generatedAt?: string;
+  totalSubjectsWithoutTeacher: number;
+  totalOpenActas: number;
+  globalPassRate: number;
+  studentsAtRiskCount: number;
+  managements: ManagementSummary[];
 }
 
-export interface AdminDashboardBackendResponse {
-  totalStudents?: DashboardMetricValue;
-  totalEstudiantes?: DashboardMetricValue;
-  studentsTotal?: DashboardMetricValue;
-  activeSubjects?: DashboardMetricValue;
-  materiasActivas?: DashboardMetricValue;
-  activeCourses?: DashboardMetricValue;
-  approvedRate?: DashboardMetricValue;
-  approvalRate?: DashboardMetricValue;
-  passRate?: DashboardMetricValue;
-  approvedPercentage?: DashboardMetricValue;
-  indiceAprobados?: DashboardMetricValue;
-  failedRate?: DashboardMetricValue;
-  failureRate?: DashboardMetricValue;
-  reprobationRate?: DashboardMetricValue;
-  failedPercentage?: DashboardMetricValue;
-  indiceReprobados?: DashboardMetricValue;
-  approvedStudents?: DashboardMetricValue;
-  passedStudents?: DashboardMetricValue;
-  studentsApproved?: DashboardMetricValue;
-  aprobados?: DashboardMetricValue;
-  failedStudents?: DashboardMetricValue;
-  reprobados?: DashboardMetricValue;
-  studentsFailed?: DashboardMetricValue;
-  totalEvaluated?: DashboardMetricValue;
-  evaluatedStudents?: DashboardMetricValue;
-  totalCalificados?: DashboardMetricValue;
-  criticalSubjects?: CriticalSubjectBackend[] | null;
-  materiasCriticas?: CriticalSubjectBackend[] | null;
-  generatedAt?: string;
+export interface AdminDashboardSummary extends DashboardAdminBackendResponse {
+  globalFailRate: number;
 }
 
 export interface AdminDashboardApiEnvelope {
-  success?: boolean;
-  message?: string;
-  data?: AdminDashboardBackendResponse | null;
+  success: boolean;
+  message: string;
+  data: DashboardAdminBackendResponse | null;
 }
 
-export type AdminDashboardApiResponse = AdminDashboardBackendResponse | AdminDashboardApiEnvelope;
-export type DashboardMetricValue = number | string | null | undefined;
-
+export type AdminDashboardApiResponse = DashboardAdminBackendResponse | AdminDashboardApiEnvelope;
