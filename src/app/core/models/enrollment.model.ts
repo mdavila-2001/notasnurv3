@@ -24,6 +24,24 @@ export interface StudentResponseDTO {
   academicStatus?: string;
 }
 
+export interface StudentEnrolledResponse {
+  studentId?: string;
+  id?: string;
+  enrollmentId?: string;
+  fullName?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  ci?: string;
+  email?: string;
+  degreeName?: string;
+  degreeNameDto?: string;
+  photoUrl?: string;
+  avatarUrl?: string;
+  profilePicture?: string;
+  imageUrl?: string;
+}
+
 
 export interface MySubjectResponseDTO {
   subjectCode: string;

@@ -2,20 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
+import { StudentEnrolledResponse } from '../../../core/models/enrollment.model';
 
-export interface StudentEnrolledResponse {
-  studentId?: string;
-  enrollmentId?: string;
-  id?: string;
-  fullName?: string;
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  ci?: string;
-  email?: string;
-  degreeName?: string;
-  degreeNameDto?: string;
-}
+export type { StudentEnrolledResponse } from '../../../core/models/enrollment.model';
 
 export interface EnrollmentResponse {
   id: string;

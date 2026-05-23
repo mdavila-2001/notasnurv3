@@ -85,20 +85,20 @@
                 </tr>
               </thead>
               <tbody>
-                @for (student of enrolledStudents(); track student.studentId) {
+                @for (student of enrolledStudents(); track student.id ?? student.studentId) {
                   <tr>
                     <td>{{ student.fullName }}</td>
                     <td>{{ student.ci }}</td>
                     <td>{{ student.email }}</td>
                     <td>{{ student.degreeName || '—' }}</td>
                     <td>
-                      <button
-                        class="btn-withdraw"
+                      <app-button
+                        variant="tertiary"
                         title="Dar de baja"
-                        (click)="withdrawStudent(student.id, student.fullName)">
+                        (clicked)="openWithdrawModal(student.id, student.fullName)">
                         <span class="material-symbols-outlined">person_remove</span>
                         Dar de baja
-                      </button>
+                      </app-button>
                     </td>
                   </tr>
                 }
@@ -120,13 +120,15 @@
 
   <div class="enroll-form">
     <div class="form-group">
-      <label class="form-label">ID de Expediente Académico (userDegreeId)</label>
-      <input
+      <app-input
         type="number"
-        class="form-input"
-        [(ngModel)]="userDegreeId"
+        label="ID de Expediente Académico (userDegreeId)"
         placeholder="Ej: 1"
-        min="1" />
+        [value]="userDegreeId() ?? ''"
+        [min]="1"
+        [required]="true"
+        [showErrors]="true"
+        (valueChange)="onUserDegreeIdChange($event)" />
       <p class="form-hint">
         <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
         El ID del expediente académico del estudiante en esta carrera.
@@ -146,6 +148,29 @@
     <app-button variant="primary" (clicked)="confirmEnroll()">
       <span class="material-symbols-outlined btn-icon-left">how_to_reg</span>
       Confirmar Matrícula
+    </app-button>
+  </div>
+</app-modal>
+
+<!-- Modal: Confirmar baja -->
+<app-modal
+  [isOpen]="isWithdrawModalOpen()"
+  title="Confirmar baja"
+  (closed)="closeWithdrawModal()">
+
+  <p class="form-hint">
+    Vas a dar de baja a <strong>{{ pendingWithdrawStudentName() }}</strong> de esta materia.
+    Esta acción eliminará la matrícula asociada.
+  </p>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" [disabled]="isWithdrawing()" (clicked)="closeWithdrawModal()">Cancelar</app-button>
+    <app-button variant="tertiary" [disabled]="isWithdrawing()" (clicked)="confirmWithdraw()">
+      @if (isWithdrawing()) {
+        Procesando...
+      } @else {
+        Confirmar baja
+      }
     </app-button>
   </div>
 </app-modal>

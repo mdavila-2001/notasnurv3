@@ -1,24 +1,26 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, finalize, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
+import { StudentOperational } from '../../../core/models/operational.model';
 import {
   AttendanceStatus,
   AttendanceRowUi,
-  AttendanceBulkRequest
+  AttendanceBulkRequest,
+  AttendanceAbsenceRecord,
 } from '../../../core/models/attendance';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AttendanceService {
   private readonly api = inject(ApiService);
   private readonly operationalService = inject(SubjectOperationalService);
 
   private readonly _attendanceDraft = signal<AttendanceRowUi[]>([]);
+  private readonly _absencesCache = signal<Map<string, Map<string, number>>>(new Map());
   private readonly _date = signal<string>(this.todayISO());
   private readonly _isSaving = signal(false);
+  private readonly _isDraftHydrating = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly _successMessage = signal<string | null>(null);
 
@@ -26,9 +28,28 @@ export class AttendanceService {
   readonly attendanceDraft = computed(() => this._attendanceDraft());
   readonly date = computed(() => this._date());
   readonly isSaving = computed(() => this._isSaving());
+  readonly isDraftHydrating = computed(() => this._isDraftHydrating());
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
-  readonly todayDate = computed(() => this.todayISO());
+
+  getSubjectAbsences(subjectId: string): Observable<Map<string, number>> {
+    const cachedAbsences = this._absencesCache().get(subjectId);
+
+    if (cachedAbsences) {
+      return of(cachedAbsences);
+    }
+
+    return this.api.get<AttendanceAbsenceRecord[]>(`/attendance/subject/${subjectId}/absences`).pipe(
+      map((response) => this.normalizeAbsenceRecords(response.data ?? [])),
+      tap((absencesMap) => {
+        this._absencesCache.update((currentCache) => {
+          const nextCache = new Map(currentCache);
+          nextCache.set(subjectId, absencesMap);
+          return nextCache;
+        });
+      }),
+    );
+  }
 
   // Selector derivado para las estadísticas del Header de la UI
   readonly recordCounts = computed(() => {
@@ -36,52 +57,121 @@ export class AttendanceService {
     return {
       present: records.filter(r => r.status === 'PRESENT').length,
       absent: records.filter(r => r.status === 'ABSENT').length,
-      late: records.filter(r => r.status === 'LATE').length, // Ajustado a LATE si tu modelo lo requiere
+      late: records.filter(r => r.status === 'JUSTIFIED').length,
       total: records.length,
     };
   });
 
   readonly isReadyToSubmit = computed(() =>
-    this._attendanceDraft().length > 0
+    this._attendanceDraft().length > 0 && !this._isSaving() && !this._isDraftHydrating()
   );
 
-  initializeDraft(): void {
+  initializeDraft(students: StudentOperational[] = this.operationalService.students(), subjectId: string | null = this.operationalService.subject()?.id?.toString() ?? null): void {
     this._error.set(null);
     this._successMessage.set(null);
-    
-    const students = this.operationalService.students();
+
+    if (!students.length) {
+      this._attendanceDraft.set([]);
+      this._isDraftHydrating.set(false);
+      return;
+    }
+
+    this._isDraftHydrating.set(true);
 
     const initialDraft: AttendanceRowUi[] = students.map(student => ({
-      enrollmentId: student.enrollmentId || student.studentId,
+      id: this.resolveEnrollmentId(student),
+      enrollmentId: this.resolveEnrollmentId(student),
       studentName: student.fullName,
       ci: student.ci ?? 'N/A',
       degreeName: student.degreeName,
-      status: 'PRESENT'
+      photoUrl: student.photoUrl,
+      absencesCount: 0,
+      totalAbsences: 0,
+      status: 'PRESENT',
     }));
 
     this._attendanceDraft.set(initialDraft);
+
+    if (!subjectId) {
+      this._isDraftHydrating.set(false);
+      return;
+    }
+
+    this.getSubjectAbsences(subjectId).subscribe({
+      next: (absencesMap) => {
+        this._attendanceDraft.update(currentDraft =>
+          currentDraft.map((row) => ({
+            ...row,
+            totalAbsences: absencesMap.get(row.enrollmentId) ?? row.totalAbsences,
+            absencesCount: absencesMap.get(row.enrollmentId) ?? row.absencesCount,
+          })),
+        );
+        this.loadAttendanceForDate(subjectId, this._date(), students, true);
+      },
+      error: () => {
+        this.loadAttendanceForDate(subjectId, this._date(), students, true);
+      },
+    });
   }
 
   setDate(date: string): void {
     this._date.set(date);
     this.clearFeedback();
+    
+    // Al cambiar la fecha, intentar cargar las asistencias registradas para ese día
+    const subjectId = this.operationalService.currentSubjectId();
+    const students = this.operationalService.students();
+    
+    if (subjectId && students.length > 0) {
+      this.loadAttendanceForDate(subjectId, date, students);
+    }
   }
 
-  /**
-   * Actualiza el estado de un alumno específico en el borrador reactivo.
-   */
+  private loadAttendanceForDate(subjectId: string, date: string, _students: StudentOperational[], fromInit = false): void {
+    if (!fromInit) {
+      this._isDraftHydrating.set(true);
+    }
+    
+    this.api.get<any>(`/attendance/subject/${subjectId}`, { date }).pipe(
+      catchError((err) => {
+        return of(null);
+      })
+    ).subscribe((response) => {
+      // El backend devuelve ApiResponse<List<AttendanceRecordResponse>>
+      // Cada AttendanceRecordResponse tiene: enrollmentId (UUID), studentId (UUID), fullName, status, date
+      const records: any[] = Array.isArray(response?.data) ? response.data : [];
+      
+      this._attendanceDraft.update(currentDraft => {
+        return currentDraft.map(row => {
+          // Comparar por enrollmentId o studentId del backend
+          const existingRecord = records.find(r => {
+            const backendEnrollmentId = String(r.enrollmentId ?? '').trim();
+            const backendStudentId = String(r.studentId ?? '').trim();
+            const draftEnrollmentId = String(row.enrollmentId ?? '').trim();
+            return backendEnrollmentId === draftEnrollmentId || backendStudentId === draftEnrollmentId;
+          });
+          
+          return {
+            ...row,
+            status: existingRecord ? existingRecord.status : (fromInit ? row.status : 'PRESENT')
+          };
+        });
+      });
+      this._isDraftHydrating.set(false);
+    });
+  }
+
   updateStudentStatus(enrollmentId: string, status: AttendanceStatus): void {
+    const normalizedEnrollmentId = enrollmentId.trim();
+
     this._attendanceDraft.update(currentDraft =>
-      currentDraft.map(row => 
-        row.enrollmentId === enrollmentId ? { ...row, status } : row
+      currentDraft.map(row =>
+        row.enrollmentId === normalizedEnrollmentId ? { ...row, status } : row
       )
     );
     this.clearFeedback();
   }
 
-  /**
-   * Acción en lote: Marca a todos los alumnos con un estado específico.
-   */
   markAllAs(status: AttendanceStatus): void {
     this._attendanceDraft.update(currentDraft =>
       currentDraft.map(row => ({ ...row, status }))
@@ -89,59 +179,38 @@ export class AttendanceService {
     this.clearFeedback();
   }
 
-  // --- Comunicación con el Backend ---
-
-  submit(subjectIdFromRoute: string | null): Observable<boolean> {
-    const selectedDate = this._date();
-    
-    if (!this.isReadyToSubmit() || !subjectIdFromRoute) {
-      this._error.set('No hay datos para guardar o falta el identificador de la materia.');
-      return of(false);
+  submit(subjectId: string): Observable<boolean> {
+    if (!subjectId || Number.isNaN(Number(subjectId))) {
+      return throwError(() => new Error('No se pudo determinar la materia. Intentá recargar la página.'));
     }
 
-    // Validate that the selected date is not in the future
-    if (this.isFutureDate(selectedDate)) {
-      this._error.set('La fecha seleccionada no puede ser futura. Por favor, seleccione una fecha válida.');
-      return of(false);
+    const draft = this._attendanceDraft();
+    if (draft.length === 0 || this._isSaving() || this._isDraftHydrating()) {
+      return throwError(() => new Error('No hay datos para guardar. Esperá a que cargue la lista de estudiantes.'));
     }
 
     this._isSaving.set(true);
     this.clearFeedback();
 
     const request: AttendanceBulkRequest = {
-      subjectId: parseInt(String(subjectIdFromRoute), 10),
-      date: selectedDate,
-      records: this._attendanceDraft().map(row => ({
+      subjectId: Number(subjectId),
+      date: this._date(),
+      records: draft.map(row => ({
         enrollmentId: row.enrollmentId,
         status: row.status,
       })),
     };
-
+    
     return this.api.post<void>('/attendance/bulk', request).pipe(
-      tap(() => {
-        this._isSaving.set(false);
-        this._successMessage.set('La asistencia se guardó correctamente.');
-      }),
       map(() => true),
       catchError(err => {
+        const message = err?.error?.message ?? err?.message ?? 'Ocurrió un error al guardar la asistencia.';
+        return throwError(() => new Error(message));
+      }),
+      finalize(() => {
         this._isSaving.set(false);
-        this._error.set(err.error?.message ?? 'Ocurrió un error al guardar la asistencia.');
-        return of(false);
       })
     );
-  }
-
-  /**
-   * Verifica si una fecha en formato YYYY-MM-DD es futura (después de hoy).
-   */
-  private isFutureDate(dateString: string): boolean {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const selectedDate = new Date(year, month - 1, day);
-    const today = new Date();
-    // Normalize both dates to midnight for fair comparison
-    today.setHours(0, 0, 0, 0);
-    selectedDate.setHours(0, 0, 0, 0);
-    return selectedDate > today;
   }
 
   clearFeedback(): void {
@@ -153,10 +222,40 @@ export class AttendanceService {
     this._attendanceDraft.set([]);
     this._date.set(this.todayISO());
     this._isSaving.set(false);
+    this._isDraftHydrating.set(false);
     this.clearFeedback();
   }
 
-  // Helper interno
+  private normalizeAbsenceRecords(records: any): Map<string, number> {
+    const absencesMap = new Map<string, number>();
+    
+    // El backend devuelve AttendanceAbsencesResponse: { students: [...], absenceLimit: N }
+    // Cada StudentAbsence tiene: enrollmentId, studentId, fullName, absencesCount
+    const actualRecords: any[] = Array.isArray(records)
+      ? records
+      : (records?.students ?? records?.records ?? []);
+
+    for (const record of actualRecords) {
+      const enrollmentKey = record.enrollmentId === null || record.enrollmentId === undefined
+        ? ''
+        : String(record.enrollmentId).trim();
+
+      if (!enrollmentKey) {
+        continue;
+      }
+
+      // El campo en StudentAbsence es 'absencesCount'
+      const absences = record.absencesCount ?? record.absences ?? record.totalAbsences ?? 0;
+      absencesMap.set(enrollmentKey, Math.max(0, absences));
+    }
+
+    return absencesMap;
+  }
+
+  private resolveEnrollmentId(student: StudentOperational): string {
+    return student.enrollmentId?.trim() || student.studentId || '';
+  }
+
   private todayISO(): string {
     const d = new Date();
     const month = String(d.getMonth() + 1).padStart(2, '0');

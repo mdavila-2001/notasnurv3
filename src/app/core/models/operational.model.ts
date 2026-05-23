@@ -5,6 +5,7 @@ export interface StudentOperational {
     ci?: string;
     email?: string;
     degreeName?: string;
+    photoUrl?: string;
 }
 
 export interface EvaluationComponent {

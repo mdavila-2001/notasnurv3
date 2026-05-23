@@ -1,27 +1,37 @@
-import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   ComponentRequest,
   ComponentResponse,
   ComponentUpdateRequest,
   EvaluationPlanService,
 } from '../../../../services/evaluation-plan.service';
-import { Button } from '../../../../../../shared/components/button/button';
 import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 import { ToastService } from '../../../../../../shared/services/toast.service';
+import { Button } from '../../../../../../shared/components/button/button';
+import { Input } from '../../../../../../shared/components/input/input';
+import { Modal } from '../../../../../../shared/components/modal/modal';
 
 @Component({
   selector: 'app-evaluation-plan-tab',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button],
+  imports: [CommonModule, Button, Input, Modal],
   templateUrl: './evaluation-plan-tab.html',
   styleUrl: './evaluation-plan-tab.css',
 })
 export class EvaluationPlanTab {
-  readonly service = inject(EvaluationPlanService);
+  private readonly service = inject(EvaluationPlanService);
   private readonly operationalService = inject(SubjectOperationalService);
   private readonly toast = inject(ToastService);
+
+  readonly hasPlan = computed(() => this.service.hasPlan());
+  readonly isLoading = computed(() => this.service.isLoading());
+  readonly errorMessage = computed(() => this.service.error());
+  readonly components = computed(() => this.service.components());
+  readonly componentsTotalWeight = computed(() => this.service.componentsTotalWeight());
+  readonly componentsMissingWeight = computed(() => this.service.componentsMissingWeight());
+  readonly componentsExcessWeight = computed(() => this.service.componentsExcessWeight());
+  readonly isComponentsWeightValid = computed(() => this.service.isComponentsWeightValid());
 
   readonly newName = signal('');
   readonly newWeight = signal<number | null>(null);
@@ -32,57 +42,37 @@ export class EvaluationPlanTab {
   readonly editWeight = signal<number | null>(null);
   readonly editDescription = signal('');
 
-  /** Convierte el valor del input a number en la frontera (sin Number() disperso) */
-  setNewWeight(value: string | number | null) {
-    if (value === null || value === '') {
-      this.newWeight.set(null);
-      return;
-    }
-    const parsed = typeof value === 'number' ? value : parseFloat(value);
-    this.newWeight.set(isNaN(parsed) ? null : parsed);
-  }
-
-  setEditWeight(value: string | number | null) {
-    if (value === null || value === '') {
-      this.editWeight.set(null);
-      return;
-    }
-    const parsed = typeof value === 'number' ? value : parseFloat(value);
-    this.editWeight.set(isNaN(parsed) ? null : parsed);
-  }
+  readonly componentToDelete = signal<ComponentResponse | null>(null);
+  readonly deleteModalOpen = computed(() => this.componentToDelete() !== null);
 
   readonly currentSubjectId = computed(
     () => this.operationalService.subject()?.id?.toString() ?? null,
   );
 
   readonly selectedEditingComponent = computed(
-    () =>
-      this.service.components().find((component) => component.id === this.editingComponentId()) ??
-      null,
+    () => this.components().find((component) => component.id === this.editingComponentId()) ?? null,
   );
 
   readonly projectedNewTotalWeight = computed(
-    () => this.service.componentsTotalWeight() + (this.newWeight() ?? 0),
+    () => this.componentsTotalWeight() + (this.newWeight() ?? 0),
   );
 
   readonly projectedEditTotalWeight = computed(() => {
     const editingComponent = this.selectedEditingComponent();
 
     if (!editingComponent) {
-      return this.service.componentsTotalWeight();
+      return this.componentsTotalWeight();
     }
 
-    return (
-      this.service.componentsTotalWeight() - editingComponent.weight + (this.editWeight() ?? 0)
-    );
+    return this.componentsTotalWeight() - editingComponent.weight + (this.editWeight() ?? 0);
   });
 
   readonly isAddComponentDisabled = computed(() => {
     const weight = this.newWeight();
-    const currentTotal = this.service.componentsTotalWeight();
+    const currentTotal = this.componentsTotalWeight();
 
     return (
-      currentTotal >= 100 || // Ya se alcanzó el 100%, bloquear completamente
+      currentTotal >= 100 ||
       !this.newName().trim() ||
       weight === null ||
       weight <= 0 ||
@@ -102,6 +92,54 @@ export class EvaluationPlanTab {
       this.projectedEditTotalWeight() > 100
     );
   });
+
+  clearError() {
+    this.service.clearError();
+  }
+
+  setNewName(value: string | number) {
+    if (typeof value === 'string') {
+      this.newName.set(value);
+    }
+  }
+
+  setNewWeight(value: string | number | null) {
+    if (value === null || value === '') {
+      this.newWeight.set(null);
+      return;
+    }
+
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    this.newWeight.set(Number.isNaN(parsed) ? null : parsed);
+  }
+
+  setNewDescription(value: string | number) {
+    if (typeof value === 'string') {
+      this.newDescription.set(value);
+    }
+  }
+
+  setEditName(value: string | number) {
+    if (typeof value === 'string') {
+      this.editName.set(value);
+    }
+  }
+
+  setEditWeight(value: string | number | null) {
+    if (value === null || value === '') {
+      this.editWeight.set(null);
+      return;
+    }
+
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    this.editWeight.set(Number.isNaN(parsed) ? null : parsed);
+  }
+
+  setEditDescription(value: string | number) {
+    if (typeof value === 'string') {
+      this.editDescription.set(value);
+    }
+  }
 
   handleCreate() {
     const subjectId = this.currentSubjectId();
@@ -181,17 +219,32 @@ export class EvaluationPlanTab {
     });
   }
 
-  handleDelete(component: ComponentResponse) {
-    const confirmed = confirm(`¿Eliminar el componente "${component.name}"?`);
+  requestDelete(component: ComponentResponse) {
+    this.componentToDelete.set(component);
+  }
 
-    if (!confirmed) {
+  cancelDelete() {
+    this.componentToDelete.set(null);
+  }
+
+  confirmDelete() {
+    const component = this.componentToDelete();
+
+    if (!component) {
       return;
     }
 
     this.service.deleteComponent(component.id).subscribe((deleted) => {
-      if (deleted) {
-        this.toast.success('Componente eliminado correctamente.', 'Componente eliminado');
+      if (!deleted) {
+        return;
       }
+
+      if (this.editingComponentId() === component.id) {
+        this.cancelEdit();
+      }
+
+      this.toast.success('Componente eliminado correctamente.', 'Componente eliminado');
+      this.cancelDelete();
     });
   }
 
@@ -202,7 +255,7 @@ export class EvaluationPlanTab {
       return;
     }
 
-    if (!this.service.isComponentsWeightValid()) {
+    if (!this.isComponentsWeightValid()) {
       this.toast.warning(
         'No puedes finalizar hasta que la suma de los componentes sea exactamente 100%.',
         'Configuración incompleta',

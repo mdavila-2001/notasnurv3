@@ -6,11 +6,16 @@
     </div>
   } @else {
     <header class="detail-header">
-      <div>
-        <h1>{{ subject()?.name }}</h1>
-        <p class="subject-meta">
-          {{ subject()?.code }} · {{ subject()?.semesterName }}
-        </p>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <app-button variant="tertiary" (clicked)="goBack()">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </app-button>
+        <div>
+          <h1>{{ subject()?.name }}</h1>
+          <p class="subject-meta">
+            {{ subject()?.code }} · {{ subject()?.semesterName }}
+          </p>
+        </div>
       </div>
     </header>
 
