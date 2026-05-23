@@ -1,0 +1,106 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Configuración</h1>
+    <p class="page-subtitle">Personalice su experiencia, gestione sus datos personales y configure la seguridad de su cuenta.</p>
+  </div>
+
+  <div class="settings-layout">
+    <!-- Sidebar de Pestañas Dinámicas -->
+    <div class="settings-sidebar">
+      @for (tab of tabs(); track tab.id) {
+        <button 
+          type="button" 
+          class="tab-btn" 
+          [class.active]="activeTab() === tab.id" 
+          (click)="setTab(tab.id)">
+          <span class="material-symbols-outlined tab-icon">{{ tab.icon }}</span>
+          <div class="tab-label-group">
+            <span class="tab-title">{{ tab.label }}</span>
+            <span class="tab-desc">{{ tab.desc }}</span>
+          </div>
+        </button>
+      }
+    </div>
+
+    <!-- Contenido Activo de Ajustes -->
+    <div class="settings-content">
+      <!-- PESTAÑA: PERFIL -->
+      @if (activeTab() === 'profile') {
+        <app-profile-view [profile]="profile()" [isLoading]="isProfileLoading()"></app-profile-view>
+      }
+
+      <!-- PESTAÑA: PREFERENCIAS -->
+      @if (activeTab() === 'preferences') {
+        <div class="tab-panel animated-panel">
+          <h2 class="panel-title">Preferencias del Sistema</h2>
+          <p class="panel-desc">Configure los ajustes visuales para adaptar la plataforma a su comodidad visual.</p>
+          
+          <div class="divider"></div>
+
+          <div class="preference-item">
+            <div class="preference-details">
+              <span class="material-symbols-outlined pref-icon">dark_mode</span>
+              <div class="pref-text">
+                <h4 class="pref-title">Modo Oscuro</h4>
+                <p class="pref-desc">Reduce la fatiga visual alternando a un fondo oscuro y tonos optimizados para entornos con poca luz.</p>
+              </div>
+            </div>
+            
+            <div class="pref-action">
+              <button 
+                type="button" 
+                class="switch-container" 
+                [class.switch-active]="isDarkMode()" 
+                (click)="toggleDarkMode()"
+                aria-label="Alternar modo oscuro">
+                <div class="switch-handle">
+                  <span class="material-symbols-outlined switch-icon">
+                    {{ isDarkMode() ? 'dark_mode' : 'light_mode' }}
+                  </span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="theme-preview-card" [class.dark-preview]="isDarkMode()">
+            <div class="preview-header">
+              <span class="preview-dot red"></span>
+              <span class="preview-dot yellow"></span>
+              <span class="preview-dot green"></span>
+              <span class="preview-title">Previsualización de Tema</span>
+            </div>
+            <div class="preview-body">
+              <h5 class="preview-h5">Dashboard de Notas</h5>
+              <div class="preview-skeleton-item text"></div>
+              <div class="preview-skeleton-item text short"></div>
+              <div class="preview-grid">
+                <div class="preview-skeleton-item card"></div>
+                <div class="preview-skeleton-item card"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- PESTAÑA: SEGURIDAD -->
+      @if (activeTab() === 'security') {
+        <app-security-settings></app-security-settings>
+      }
+
+      <!-- PESTAÑA: AJUSTES ACADÉMICOS (ADMIN ONLY) -->
+      @if (activeTab() === 'system-academic' && profile()?.role === 'ADMIN') {
+        <app-academic-settings></app-academic-settings>
+      }
+
+      <!-- PESTAÑA: AJUSTES ASISTENCIA (ADMIN ONLY) -->
+      @if (activeTab() === 'system-attendance' && profile()?.role === 'ADMIN') {
+        <app-attendance-settings></app-attendance-settings>
+      }
+
+      <!-- PESTAÑA: SUSCRIPCIONES / ALERTAS (STUDENT ONLY) -->
+      @if (activeTab() === 'subscriptions' && profile()?.role === 'STUDENT') {
+        <app-student-subscriptions></app-student-subscriptions>
+      }
+    </div>
+  </div>
+</div>

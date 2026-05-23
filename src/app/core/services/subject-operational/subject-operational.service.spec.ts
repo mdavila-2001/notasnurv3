@@ -12,6 +12,7 @@ describe('SubjectOperationalService', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        SubjectOperationalService,
       ],
     });
     service = TestBed.inject(SubjectOperationalService);

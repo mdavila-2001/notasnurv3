@@ -96,7 +96,6 @@
           <tr>
             <th class="th-identity">IDENTIDAD DEL USUARIO</th>
             <th class="th-contact">CONTACTO</th>
-            <th class="th-rol">ROL</th>
             <th class="th-estado">ESTADO</th>
             <th class="th-acciones">ACCIONES</th>
           </tr>
@@ -130,18 +129,14 @@
                 </div>
               </td>
 
-              <td class="td-rol">
-                <span class="badge badge-rol">
-                  {{ user.role }}
-                </span>
-              </td>
-
               <td class="td-estado">
                 <div class="estado-wrap">
                   <label class="toggle-switch">
-                    <input type="checkbox" 
-                           [checked]="user.status === 'ACTIVE'" 
-                           (change)="toggleEstado(user)">
+                    <input
+                      type="checkbox" 
+                      [checked]="user.status === 'ACTIVE'" 
+                      (change)="toggleEstado(user)"
+                    >
                     <span class="toggle-track"></span>
                   </label>
                   <span class="estado-text">{{ user.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</span>

@@ -26,7 +26,7 @@
 
   <app-management-form
     [management]="selectedManagement()"
-    [existingYears]="existingYears"
+    [existingYears]="existingYears()"
     (save)="onSave($event)"
     (cancel)="closeFormModal()">
   </app-management-form>

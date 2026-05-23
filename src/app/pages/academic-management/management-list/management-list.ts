@@ -1,8 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
 import {
-  ApiError,
   Management,
   ManagementRequest,
 } from '../../../core/models/academic-management.model';
@@ -10,6 +10,7 @@ import { Table, TableColumn } from '../../../shared/components/table/table';
 import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
 import { ManagementFormComponent } from '../management-form/management-form';
+import { ToastService } from '../../../shared/services/toast.service';
 
 interface ManagementTableRow {
   id: number;
@@ -31,6 +32,8 @@ const MANAGEMENT_COLUMNS: TableColumn[] = [
 })
 export class ManagementListComponent {
   private readonly academicManagementService = inject(AcademicManagementService);
+  private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly columns = MANAGEMENT_COLUMNS;
   readonly managements = signal<Management[]>([]);
@@ -43,33 +46,34 @@ export class ManagementListComponent {
   readonly isDeleteModalOpen = signal(false);
   readonly managementToDelete = signal<Management | null>(null);
 
+  readonly existingYears = computed(() =>
+    this.managements().map((item) => item.year)
+  );
+
   constructor() {
     this.refreshList();
   }
 
-  get existingYears() {
-    return this.managements().map((item) => item.year);
-  }
-
   refreshList() {
     this.isLoading.set(true);
-    this.academicManagementService.getManagements().subscribe({
-      next: (data) => {
-        this.managements.set(data);
-        this.tableRows.set(
-          data.map((item) => ({
-            id: item.id,
-            year: item.year,
-            raw: item,
-          }))
-        );
-        this.isLoading.set(false);
-      },
-      error: (error: ApiError) => {
-        this.isLoading.set(false);
-        this.showError(error, 'No se pudo cargar la lista de gestiones.');
-      },
-    });
+    this.academicManagementService.getManagements()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.managements.set(data);
+          this.tableRows.set(
+            data.map((item) => ({
+              id: item.id,
+              year: item.year,
+              raw: item,
+            }))
+          );
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.isLoading.set(false);
+        },
+      });
   }
 
   openNewModal() {
@@ -94,24 +98,18 @@ export class ManagementListComponent {
       ? this.academicManagementService.updateManagement(editing.id, payload)
       : this.academicManagementService.createManagement(payload);
 
-    action$.subscribe({
-      next: () => {
-        this.closeFormModal();
-        this.refreshList();
-        alert(editing ? 'Gestión actualizada correctamente.' : 'Gestión creada correctamente.');
-      },
-      error: (error: ApiError) => {
-        if (error.status === 409) {
-          alert('Ya existe una gestión con ese año.');
-          return;
-        }
-
-        this.showError(
-          error,
-          editing ? 'No se pudo actualizar la gestión.' : 'No se pudo crear la gestión.'
-        );
-      },
-    });
+    action$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.closeFormModal();
+          this.refreshList();
+          this.toast.success(editing ? 'Gestión actualizada correctamente.' : 'Gestión creada correctamente.');
+        },
+        error: () => {
+          // El interceptor global ya maneja la visualización del error con toastService
+        },
+      });
   }
 
   askDelete(row: ManagementTableRow) {
@@ -130,22 +128,17 @@ export class ManagementListComponent {
       return;
     }
 
-    this.academicManagementService.deleteManagement(selected.id).subscribe({
-      next: () => {
-        this.cancelDelete();
-        this.refreshList();
-        alert('Gestión eliminada correctamente.');
-      },
-      error: (error: ApiError) => {
-        this.cancelDelete();
-        this.showError(error, 'No se pudo eliminar la gestión.');
-      },
-    });
-  }
-
-  private showError(error: ApiError, fallback: string) {
-    const message = error?.message?.trim() || fallback;
-    alert(message);
-    console.error(error);
+    this.academicManagementService.deleteManagement(selected.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.cancelDelete();
+          this.refreshList();
+          this.toast.success('Gestión eliminada correctamente.');
+        },
+        error: () => {
+          this.cancelDelete();
+        },
+      });
   }
 }
