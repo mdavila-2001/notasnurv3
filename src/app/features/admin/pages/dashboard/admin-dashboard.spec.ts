@@ -14,31 +14,27 @@ describe('AdminDashboard', () => {
 
   const mockSummary: AdminDashboardSummary = {
     totalStudents: 1500,
-    activeSubjects: 45,
-    approvedRate: 88.5,
-    failedRate: 11.5,
-    approvedStudents: 1327,
-    failedStudents: 173,
-    totalEvaluated: 1500,
-    criticalSubjects: [
+    totalSubjectsWithoutTeacher: 5,
+    totalOpenActas: 10,
+    globalPassRate: 88.5,
+    globalFailRate: 11.5,
+    studentsAtRiskCount: 173,
+    managements: [
       {
-        id: '1',
-        code: 'MAT-101',
-        name: 'Álgebra Lineal',
-        teacherName: 'Carlos Mendoza',
-        failureRate: 45.5,
-        status: 'CERRADA',
+        id: 1,
+        year: 2026,
+        status: 'ACTIVE',
+        studentCount: 1500,
+        passRate: 88.5
       },
       {
-        id: '2',
-        code: 'INF-220',
-        name: 'Estructuras de Datos I',
-        teacherName: 'Martha Quiroga',
-        failureRate: 42.0,
-        status: 'ACTIVA',
+        id: 2,
+        year: 2025,
+        status: 'CLOSED',
+        studentCount: 1400,
+        passRate: 89.2
       }
-    ],
-    generatedAt: '2026-05-22T18:00:00'
+    ]
   };
 
   beforeEach(async () => {
@@ -78,24 +74,37 @@ describe('AdminDashboard', () => {
   it('should compute dashboard cards correctly based on summary', () => {
     fixture.detectChanges();
     const cards = component.dashboardCards();
-    expect(cards.length).toBe(4);
+    expect(cards.length).toBe(6);
     
     // Total Students Card
-    expect(cards[0].title).toBe('Total de estudiantes');
+    expect(cards[0].title).toBe('Total estudiantes');
     expect(cards[0].value).toBe('1.500'); // BO Locale formatted
-    expect(cards[0].accent).toBe('students');
+    expect(cards[0].variant).toBe('students');
 
-    // Active Subjects Card
-    expect(cards[1].title).toBe('Materias activas');
-    expect(cards[1].value).toBe('45');
+    // Subjects without Teacher Card
+    expect(cards[1].title).toBe('Materias sin docente');
+    expect(cards[1].value).toBe('5');
+    expect(cards[1].variant).toBe('subjects');
+
+    // Open Actas Card
+    expect(cards[2].title).toBe('Actas abiertas');
+    expect(cards[2].value).toBe('10');
+    expect(cards[2].variant).toBe('actas');
     
     // Approved Rate Card
-    expect(cards[2].title).toBe('Índice de aprobados');
-    expect(cards[2].value).toBe('88,5%'); // BO Locale formatting for floats
+    expect(cards[3].title).toBe('Índice aprobados');
+    expect(cards[3].value).toBe('88,5%'); // BO Locale formatting for floats
+    expect(cards[3].variant).toBe('approved');
 
     // Failed Rate Card
-    expect(cards[3].title).toBe('Índice de reprobados');
-    expect(cards[3].value).toBe('11,5%');
+    expect(cards[4].title).toBe('Índice reprobados');
+    expect(cards[4].value).toBe('11,5%');
+    expect(cards[4].variant).toBe('failed');
+
+    // Students at Risk Card
+    expect(cards[5].title).toBe('Estudiantes en riesgo');
+    expect(cards[5].value).toBe('173');
+    expect(cards[5].variant).toBe('risk');
   });
 
   it('should display error state when loading dashboard fails', () => {

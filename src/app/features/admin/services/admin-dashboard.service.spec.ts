@@ -5,7 +5,7 @@ import { AdminDashboardService } from './admin-dashboard.service';
 import { ApiService } from '../../../core/services/api.service';
 import { environment } from '../../../../environments/environment';
 import { describe, beforeEach, afterEach, it, expect } from 'vitest';
-import { AdminDashboardBackendResponse } from '../../../core/models/admin-dashboard.model';
+import { DashboardAdminBackendResponse, AdminDashboardApiEnvelope } from '../../../core/models/admin-dashboard.model';
 
 describe('AdminDashboardService', () => {
   let service: AdminDashboardService;
@@ -34,41 +34,35 @@ describe('AdminDashboardService', () => {
   });
 
   describe('getSummary', () => {
-    it('should fetch and normalize dashboard metrics with English property names', () => {
-      const mockBackendResponse: AdminDashboardBackendResponse = {
+    it('should fetch and normalize dashboard metrics with direct response', () => {
+      const mockBackendResponse: DashboardAdminBackendResponse = {
         totalStudents: 150,
-        activeSubjects: 12,
-        approvedStudents: 120,
-        failedStudents: 20,
-        totalEvaluated: 140,
-        approvedRate: 85.7,
-        failedRate: 14.3,
-        criticalSubjects: [
+        totalSubjectsWithoutTeacher: 5,
+        totalOpenActas: 12,
+        globalPassRate: 85.5,
+        studentsAtRiskCount: 22,
+        managements: [
           {
-            id: '10',
-            code: 'MAT-200',
-            name: 'Algebra',
-            teacherName: 'Juan Perez',
-            failureRate: 40.5,
-            status: 'ACTIVA'
+            id: 1,
+            year: 2026,
+            status: 'ACTIVE',
+            studentCount: 150,
+            passRate: 85.5
           }
-        ],
-        generatedAt: '2026-05-22T12:00:00'
+        ]
       };
 
       service.getSummary().subscribe((summary) => {
         expect(summary.totalStudents).toBe(150);
-        expect(summary.activeSubjects).toBe(12);
-        expect(summary.approvedStudents).toBe(120);
-        expect(summary.failedStudents).toBe(20);
-        expect(summary.totalEvaluated).toBe(140);
-        expect(summary.approvedRate).toBe(85.7);
-        expect(summary.failedRate).toBe(14.3);
-        expect(summary.criticalSubjects.length).toBe(1);
-        expect(summary.criticalSubjects[0].code).toBe('MAT-200');
-        expect(summary.criticalSubjects[0].failureRate).toBe(40.5);
-        expect(summary.criticalSubjects[0].status).toBe('ACTIVA');
-        expect(summary.generatedAt).toBe('2026-05-22T12:00:00');
+        expect(summary.totalSubjectsWithoutTeacher).toBe(5);
+        expect(summary.totalOpenActas).toBe(12);
+        expect(summary.globalPassRate).toBe(85.5);
+        expect(summary.globalFailRate).toBe(14.5); // 100 - 85.5
+        expect(summary.studentsAtRiskCount).toBe(22);
+        expect(summary.managements.length).toBe(1);
+        expect(summary.managements[0].year).toBe(2026);
+        expect(summary.managements[0].studentCount).toBe(150);
+        expect(summary.managements[0].passRate).toBe(85.5);
       });
 
       const req = httpMock.expectOne(`${baseUrl}/dashboard/admin`);
@@ -76,61 +70,62 @@ describe('AdminDashboardService', () => {
       req.flush(mockBackendResponse);
     });
 
-    it('should normalize backend response using Spanish field variants', () => {
-      const mockBackendResponse = {
-        totalEstudiantes: 200,
-        materiasActivas: 15,
-        aprobados: 160,
-        reprobados: 40,
-        totalCalificados: 200,
-        indiceAprobados: 0.8,
-        indiceReprobados: 0.2,
-        materiasCriticas: [
-          {
-            codigo: 'FIS-101',
-            materia: 'Fisica',
-            docente: 'Maria Lopez',
-            tasaReprobacion: 48,
-            estado: 'CERRADA'
-          }
-        ],
-        generatedAt: '2026-05-22T18:00:00'
+    it('should fetch and normalize dashboard metrics with API envelope response', () => {
+      const mockEnvelope: AdminDashboardApiEnvelope = {
+        success: true,
+        message: 'Loaded successfully',
+        data: {
+          totalStudents: 200,
+          totalSubjectsWithoutTeacher: 3,
+          totalOpenActas: 8,
+          globalPassRate: 90.0,
+          studentsAtRiskCount: 15,
+          managements: [
+            {
+              id: 2,
+              year: 2025,
+              status: 'CLOSED',
+              studentCount: 180,
+              passRate: 92.0
+            }
+          ]
+        }
       };
 
       service.getSummary().subscribe((summary) => {
         expect(summary.totalStudents).toBe(200);
-        expect(summary.activeSubjects).toBe(15);
-        expect(summary.approvedStudents).toBe(160);
-        expect(summary.failedStudents).toBe(40);
-        expect(summary.approvedRate).toBe(80); // converted from 0.8
-        expect(summary.failedRate).toBe(20); // converted from 0.2
-        expect(summary.criticalSubjects.length).toBe(1);
-        expect(summary.criticalSubjects[0].code).toBe('FIS-101');
-        expect(summary.criticalSubjects[0].name).toBe('Fisica');
-        expect(summary.criticalSubjects[0].teacherName).toBe('Maria Lopez');
-        expect(summary.criticalSubjects[0].failureRate).toBe(48);
-        expect(summary.criticalSubjects[0].status).toBe('CERRADA');
+        expect(summary.totalSubjectsWithoutTeacher).toBe(3);
+        expect(summary.totalOpenActas).toBe(8);
+        expect(summary.globalPassRate).toBe(90.0);
+        expect(summary.globalFailRate).toBe(10.0); // 100 - 90
+        expect(summary.studentsAtRiskCount).toBe(15);
+        expect(summary.managements.length).toBe(1);
+        expect(summary.managements[0].status).toBe('CLOSED');
       });
 
       const req = httpMock.expectOne(`${baseUrl}/dashboard/admin`);
-      req.flush(mockBackendResponse);
+      req.flush(mockEnvelope);
     });
 
-    it('should fallback to mock critical subjects if response has empty subjects list', () => {
-      const mockBackendResponse = {
-        totalStudents: 100,
-        activeSubjects: 5,
-        criticalSubjects: []
+    it('should fallback to empty dashboard values if response is null or empty', () => {
+      const mockEnvelope: AdminDashboardApiEnvelope = {
+        success: true,
+        message: 'Empty dashboard',
+        data: null
       };
 
       service.getSummary().subscribe((summary) => {
-        expect(summary.totalStudents).toBe(100);
-        expect(summary.criticalSubjects.length).toBe(5);
-        expect(summary.criticalSubjects[0].code).toBe('MAT-101'); // First mock
+        expect(summary.totalStudents).toBe(0);
+        expect(summary.totalSubjectsWithoutTeacher).toBe(0);
+        expect(summary.totalOpenActas).toBe(0);
+        expect(summary.globalPassRate).toBe(0);
+        expect(summary.globalFailRate).toBe(100); // 100 - 0
+        expect(summary.studentsAtRiskCount).toBe(0);
+        expect(summary.managements.length).toBe(0);
       });
 
       const req = httpMock.expectOne(`${baseUrl}/dashboard/admin`);
-      req.flush(mockBackendResponse);
+      req.flush(mockEnvelope);
     });
   });
 });

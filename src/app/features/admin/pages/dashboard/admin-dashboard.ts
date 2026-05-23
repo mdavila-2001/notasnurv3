@@ -828,6 +828,9 @@ export class AdminDashboard implements OnInit {
     if (error instanceof HttpErrorResponse) {
       return error.error?.message ?? error.message ?? 'No se pudo cargar el dashboard gerencial.';
     }
+    if (error instanceof Error) {
+      return error.message;
+    }
 
     return 'No se pudo cargar el dashboard gerencial.';
   }
