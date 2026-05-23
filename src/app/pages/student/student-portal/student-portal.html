@@ -1,0 +1,254 @@
+<div class="student-portal-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Portal Estudiantil</h1>
+    <p class="page-subtitle">Visualiza tus materias activas y tu historial académico (Kardex)</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loader
+        variant="spinner"
+        size="lg"
+        label="Cargando información académica..."
+        [showLabel]="true">
+      </app-loader>
+    </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <div class="error-container">
+      <div class="error-message">
+        <span class="material-symbols-outlined error-icon">error</span>
+        <div class="error-text">
+          <h3>Error al cargar los datos</h3>
+          <p>{{ error() }}</p>
+        </div>
+      </div>
+      <app-button variant="primary" type="button" (clicked)="refreshData()">
+        Reintentar
+      </app-button>
+    </div>
+  } @else {
+    <!-- Tabs Navigation -->
+    <div class="tabs-navigation">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="activeTab() === 'subjects'"
+        (click)="setTab('subjects')">
+        <span class="material-symbols-outlined tab-icon">book</span>
+        <span class="tab-label">Materias Activas</span>
+        <span class="tab-badge">{{ subjectsCount() }}</span>
+      </button>
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="activeTab() === 'kardex'"
+        (click)="setTab('kardex')">
+        <span class="material-symbols-outlined tab-icon">assignment</span>
+        <span class="tab-label">Kardex</span>
+      </button>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="portal-content">
+      <!-- SUBJECTS TAB -->
+      @if (activeTab() === 'subjects') {
+        <div class="tab-content animated-fade-in">
+          <div class="section-header">
+            <h2 class="section-title">Tus Materias Matriculadas</h2>
+            <p class="section-desc">
+              Listado de todas las materias en las que estás matriculado en el período
+              académico actual.
+            </p>
+          </div>
+
+          @if (mySubjects().length === 0) {
+            <div class="empty-state">
+              <span class="material-symbols-outlined empty-icon">school</span>
+              <h3 class="empty-title">No tienes materias matriculadas</h3>
+              <p class="empty-desc">
+                Comunícate con tu coordinador académico para matricularte en materias.
+              </p>
+            </div>
+          } @else {
+            <div class="subjects-grid">
+              @for (subject of mySubjects(); track subject.subjectCode) {
+                <div class="subject-card">
+                  <div class="card-header">
+                    <h3 class="subject-code">{{ subject.subjectCode }}</h3>
+                    @if (subject.modality) {
+                      <span class="modality-badge" [class]="subject.modality | lowercase">
+                        {{ getModalityLabel(subject.modality) }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="card-body">
+                    <div class="subject-item">
+                      <span class="label">Materia:</span>
+                      <span class="value">{{ subject.subjectName }}</span>
+                    </div>
+                    <div class="subject-item">
+                      <span class="label">Docente:</span>
+                      <span class="value">{{ subject.teacherName }}</span>
+                    </div>
+                    <div class="subject-item">
+                      <span class="label">Programa:</span>
+                      <span class="value">{{ subject.degreeName }}</span>
+                    </div>
+                    @if (subject.credits) {
+                      <div class="subject-item">
+                        <span class="label">Créditos:</span>
+                        <span class="value credit-badge">{{ subject.credits }}</span>
+                      </div>
+                    }
+                    @if (subject.semesterName) {
+                      <div class="subject-item">
+                        <span class="label">Semestre:</span>
+                        <span class="value">{{ subject.semesterName }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- KARDEX TAB -->
+      @if (activeTab() === 'kardex') {
+        <div class="tab-content animated-fade-in">
+          <div class="section-header">
+            <h2 class="section-title">Historial Académico (Kardex)</h2>
+            <p class="section-desc">
+              Registro completo de tu desempeño académico a lo largo de tu carrera.
+            </p>
+          </div>
+
+          @if (kardexHistory()) {
+            <!-- Student Info Card -->
+            <div class="kardex-info-card">
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Estudiante:</span>
+                  <span class="info-value">{{ kardexHistory()?.fullName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">C.I.:</span>
+                  <span class="info-value">{{ kardexHistory()?.ci }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Programa:</span>
+                  <span class="info-value">{{ kardexHistory()?.degreeName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Estado Académico:</span>
+                  <span class="info-value status-badge">
+                    {{ kardexHistory()?.academicStatus }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon credits">
+                  <span class="material-symbols-outlined">grade</span>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Créditos Totales</span>
+                  <span class="stat-value">{{ kardexStats().totalCredits }}</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon earned">
+                  <span class="material-symbols-outlined">done_all</span>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">Créditos Ganados</span>
+                  <span class="stat-value">{{ kardexStats().earnedCredits }}</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon gpa">
+                  <span class="material-symbols-outlined">assessment</span>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">GPA</span>
+                  <span class="stat-value">{{ kardexStats().gpa.toFixed(2) }}</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon summary">
+                  <span class="material-symbols-outlined">summarize</span>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-label">
+                    Aprobadas: {{ kardexStats().passedSubjects }} | Reprobadas:
+                    {{ kardexStats().failedSubjects }}
+                  </span>
+                  <span class="stat-value">
+                    {{ kardexStats().passedSubjects + kardexStats().failedSubjects }}
+                    total
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kardex Table (using app-table custom component) -->
+            @if (filteredKardexEntries().length === 0) {
+              <div class="empty-state">
+                <span class="material-symbols-outlined empty-icon">history</span>
+                <h3 class="empty-title">No hay registros en el kardex</h3>
+                <p class="empty-desc">
+                  Tu historial académico aparecerá aquí una vez completes materias.
+                </p>
+              </div>
+            } @else {
+              <app-table
+                [columns]="kardexTableColumns()"
+                [data]="kardexTableData()"
+                [showActions]="false">
+                <ng-template #customRow let-row>
+                  <tr>
+                    <td class="code">{{ row.subjectCode }}</td>
+                    <td class="name">
+                      <a 
+                        [routerLink]="['/student/subject', row.entry?.id || row.subjectCode]"
+                        class="subject-link"
+                        title="Ver detalles de la materia">
+                        {{ row.subjectName }}
+                      </a>
+                    </td>
+                    <td class="semester">{{ row.semester }}</td>
+                    <td class="grade">{{ row.grade }}</td>
+                    <td class="credits">{{ row.credits }}</td>
+                    <td class="status">
+                      <span [class]="'status-badge ' + getGradeStatusClass(row.status)">
+                        {{ getStatusLabel(row.status) }}
+                      </span>
+                    </td>
+                  </tr>
+                </ng-template>
+              </app-table>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Refresh Button -->
+    <div class="portal-footer">
+      <app-button variant="secondary" type="button" (clicked)="refreshData()">
+        <span class="material-symbols-outlined">refresh</span>
+        Actualizar
+      </app-button>
+    </div>
+  }
+</div>
