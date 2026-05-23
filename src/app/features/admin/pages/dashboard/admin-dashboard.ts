@@ -14,7 +14,7 @@ interface DashboardMetricCard {
   helper: string;
   status: string;
   icon: string;
-  variant: 'students' | 'subjects' | 'approved' | 'failed';
+  variant: 'students' | 'subjects' | 'actas' | 'approved' | 'failed' | 'risk';
 }
 
 @Component({
@@ -34,15 +34,6 @@ interface DashboardMetricCard {
         </div>
 
         <div class="hero-actions">
-          @if (summary()?.generatedAt) {
-            <div class="refresh-pill">
-              <span class="material-symbols-outlined">schedule</span>
-              <div>
-                <small>Actualizado</small>
-                <strong>{{ summary()?.generatedAt | date:'dd/MM/yyyy HH:mm' }}</strong>
-              </div>
-            </div>
-          }
 
           <app-button variant="secondary" (clicked)="loadDashboard()" [disabled]="isLoading()">
             @if (isLoading()) {
@@ -100,23 +91,23 @@ interface DashboardMetricCard {
             <div class="score-row">
               <div>
                 <small>Aprobación global</small>
-                <strong>{{ formatPercentage(summary()?.approvedRate ?? 0) }}</strong>
+                <strong>{{ formatPercentage(summary()?.globalPassRate ?? 0) }}</strong>
               </div>
               <div>
                 <small>Reprobación global</small>
-                <strong>{{ formatPercentage(summary()?.failedRate ?? 0) }}</strong>
+                <strong>{{ formatPercentage(summary()?.globalFailRate ?? 0) }}</strong>
               </div>
             </div>
 
             <div class="stacked-bar" aria-label="Distribución de aprobación y reprobación">
-              <span class="stacked-bar__approved" [style.width.%]="summary()?.approvedRate ?? 0"></span>
-              <span class="stacked-bar__failed" [style.width.%]="summary()?.failedRate ?? 0"></span>
+              <span class="stacked-bar__approved" [style.width.%]="summary()?.globalPassRate ?? 0"></span>
+              <span class="stacked-bar__failed" [style.width.%]="summary()?.globalFailRate ?? 0"></span>
             </div>
 
             <div class="legend-row">
               <span><i class="legend-dot legend-dot--approved"></i>Aprobados</span>
               <span><i class="legend-dot legend-dot--failed"></i>Reprobados</span>
-              <strong>{{ formatInteger(summary()?.totalEvaluated ?? 0) }} evaluados</strong>
+              <strong>{{ formatInteger(summary()?.totalStudents ?? 0) }} estudiantes</strong>
             </div>
           </article>
 
@@ -133,7 +124,7 @@ interface DashboardMetricCard {
               <div class="quality-item quality-item--approved">
                 <span class="material-symbols-outlined">trending_up</span>
                 <div>
-                  <strong>{{ buildStudentCountDescription(summary()?.approvedStudents ?? 0, 'aprobados') }}</strong>
+                  <strong>{{ formatPercentage(summary()?.globalPassRate ?? 0) }} de aprobación global</strong>
                   <small>Indicador positivo del periodo académico.</small>
                 </div>
               </div>
@@ -141,12 +132,49 @@ interface DashboardMetricCard {
               <div class="quality-item quality-item--failed">
                 <span class="material-symbols-outlined">priority_high</span>
                 <div>
-                  <strong>{{ buildStudentCountDescription(summary()?.failedStudents ?? 0, 'reprobados') }}</strong>
+                  <strong>{{ formatInteger(summary()?.studentsAtRiskCount ?? 0) }} estudiantes en riesgo</strong>
                   <small>Requiere análisis de acompañamiento docente.</small>
                 </div>
               </div>
             </div>
           </article>
+        </section>
+
+        <section class="management-panel" aria-label="Resumen por gestión">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Resumen por gestión</span>
+              <h2>Rendimiento anual</h2>
+            </div>
+            <span class="status-badge">DashboardController</span>
+          </div>
+
+          @if ((summary()?.managements?.length ?? 0) > 0) {
+            <div class="management-grid">
+              @for (management of summary()?.managements ?? []; track management.id) {
+                <article class="management-card">
+                  <div>
+                    <small>Gestión</small>
+                    <strong>{{ management.year }}</strong>
+                  </div>
+                  <div>
+                    <small>Estado</small>
+                    <span class="management-status">{{ translateManagementStatus(management.status) }}</span>
+                  </div>
+                  <div>
+                    <small>Estudiantes</small>
+                    <strong>{{ formatInteger(management.studentCount) }}</strong>
+                  </div>
+                  <div>
+                    <small>Aprobación</small>
+                    <strong>{{ formatPercentage(management.passRate) }}</strong>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="empty-managements">No hay gestiones disponibles para mostrar.</p>
+          }
         </section>
       }
     </section>
@@ -298,7 +326,7 @@ interface DashboardMetricCard {
 
     @media (min-width: 1180px) {
       .metrics-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
       }
     }
 
@@ -327,7 +355,10 @@ interface DashboardMetricCard {
     }
 
     .metric-card--students::before,
-    .metric-card--approved::before {
+    .metric-card--subjects::before,
+    .metric-card--actas::before,
+    .metric-card--approved::before,
+    .metric-card--risk::before {
       opacity: 1;
     }
 
@@ -417,7 +448,8 @@ interface DashboardMetricCard {
     }
 
     .performance-panel,
-    .quality-panel {
+    .quality-panel,
+    .management-panel {
       padding: clamp(1.25rem, 3vw, 2rem);
       border-radius: 1.35rem;
       background: #ffffff;
@@ -591,6 +623,57 @@ interface DashboardMetricCard {
       background: #fef3c7;
     }
 
+    .management-panel {
+      margin-top: 1.5rem;
+    }
+
+    .management-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      gap: 1rem;
+    }
+
+    .management-card {
+      display: grid;
+      gap: 1rem;
+      padding: 1.1rem;
+      border-radius: 1rem;
+      background: #f8fafc;
+      border: 1px solid rgba(0, 33, 49, 0.07);
+    }
+
+    .management-card small {
+      display: block;
+      color: #6f7782;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 0.25rem;
+    }
+
+    .management-card strong {
+      color: #061626;
+      font-size: 1.45rem;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+    }
+
+    .management-status {
+      display: inline-flex;
+      width: fit-content;
+      padding: 0.32rem 0.65rem;
+      border-radius: 999px;
+      background: #e7f7ff;
+      color: #00658f;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .empty-managements {
+      color: #6f7782;
+    }
+
     .quality-item strong {
       display: block;
       color: #061626;
@@ -629,9 +712,11 @@ export class AdminDashboard implements OnInit {
   readonly dashboardCards = computed<DashboardMetricCard[]>(() => {
     const summary = this.summary();
     const totalStudents = summary?.totalStudents ?? 0;
-    const activeSubjects = summary?.activeSubjects ?? 0;
-    const approvedRate = summary?.approvedRate ?? 0;
-    const failedRate = summary?.failedRate ?? 0;
+    const totalSubjectsWithoutTeacher = summary?.totalSubjectsWithoutTeacher ?? 0;
+    const totalOpenActas = summary?.totalOpenActas ?? 0;
+    const globalPassRate = summary?.globalPassRate ?? 0;
+    const globalFailRate = summary?.globalFailRate ?? 0;
+    const studentsAtRiskCount = summary?.studentsAtRiskCount ?? 0;
 
     return [
       {
@@ -643,28 +728,44 @@ export class AdminDashboard implements OnInit {
         variant: 'students',
       },
       {
-        title: 'Materias activas',
-        value: this.formatInteger(activeSubjects),
-        helper: 'Materias habilitadas en la gestión actual.',
-        status: 'Oferta vigente',
-        icon: 'menu_book',
+        title: 'Materias sin docente',
+        value: this.formatInteger(totalSubjectsWithoutTeacher),
+        helper: 'Materias pendientes de asignación docente.',
+        status: 'Gestión académica',
+        icon: 'person_off',
         variant: 'subjects',
       },
       {
+        title: 'Actas abiertas',
+        value: this.formatInteger(totalOpenActas),
+        helper: 'Actas pendientes de cierre académico.',
+        status: 'Seguimiento administrativo',
+        icon: 'fact_check',
+        variant: 'actas',
+      },
+      {
         title: 'Índice aprobados',
-        value: this.formatPercentage(approvedRate),
-        helper: this.buildStudentCountDescription(summary?.approvedStudents ?? 0, 'aprobados'),
+        value: this.formatPercentage(globalPassRate),
+        helper: 'Porcentaje global de aprobación institucional.',
         status: 'Rendimiento positivo',
         icon: 'trending_up',
         variant: 'approved',
       },
       {
         title: 'Índice reprobados',
-        value: this.formatPercentage(failedRate),
-        helper: this.buildStudentCountDescription(summary?.failedStudents ?? 0, 'reprobados'),
+        value: this.formatPercentage(globalFailRate),
+        helper: 'Calculado desde el índice global de aprobados.',
         status: 'Seguimiento requerido',
         icon: 'warning',
         variant: 'failed',
+      },
+      {
+        title: 'Estudiantes en riesgo',
+        value: this.formatInteger(studentsAtRiskCount),
+        helper: 'Estudiantes que requieren acompañamiento académico.',
+        status: 'Alerta temprana',
+        icon: 'priority_high',
+        variant: 'risk',
       },
     ];
   });
@@ -707,6 +808,16 @@ export class AdminDashboard implements OnInit {
     }
 
     return `${this.formatInteger(count)} estudiantes ${label}.`;
+  }
+
+  translateManagementStatus(status: string): string {
+    const statusLabels: Record<string, string> = {
+      ACTIVE: 'Activa',
+      CLOSED: 'Cerrada',
+      CONFIGURING: 'Configuración',
+    };
+
+    return statusLabels[status] ?? status;
   }
 
   private clampPercentage(value: number): number {
