@@ -15,6 +15,8 @@ export interface GradeResponse {
   score: number;
 }
 
+export type GradeAcademicStatus = 'APROBADO' | 'REPROBADO' | 'REPROBADO_POR_FALTAS' | 'PENDIENTE';
+
 export interface GradeRowUI {
   studentId: string;
   enrollmentId: string | null;
@@ -22,6 +24,7 @@ export interface GradeRowUI {
   ci?: string;
   degreeName?: string;
   scores: Record<number, number | null>;
+  academicStatus: GradeAcademicStatus;
 }
 
 export interface StudentGradeRowUI {

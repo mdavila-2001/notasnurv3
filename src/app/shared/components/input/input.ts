@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 
 export interface SelectOption {
   label: string;
-  value: any;
+  value: string | number;
 }
 
 @Component({

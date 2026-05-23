@@ -1,100 +1,151 @@
-<div class="attendance-tab">
-    <div class="tab-header">
-        <h2>Registro de Asistencia</h2>
-        @if (recordCounts(); as counts) {
-            <div class="counts-row">
-                <span class="count present">{{ counts.present }} Presentes</span>
-                <span class="count absent">{{ counts.absent }} Ausentes</span>
-                <span class="count late">{{ counts.late }} Retardos</span>
-                <span class="count total">{{ counts.total }} Total</span>
-            </div>
-        }
-    </div>
-
-    @if (successMessage(); as msg) {
-        <app-toast type="success" title="Éxito" [message]="msg"></app-toast>
-    }
-
-    @if (error(); as errorMessage) {
-        <app-toast type="error" title="Error" [message]="errorMessage"></app-toast>
-    }
-
-    <div class="date-picker-row">
-        <app-input
-            type="date"
-            label="Fecha"
-            [value]="date()"
-            (valueChange)="handleDateChange($event)"
-        ></app-input>
-    </div>
-
-    @if (isLoading()) {
-        <div class="loading-state">
-            <app-loader [showLabel]="true" label="Cargando información de la materia..." [centered]="true"></app-loader>
+<section class="attendance-shell">
+    <header class="attendance-hero">
+        <div class="attendance-hero__copy">
+            <span class="attendance-kicker">Presencial · Control diario</span>
+            <h2>Registro de asistencia</h2>
+            <p>
+                @if (subject(); as currentSubject) {
+                    {{ currentSubject.name }} · {{ currentSubject.code }}
+                } @else {
+                    Materia
+                }
+            </p>
         </div>
-    } @else if (attendanceDraft().length === 0) {
+
+        <div class="attendance-hero__meta">
+            <app-input
+                type="date"
+                label="Fecha de registro"
+                [value]="date()"
+                (valueChange)="handleDateChange($event)"
+            ></app-input>
+
+            @if (recordCounts(); as counts) {
+                <div class="attendance-summary">
+                    <div>
+                        <span>Total presentes</span>
+                        <strong>{{ counts.present }}</strong>
+                    </div>
+                    <div>
+                        <span>Total ausentes</span>
+                        <strong>{{ counts.absent }}</strong>
+                    </div>
+                    <div>
+                        <span>Total registros</span>
+                        <strong>{{ counts.total }}</strong>
+                    </div>
+                </div>
+            }
+        </div>
+    </header>
+
+    @if (isBusy()) {
+        <div class="loading-state">
+            <app-loader [showLabel]="true" label="Cargando estudiantes y asistencia..." [centered]="true"></app-loader>
+        </div>
+    } @else if (attendanceRows().length === 0) {
         <div class="empty-state-notice">
-            <p>No hay estudiantes cargados. Recargue la página.</p>
+            <p>No hay estudiantes cargados para registrar asistencia.</p>
         </div>
     } @else {
-        <div class="bulk-actions">
-            <app-button variant="secondary" (clicked)="setAll('PRESENT')">Todos Presentes</app-button>
-            <app-button variant="secondary" (clicked)="setAll('ABSENT')">Todos Ausentes</app-button>
-            <app-button variant="secondary" (clicked)="setAll('LATE')">Todos Retardos</app-button>
-        </div>
+        <div class="table-wrapper">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Estudiante</th>
+                        <th>Faltas</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of attendanceRows(); track row.enrollmentId + row.status) {
+                        <tr class="attendance-row"
+                            [class.attendance-row--success]="rowTone(row.absencesCount) === 'attendance-row--success'"
+                            [class.attendance-row--warning]="rowTone(row.absencesCount) === 'attendance-row--warning'"
+                            [class.attendance-row--danger]="rowTone(row.absencesCount) === 'attendance-row--danger'">
 
-        <app-table 
-            [columns]="[
-                { key: 'index', label: '#' },
-                { key: 'studentName', label: 'Estudiante' },
-                { key: 'ci', label: 'CI' },
-                { key: 'degreeName', label: 'Carrera' },
-                { key: 'status', label: 'Estado' }
-            ]" 
-            [data]="attendanceDraft()">
-            
-            <ng-template #customRow let-row let-i="index">
-                <tr>
-                    <td class="row-number">{{ i + 1 }}</td>
-                    <td class="student-name">{{ row.studentName }}</td>
-                    <td>{{ row.ci }}</td>
-                    <td>{{ row.degreeName || '—' }}</td>
-                    <td>
-                        <div class="status-selector">
-                            <app-button
-                                [variant]="row.status === 'PRESENT' ? 'present' : 'tertiary'"
-                                (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
-                            >P</app-button>
-                            
-                            <app-button
-                                [variant]="row.status === 'ABSENT' ? 'absent' : 'tertiary'"
-                                (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
-                            >A</app-button>
-                            
-                            <app-button
-                                [variant]="row.status === 'LATE' ? 'secondary' : 'tertiary'"
-                                (clicked)="handleStatusChange(row.enrollmentId, 'LATE')"
-                            >R</app-button>
-                        </div>
-                    </td>
-                </tr>
-            </ng-template>
-        </app-table>
+                            <td class="attendance-cell attendance-cell--student">
+                                <div class="student-identity">
+                                    <div class="student-avatar">
+                                        @if (row.photoUrl) {
+                                            <img [src]="row.photoUrl" [alt]="row.studentName" />
+                                        } @else {
+                                            <span>{{ initials(row.studentName) }}</span>
+                                        }
+                                    </div>
+                                    <div class="student-copy">
+                                        <strong>{{ row.studentName }}</strong>
+                                        <span>CI: {{ row.ci }}</span>
+                                    </div>
+                                </div>
+                            </td>
 
-        <div class="submit-section">
-            <app-button
-                variant="primary"
-                [disabled]="isSaving() || !isReady()"
-                (clicked)="handleSubmit()"
-            >
-                @if (isSaving()) {
-                    <span class="material-symbols-outlined spinning" style="margin-right: 8px;">progress_activity</span>
-                    Guardando...
-                } @else {
-                    <span class="material-symbols-outlined" style="margin-right: 8px;">save</span>
-                    Guardar Asistencia
-                }
-            </app-button>
+                            <td class="attendance-cell attendance-cell--badge">
+                                <app-badge [color]="absenceBadgeColor(row.absencesCount)">
+                                    {{ absenceLabel(row.absencesCount) }}
+                                </app-badge>
+                            </td>
+
+                            <td class="attendance-cell attendance-cell--actions">
+                                <div class="status-selector" role="group" [attr.aria-label]="'Registrar asistencia de ' + row.studentName">
+                                    <app-button
+                                        [variant]="statusVariant(row.status, 'PRESENT')"
+                                        [class]="statusClass(row.status, 'PRESENT')"
+                                        [attr.aria-pressed]="row.status === 'PRESENT'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'PRESENT')"
+                                    >Presente</app-button>
+
+                                    <app-button
+                                        [variant]="statusVariant(row.status, 'ABSENT')"
+                                        [class]="statusClass(row.status, 'ABSENT')"
+                                        [attr.aria-pressed]="row.status === 'ABSENT'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'ABSENT')"
+                                    >Falta</app-button>
+
+                                    <app-button
+                                        [variant]="statusVariant(row.status, 'JUSTIFIED')"
+                                        [class]="statusClass(row.status, 'JUSTIFIED')"
+                                        [attr.aria-pressed]="row.status === 'JUSTIFIED'"
+                                        (clicked)="handleStatusChange(row.enrollmentId, 'JUSTIFIED')"
+                                    >Licencia</app-button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
-</div>
+
+
+    <footer class="attendance-footer">
+        <div class="attendance-footer__totals">
+            <div>
+                <span>Presentes</span>
+                <strong>{{ recordCounts().present }}</strong>
+            </div>
+            <div>
+                <span>Ausentes</span>
+                <strong>{{ recordCounts().absent }}</strong>
+            </div>
+            <div>
+                <span>Licencias</span>
+                <strong>{{ recordCounts().late }}</strong>
+            </div>
+        </div>
+
+        <app-button
+            variant="primary"
+            [disabled]="isSaving() || !isReady()"
+            (clicked)="handleSubmit()"
+        >
+            @if (isSaving()) {
+                <span class="material-symbols-outlined spinning">progress_activity</span>
+                Guardando...
+            } @else {
+                <span class="material-symbols-outlined">save</span>
+                Guardar Asistencia del Día
+            }
+        </app-button>
+    </footer>
+</section>

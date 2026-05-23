@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Location } from '@angular/common';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
 import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { AttendanceService } from '../../services/attendance.service';
@@ -40,6 +41,7 @@ interface Tab {
 })
 export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   
   // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
@@ -94,5 +96,9 @@ export class SubjectDetail implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.operationalService.clearStore();
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -114,6 +114,11 @@
   padding: 1rem;
 }
 
+.table-scroll-shell {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .student-name {
   font-weight: 700;
   color: var(--text-primary, #0f172a);
@@ -150,14 +155,28 @@
 }
 
 :host ::ng-deep app-table .grid-cell {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  vertical-align: middle;
   min-height: 76px;
   padding: 0.75rem;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
+}
+
+:host ::ng-deep app-table .cell-content {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+:host ::ng-deep app-table .table-container {
+  max-width: 100%;
+}
+
+:host ::ng-deep app-table .data-table {
+  min-width: 100%;
+  width: max-content;
 }
 
 :host ::ng-deep app-table .sticky-column {
@@ -168,12 +187,20 @@
 }
 
 :host ::ng-deep app-table .student-cell {
+  min-width: 280px;
+}
+
+:host ::ng-deep app-table .student-content {
   gap: 0.15rem;
 }
 
 :host ::ng-deep app-table .score-cell app-input {
   display: block;
   width: 100%;
+}
+
+:host ::ng-deep app-table .score-content {
+  min-width: 130px;
 }
 
 :host ::ng-deep app-table .final-cell {
@@ -183,12 +210,32 @@
   background: linear-gradient(135deg, #ecfeff 0%, #f0f9ff 100%);
 }
 
+:host ::ng-deep app-table .status-cell {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+}
+
+:host ::ng-deep app-table .status-content {
+  align-items: center;
+  gap: 0.45rem;
+}
+
 :host ::ng-deep app-table .final-label {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-secondary, #64748b);
   margin-bottom: 0.2rem;
+}
+
+:host ::ng-deep app-table .status-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, #64748b);
+}
+
+:host ::ng-deep app-table .status-cell app-badge {
+  width: fit-content;
 }
 
 @media (max-width: 1024px) {

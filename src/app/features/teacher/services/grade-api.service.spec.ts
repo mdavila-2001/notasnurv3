@@ -70,7 +70,7 @@ describe('GradeApiService', () => {
     expect(result.map((grade) => grade.enrollmentId)).toEqual(['77', '88-A', '']);
   });
 
-  it('sends bulk payload to save endpoint', () => {
+  it('sends the bulk payload to the save endpoint', () => {
     const payload: GradeBulkRequest = {
       grades: [
         { enrollmentId: 'ENR-10', componentId: 5, score: 95 },
