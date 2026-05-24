@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { Loader } from '../../shared/components/loader/loader';
 import { UserProfileResponse } from '../../core/models/api.models';
 
 // Import standalone sub-components
@@ -17,7 +16,6 @@ import { StudentSubscriptions } from './components/student-subscriptions/student
   standalone: true,
   imports: [
     CommonModule,
-    Loader,
     ProfileView,
     SecuritySettings,
     AcademicSettings,
