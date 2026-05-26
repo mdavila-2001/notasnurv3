@@ -1,0 +1,140 @@
+.schedule-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-lg, 12px);
+  border: 1px solid var(--border-light, rgba(195, 198, 209, 0.3));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 800px;
+}
+
+.schedule-table th {
+  background: var(--neutral-color, #f8fafc);
+  color: var(--brand-navy, #002131);
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 14px 16px;
+  text-align: center;
+  border: 1px solid var(--border-light, rgba(195, 198, 209, 0.3));
+}
+
+.schedule-table td {
+  padding: 12px;
+  border: 1px solid var(--border-light, rgba(195, 198, 209, 0.3));
+  vertical-align: middle;
+  height: 100px;
+}
+
+.time-col-header {
+  width: 120px;
+}
+
+.time-cell {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--brand-navy, #002131);
+  background: var(--neutral-color, #f8fafc);
+  text-align: center;
+  border: 1px solid var(--border-light, rgba(195, 198, 209, 0.3)) !important;
+}
+
+.class-cell {
+  background: #ffffff;
+}
+
+.schedule-card {
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.schedule-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.color-odd {
+  background: rgba(99, 102, 241, 0.05);
+  border-left: 4px solid var(--primary-color, #6366f1);
+}
+
+.color-even {
+  background: rgba(14, 165, 233, 0.05);
+  border-left: 4px solid var(--brand-cyan, #00AEEF);
+}
+
+.subject-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  letter-spacing: 0.05em;
+}
+
+.subject-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-name,
+.classroom-badge {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.teacher-name .icon,
+.classroom-badge .icon {
+  font-size: 0.875rem;
+}
+
+.classroom-badge {
+  font-weight: 600;
+  color: var(--primary-color, #00AEEF);
+}
+
+/* Modo oscuro */
+:root.dark-theme .schedule-table th,
+:root.dark-theme .time-cell {
+  background: #151e33;
+  color: #f8fafc;
+}
+
+:root.dark-theme .class-cell {
+  background: #0f172a;
+}
+
+:root.dark-theme .color-odd {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+:root.dark-theme .color-even {
+  background: rgba(14, 165, 233, 0.15);
+}
+
+:root.dark-theme .subject-name {
+  color: #f8fafc;
+}
+
+:root.dark-theme .subject-code,
+:root.dark-theme .teacher-name {
+  color: #94a3b8;
+}
+
+:root.dark-theme .schedule-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}

@@ -6,7 +6,7 @@ import { UserRole } from '../models/api.models';
 const ROLE_DASHBOARD: Record<UserRole, string> = {
   ADMIN: '/admin/dashboard',
   TEACHER: '/teacher/dashboard',
-  STUDENT: '/student/subjects',
+  STUDENT: '/student/dashboard',
 };
 
 export const authGuard: CanActivateFn = (route, state) => {

@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { AttendanceService } from './attendance.service';
 import { StudentEnrolledResponse } from './enrollment-api.service';
 import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
@@ -28,6 +30,13 @@ describe('AttendanceService', () => {
     service = TestBed.inject(AttendanceService);
     httpMock = TestBed.inject(HttpTestingController);
     operationalService = TestBed.inject(SubjectOperationalService);
+    
+    // Mock getSubjectAbsences and loadAttendanceForDate to prevent side-effect requests
+    vi.spyOn(service, 'getSubjectAbsences').mockReturnValue(of(new Map()));
+    vi.spyOn(service as any, 'loadAttendanceForDate').mockImplementation(() => {
+      (service as any)._isDraftHydrating.set(false);
+    });
+    
     service.resetModule();
   });
 
@@ -64,7 +73,7 @@ describe('AttendanceService', () => {
 
     it('should update record counts', () => {
       service.updateStudentStatus('stu-1', 'ABSENT');
-      service.updateStudentStatus('stu-2', 'LATE');
+      service.updateStudentStatus('stu-2', 'JUSTIFIED');
       const counts = service.recordCounts();
       expect(counts.present).toBe(1);
       expect(counts.absent).toBe(1);
@@ -116,7 +125,10 @@ describe('AttendanceService', () => {
       service.setDate('2026-05-12');
 
       let result = true;
-      service.submit('10').subscribe(r => { result = r; });
+      service.submit('10').subscribe({
+        next: (r) => { result = r; },
+        error: () => { result = false; }
+      });
 
       const req = httpMock.expectOne('/api/attendance/bulk');
       req.flush(
@@ -131,7 +143,10 @@ describe('AttendanceService', () => {
     it('should not submit if no subject or students loaded', () => {
       service.resetModule();
       let result = true;
-      service.submit(null).subscribe(r => { result = r; });
+      service.submit(null as any).subscribe({
+        next: (r) => { result = r; },
+        error: () => { result = false; }
+      });
       expect(result).toBe(false);
     });
   });

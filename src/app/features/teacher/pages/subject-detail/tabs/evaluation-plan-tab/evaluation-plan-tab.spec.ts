@@ -27,7 +27,7 @@ describe('EvaluationPlanTab', () => {
       isLoading: signal(false),
       error: signal(null),
       clearError: vi.fn(),
-      isComponentsWeightValid: vi.fn(() => false),
+      isComponentsWeightValid: signal(false),
       createPlan: vi.fn(() => of(null)),
       addComponent: vi.fn(() => of(null)),
       updateComponent: vi.fn(() => of(null)),
@@ -62,5 +62,46 @@ describe('EvaluationPlanTab', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('handleFinalizeConfiguration', () => {
+    it('should show success toast on successful activation', () => {
+      mockEvaluationPlanService.isComponentsWeightValid.set(true);
+      mockEvaluationPlanService.activatePlan.mockReturnValue(of(true));
+      mockOperationalService.subject.set({ id: 10 } as any);
+
+      component.handleFinalizeConfiguration();
+
+      expect(mockEvaluationPlanService.activatePlan).toHaveBeenCalledWith('10');
+      expect(mockToastService.success).toHaveBeenCalledWith(
+        'Configuración finalizada correctamente.',
+        'Plan finalizado'
+      );
+    });
+
+    it('should show error toast on activation failure', () => {
+      mockEvaluationPlanService.isComponentsWeightValid.set(true);
+      mockEvaluationPlanService.activatePlan.mockReturnValue(of(false));
+      mockEvaluationPlanService.error.set('Suma de pesos inválida');
+      mockOperationalService.subject.set({ id: 10 } as any);
+
+      component.handleFinalizeConfiguration();
+
+      expect(mockEvaluationPlanService.activatePlan).toHaveBeenCalledWith('10');
+      expect(mockToastService.error).toHaveBeenCalledWith(
+        'Suma de pesos inválida',
+        'Error al finalizar'
+      );
+    });
+
+    it('should not activate plan if components weight is invalid', () => {
+      mockEvaluationPlanService.isComponentsWeightValid.set(false);
+      mockOperationalService.subject.set({ id: 10 } as any);
+
+      component.handleFinalizeConfiguration();
+
+      expect(mockEvaluationPlanService.activatePlan).not.toHaveBeenCalled();
+      expect(mockToastService.warning).toHaveBeenCalled();
+    });
   });
 });

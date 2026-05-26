@@ -1,0 +1,133 @@
+<div class="subject-detail-container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-wrapper animated-fade-in">
+      <app-loader
+        variant="spinner"
+        size="lg"
+        label="Cargando desglose de notas parciales..."
+        [showLabel]="true">
+      </app-loader>
+    </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <div class="error-wrapper animated-fade-in">
+      <div class="error-card">
+        <span class="material-symbols-outlined error-icon">warning</span>
+        <h3>Acceso no disponible</h3>
+        <p>{{ error() }}</p>
+        <app-button variant="primary" (clicked)="goBack()">
+          <span class="material-symbols-outlined btn-icon">arrow_back</span>
+          Volver al Portal
+        </app-button>
+      </div>
+    </div>
+  } @else {
+    <!-- Success State / Subject Detail Dashboard -->
+    <div class="detail-card glass-panel animated-fade-in">
+      <!-- Header -->
+      <div class="detail-header">
+        <div class="subject-title-area">
+          <span class="subject-code-badge">{{ subjectDetail()?.subjectCode }}</span>
+          <h1 class="subject-name">{{ subjectDetail()?.subjectName }}</h1>
+          <p class="teacher-info">
+            <span class="material-symbols-outlined icon">person</span>
+            Docente: <strong>{{ subjectDetail()?.teacherName }}</strong>
+          </p>
+        </div>
+        <div class="subject-category-area">
+          <span class="category-badge">{{ subjectDetail()?.category || 'GENERAL' }}</span>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Grid -->
+      <div class="kpi-grid">
+        <!-- Metric 1: Current Score -->
+        <div class="kpi-card" [class.kpi-success]="finalGrade() >= 51" [class.kpi-danger]="finalGrade() < 51 && finalGrade() > 0">
+          <div class="kpi-icon">
+            <span class="material-symbols-outlined">analytics</span>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Nota Acumulada</span>
+            <span class="kpi-value">{{ finalGrade().toFixed(2) }}</span>
+            <span class="kpi-subtext">sobre 100 puntos</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Attendance -->
+        <div class="kpi-card" [class.kpi-warning]="isAtAbsenceRisk()" [class.kpi-danger]="absencesCount() >= absenceLimit()">
+          <div class="kpi-icon">
+            <span class="material-symbols-outlined">assignment_turned_in</span>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Faltas Acumuladas</span>
+            <span class="kpi-value">{{ absencesCount() }} / {{ absenceLimit() }}</span>
+            @if (absencesCount() >= absenceLimit()) {
+              <span class="kpi-subtext text-danger">Límite superado</span>
+            } @else if (isAtAbsenceRisk()) {
+              <span class="kpi-subtext text-warning">¡Riesgo de reprobación!</span>
+            } @else {
+              <span class="kpi-subtext text-muted">Dentro del límite</span>
+            }
+          </div>
+        </div>
+
+        <!-- Metric 3: Academic Status -->
+        <div class="kpi-card">
+          <div class="kpi-icon">
+            <span class="material-symbols-outlined">verified</span>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Estado Académico</span>
+            <div class="status-badge-wrapper">
+              <span class="status-badge" [class]="getStatusClass(academicStatus())">
+                {{ getStatusLabel(academicStatus()) }}
+              </span>
+            </div>
+            <span class="kpi-subtext text-muted">Actualizado en tiempo real</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grades Breakdown Table Section -->
+      <div class="breakdown-section">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined">list_alt</span>
+          Desglose de Calificaciones
+        </h2>
+        <p class="section-desc">
+          Detalle del plan de evaluación estipulado por el docente. Toda calificación es de carácter informativo.
+        </p>
+
+        @if (tableData().length === 0) {
+          <div class="empty-grades">
+            <span class="material-symbols-outlined empty-icon">assignment_late</span>
+            <p>El docente aún no ha registrado notas parciales para esta materia.</p>
+          </div>
+        } @else {
+          <app-table
+            [columns]="columns()"
+            [data]="tableData()"
+            [showActions]="false">
+            <ng-template #customRow let-row>
+              <tr>
+                <td class="component-name">{{ row.componentName }}</td>
+                <td class="weight">{{ row.weight }}</td>
+                <td class="score">{{ row.obtainedScore }}</td>
+                <td class="contribution font-weight-bold">{{ row.contribution }}</td>
+              </tr>
+            </ng-template>
+          </app-table>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        <app-button variant="secondary" (clicked)="goBack()">
+          <span class="material-symbols-outlined btn-icon">arrow_back</span>
+          Volver al Portal
+        </app-button>
+      </div>
+    </div>
+  }
+</div>

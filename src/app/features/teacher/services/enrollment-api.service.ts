@@ -47,4 +47,8 @@ export class EnrollmentApiService {
   withdrawStudent(enrollmentId: string): Observable<ApiResponse<void>> {
     return this.api.delete<void>(`/enrollments/${enrollmentId}`);
   }
+
+  getUserDegreesByUserId(userId: string): Observable<ApiResponse<any[]>> {
+    return this.api.get<any[]>(`/user-degrees/user/${userId}`);
+  }
 }

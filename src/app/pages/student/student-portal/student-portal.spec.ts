@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest'; 
 import { StudentPortal } from './student-portal';
@@ -50,7 +51,8 @@ describe('StudentPortal', () => {
         HttpClientTestingModule 
       ],
       providers: [
-        { provide: StudentPortalService, useValue: mockStudentPortalService }
+        { provide: StudentPortalService, useValue: mockStudentPortalService },
+        provideRouter([])
       ]
     }).compileComponents();
 

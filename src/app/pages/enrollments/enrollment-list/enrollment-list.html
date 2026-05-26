@@ -120,20 +120,70 @@
 
   <div class="enroll-form">
     <div class="form-group">
-      <app-input
-        type="number"
-        label="ID de Expediente Académico (userDegreeId)"
-        placeholder="Ej: 1"
-        [value]="userDegreeId() ?? ''"
-        [min]="1"
-        [required]="true"
-        [showErrors]="true"
-        (valueChange)="onUserDegreeIdChange($event)" />
-      <p class="form-hint">
-        <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
-        El ID del expediente académico del estudiante en esta carrera.
-      </p>
+      <label class="form-label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Seleccionar Estudiante
+      </label>
+      <div class="select-container" style="position: relative;">
+        <select 
+          class="custom-select" 
+          [value]="selectedUserId() ?? ''"
+          (change)="onStudentSelected($any($event.target).value)"
+          style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+          <option value="">-- Seleccionar de la Nómina --</option>
+          @for (student of studentsList(); track student.id) {
+            <option [value]="student.id">
+              {{ student.fullName }} (CI: {{ student.ci }})
+            </option>
+          }
+        </select>
+      </div>
     </div>
+
+    <!-- Active academic records (carreras) dynamic list -->
+    @if (selectedUserId()) {
+      <div class="form-group" style="margin-top: 1.5rem;">
+        @if (isDegreesLoading()) {
+          <div class="degrees-loading" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; padding: 0.5rem 0;">
+            <app-loader variant="spinner" size="sm"></app-loader>
+            <span>Buscando expedientes académicos...</span>
+          </div>
+        } @else if (degreesError()) {
+          <div class="degrees-error" style="color: var(--error-main, #dc2626); font-size: 0.875rem; background: var(--error-light, #fee2e2); border: 1px solid var(--error-border, #fca5a5); border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">error</span>
+            <span>{{ degreesError() }}</span>
+          </div>
+        } @else {
+          <label class="form-label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+            Carrera / Expediente Académico Activo
+          </label>
+          <div class="select-container">
+            <select 
+              class="custom-select"
+              [value]="userDegreeId() ?? ''"
+              (change)="onUserDegreeSelected($any($event.target).value)"
+              style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+              <option value="">-- Seleccionar Carrera Activa --</option>
+              @for (degree of userDegrees(); track degree.id) {
+                <option [value]="degree.id">
+                  {{ degree.degreeName }} (Expediente #{{ degree.id }})
+                </option>
+              }
+            </select>
+          </div>
+          @if (userDegrees().length > 1) {
+            <p class="form-hint" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+              <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
+              El estudiante tiene múltiples carreras activas. Por favor selecciona una.
+            </p>
+          } @else if (userDegrees().length === 1) {
+            <p class="form-hint" style="font-size: 0.75rem; color: var(--success-main, #16a34a); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+              <span class="material-symbols-outlined" style="font-size: 0.85rem;">check_circle</span>
+              Se autoseleccionó la única carrera activa del estudiante.
+            </p>
+          }
+        }
+      </div>
+    }
 
     @if (selectedSubject()) {
       <div class="enroll-summary">
