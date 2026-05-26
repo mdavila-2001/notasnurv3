@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
 import {
@@ -14,7 +15,14 @@ export class AdminSubjectService {
   private readonly api = inject(ApiService);
 
   getAll(): Observable<ApiResponse<SubjectResponse[]>> {
-    return this.api.get<SubjectResponse[]>('/subjects');
+    return this.api.get<SubjectResponse[]>('/subjects').pipe(
+      map(r => {
+        if (Array.isArray(r)) {
+          return { success: true, message: 'Catálogo obtenido', data: r };
+        }
+        return r as ApiResponse<SubjectResponse[]>;
+      })
+    );
   }
 
   getPaginated(page: number, size: number, sort?: string): Observable<ApiResponse<SubjectResponse[]>> {

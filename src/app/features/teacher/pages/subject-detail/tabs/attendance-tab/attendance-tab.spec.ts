@@ -8,6 +8,8 @@ import { vi } from 'vitest';
 import { AttendanceService } from '../../../../services/attendance.service';
 import { SubjectOperationalService } from '../../../../../../core/services/subject-operational/subject-operational.service';
 
+import { provideRouter } from '@angular/router';
+
 describe('AttendanceTab', () => {
   let component: AttendanceTab;
   let fixture: ComponentFixture<AttendanceTab>;
@@ -29,6 +31,7 @@ describe('AttendanceTab', () => {
       isReadyToSubmit: signal(false),
       date: signal('2026-05-20'),
       isSaving: signal(false),
+      isDraftHydrating: signal(false),
       recordCounts: signal({ present: 0, late: 0, absent: 0, total: 0 }),
       error: signal(null),
       successMessage: signal(null),
@@ -44,6 +47,7 @@ describe('AttendanceTab', () => {
       providers: [
         { provide: SubjectOperationalService, useValue: mockOperationalService },
         { provide: AttendanceService, useValue: mockAttendanceService },
+        provideRouter([])
       ]
     }).compileComponents();
 

@@ -1,0 +1,113 @@
+<div class="page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Horario de Clases</h1>
+    <p class="page-subtitle">Organiza tu semana académica con la asignación horaria de tus materias y aulas</p>
+  </div>
+
+  <div class="page-content">
+    @if (isLoading()) {
+      <div class="loading-container" style="display: flex; justify-content: center; align-items: center; padding: 4rem 0;">
+        <app-loader
+          variant="spinner"
+          size="lg"
+          label="Cargando tu calendario semanal..."
+          [showLabel]="true">
+        </app-loader>
+      </div>
+    } @else if (error()) {
+      <div class="error-container" style="text-align: center; padding: 3rem 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--error, #ef4444); margin-bottom: 1rem;">error_outline</span>
+        <h3>No se pudo cargar el horario</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">{{ error() }}</p>
+        <app-button variant="primary" (clicked)="loadScheduleData()">Reintentar</app-button>
+      </div>
+    } @else if (mySubjects().length === 0) {
+      <div class="empty-state" style="text-align: center; padding: 4rem 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;">calendar_today</span>
+        <h3>Sin materias matriculadas</h3>
+        <p style="color: var(--text-secondary);">No tienes materias programadas para esta gestión académica.</p>
+      </div>
+    } @else {
+      <div class="schedule-wrapper">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th class="time-col-header">Hora</th>
+              @for (day of days; track day) {
+                <th>{{ day }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (slot of timeSlots(); track slot.time) {
+              <tr>
+                <td class="time-cell">{{ slot.time }}</td>
+                
+                <!-- Monday -->
+                <td class="class-cell">
+                  @if (slot.monday; as sub) {
+                    <div class="schedule-card color-odd">
+                      <span class="subject-code">{{ sub.subjectCode }}</span>
+                      <strong class="subject-name">{{ sub.subjectName }}</strong>
+                      <span class="teacher-name"><span class="material-symbols-outlined icon">person</span> {{ sub.teacherName }}</span>
+                      <span class="classroom-badge"><span class="material-symbols-outlined icon">meeting_room</span> {{ sub.classroom }}</span>
+                    </div>
+                  }
+                </td>
+
+                <!-- Tuesday -->
+                <td class="class-cell">
+                  @if (slot.tuesday; as sub) {
+                    <div class="schedule-card color-even">
+                      <span class="subject-code">{{ sub.subjectCode }}</span>
+                      <strong class="subject-name">{{ sub.subjectName }}</strong>
+                      <span class="teacher-name"><span class="material-symbols-outlined icon">person</span> {{ sub.teacherName }}</span>
+                      <span class="classroom-badge"><span class="material-symbols-outlined icon">meeting_room</span> {{ sub.classroom }}</span>
+                    </div>
+                  }
+                </td>
+
+                <!-- Wednesday -->
+                <td class="class-cell">
+                  @if (slot.wednesday; as sub) {
+                    <div class="schedule-card color-odd">
+                      <span class="subject-code">{{ sub.subjectCode }}</span>
+                      <strong class="subject-name">{{ sub.subjectName }}</strong>
+                      <span class="teacher-name"><span class="material-symbols-outlined icon">person</span> {{ sub.teacherName }}</span>
+                      <span class="classroom-badge"><span class="material-symbols-outlined icon">meeting_room</span> {{ sub.classroom }}</span>
+                    </div>
+                  }
+                </td>
+
+                <!-- Thursday -->
+                <td class="class-cell">
+                  @if (slot.thursday; as sub) {
+                    <div class="schedule-card color-even">
+                      <span class="subject-code">{{ sub.subjectCode }}</span>
+                      <strong class="subject-name">{{ sub.subjectName }}</strong>
+                      <span class="teacher-name"><span class="material-symbols-outlined icon">person</span> {{ sub.teacherName }}</span>
+                      <span class="classroom-badge"><span class="material-symbols-outlined icon">meeting_room</span> {{ sub.classroom }}</span>
+                    </div>
+                  }
+                </td>
+
+                <!-- Friday -->
+                <td class="class-cell">
+                  @if (slot.friday; as sub) {
+                    <div class="schedule-card color-odd">
+                      <span class="subject-code">{{ sub.subjectCode }}</span>
+                      <strong class="subject-name">{{ sub.subjectName }}</strong>
+                      <span class="teacher-name"><span class="material-symbols-outlined icon">person</span> {{ sub.teacherName }}</span>
+                      <span class="classroom-badge"><span class="material-symbols-outlined icon">meeting_room</span> {{ sub.classroom }}</span>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

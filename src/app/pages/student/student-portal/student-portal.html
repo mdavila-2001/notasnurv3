@@ -111,6 +111,14 @@
                       </div>
                     }
                   </div>
+                  <div class="card-footer" style="padding: 1.25rem; border-top: 1px solid var(--border-color, #e5e7eb); display: flex; justify-content: flex-end; background: var(--background-hover, #fafafa);">
+                    <a [routerLink]="['/student/subject', subject.subjectCode]" class="subject-detail-link" style="text-decoration: none;">
+                      <app-button variant="secondary" size="sm">
+                        Ver Notas y Asistencia
+                        <span class="material-symbols-outlined" style="font-size: 1rem; margin-left: 0.25rem; vertical-align: middle;">arrow_forward</span>
+                      </app-button>
+                    </a>
+                  </div>
                 </div>
               }
             </div>

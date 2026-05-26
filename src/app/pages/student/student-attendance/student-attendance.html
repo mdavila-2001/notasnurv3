@@ -1,0 +1,74 @@
+<div class="page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Control de Asistencia</h1>
+    <p class="page-subtitle">Monitorea tus inasistencias acumuladas y el límite de faltas de tus materias</p>
+  </div>
+
+  <div class="page-content">
+    @if (isLoading()) {
+      <div class="loading-container" style="display: flex; justify-content: center; align-items: center; padding: 4rem 0;">
+        <app-loader
+          variant="spinner"
+          size="lg"
+          label="Cargando tu registro de presencialidad..."
+          [showLabel]="true">
+        </app-loader>
+      </div>
+    } @else if (error()) {
+      <div class="error-container" style="text-align: center; padding: 3rem 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--error, #ef4444); margin-bottom: 1rem;">error_outline</span>
+        <h3>No se pudo cargar la asistencia</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">{{ error() }}</p>
+        <app-button variant="primary" (clicked)="loadAttendanceData()">Reintentar</app-button>
+      </div>
+    } @else if (tableData().length === 0) {
+      <div class="empty-state" style="text-align: center; padding: 4rem 1rem;">
+        <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.3; margin-bottom: 1rem;">assignment_turned_in</span>
+        <h3>Sin materias registradas</h3>
+        <p style="color: var(--text-secondary);">No estás matriculado en ninguna materia activa en esta gestión.</p>
+      </div>
+    } @else {
+      <!-- Warning Banner if at risk -->
+      @if (tableData().some(row => row.atRisk)) {
+        <div class="alert-banner" style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--warning, #f59e0b); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span class="material-symbols-outlined" style="color: var(--warning, #f59e0b); font-size: 1.5rem;">warning</span>
+          <div>
+            <h4 style="margin: 0 0 0.25rem; font-weight: 600; color: var(--brand-navy, #002131);">¡Atención! Tienes materias en situación de riesgo</h4>
+            <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary, #64748b);">Has alcanzado o estás a un paso del límite máximo de inasistencias permitidas en alguna materia. Evita acumular más faltas para no reprobar automáticamente.</p>
+          </div>
+        </div>
+      }
+
+      <div class="table-wrapper">
+        <app-table
+          [columns]="columns()"
+          [data]="tableData()"
+          [showActions]="false">
+          <ng-template #customRow let-row>
+            <tr [class.row-at-risk]="row.atRisk" [class.row-failed]="row.status === 'Reprobado por Faltas'">
+              <td class="code" style="font-weight: 600;">{{ row.subjectCode }}</td>
+              <td class="name">
+                <a [routerLink]="['/student/subject', row.subjectCode]" class="subject-link" style="text-decoration: none; font-weight: 600; color: var(--primary-color, #00AEEF);">
+                  {{ row.subjectName }}
+                </a>
+              </td>
+              <td class="teacher" style="color: var(--text-secondary);">{{ row.teacherName }}</td>
+              <td class="absences" style="text-align: center; font-weight: 700;">
+                <span [style.color]="row.absences > 0 ? (row.atRisk ? 'var(--warning, #f59e0b)' : 'var(--error, #ef4444)') : 'inherit'">
+                  {{ row.absences }} Faltas
+                </span>
+              </td>
+              <td class="limit" style="text-align: center; color: var(--text-secondary);">{{ row.limit }} Faltas máx.</td>
+              <td class="status">
+                <span [class]="'status-badge ' + getStatusClass(row.status)">
+                  {{ row.status }}
+                </span>
+              </td>
+            </tr>
+          </ng-template>
+        </app-table>
+      </div>
+    }
+  </div>
+</div>

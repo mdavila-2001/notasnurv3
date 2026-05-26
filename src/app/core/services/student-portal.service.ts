@@ -74,4 +74,17 @@ export class StudentPortalService {
       userProfile: this.getUserProfile()
     });
   }
+
+  /**
+   * Retrieves the student dashboard data from the backend including active subjects,
+   * grades breakdown, absences, and GPA.
+   * @returns Observable of any (DashboardStudentDTO)
+   */
+  getStudentDashboard(): Observable<any> {
+    return this.http
+      .get<ApiResponse<any>>(`${environment.apiBaseUrl}/dashboard/student`)
+      .pipe(
+        map(response => response.data)
+      );
+  }
 }

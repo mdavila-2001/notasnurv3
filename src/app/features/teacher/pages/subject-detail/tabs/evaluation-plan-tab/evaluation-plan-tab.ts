@@ -266,6 +266,9 @@ export class EvaluationPlanTab {
     this.service.activatePlan(subjectId).subscribe((success) => {
       if (success) {
         this.toast.success('Configuración finalizada correctamente.', 'Plan finalizado');
+      } else {
+        const errorMsg = this.errorMessage() ?? 'Error al finalizar la configuración del plan';
+        this.toast.error(errorMsg, 'Error al finalizar');
       }
     });
   }

@@ -1,0 +1,77 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-lg, 12px);
+}
+
+.subject-link {
+  transition: opacity 0.15s ease;
+}
+
+.subject-link:hover {
+  opacity: 0.8;
+  text-decoration: underline !important;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+  text-align: center;
+}
+
+.badge-approved {
+  background: var(--success-light, #dcfce7);
+  color: var(--success, #10b981);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-absences {
+  background: var(--error-light, #fee2e2);
+  color: var(--error, #ef4444);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-at-risk {
+  background: var(--warning-light, #fef3c7);
+  color: var(--warning, #f59e0b);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.row-at-risk td {
+  background: rgba(245, 158, 11, 0.02);
+}
+
+.row-failed td {
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.alert-banner {
+  box-shadow: 0 2px 8px rgba(0, 33, 49, 0.04);
+}
+
+/* Modo oscuro */
+:root.dark-theme .badge-approved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+:root.dark-theme .badge-absences {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+:root.dark-theme .badge-at-risk {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+:root.dark-theme .alert-banner {
+  background: rgba(245, 158, 11, 0.05) !important;
+  border-left-color: var(--warning, #f59e0b) !important;
+}
+
+:root.dark-theme .alert-banner h4 {
+  color: #f8fafc !important;
+}

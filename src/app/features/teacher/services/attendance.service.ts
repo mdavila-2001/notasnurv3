@@ -63,7 +63,14 @@ export class AttendanceService {
   });
 
   readonly isReadyToSubmit = computed(() =>
-    this._attendanceDraft().length > 0 && !this._isSaving() && !this._isDraftHydrating()
+    this._attendanceDraft().length > 0 &&
+    !this._isSaving() &&
+    !this._isDraftHydrating() &&
+    this.operationalService.currentSubjectId() !== null &&
+    this._date() !== '' &&
+    this._date() !== null &&
+    this._date() !== undefined &&
+    /^\d{4}-\d{2}-\d{2}$/.test(this._date())
   );
 
   initializeDraft(students: StudentOperational[] = this.operationalService.students(), subjectId: string | null = this.operationalService.subject()?.id?.toString() ?? null): void {
@@ -202,9 +209,13 @@ export class AttendanceService {
     };
     
     return this.api.post<void>('/attendance/bulk', request).pipe(
+      tap(() => {
+        this._successMessage.set('Asistencia registrada con éxito');
+      }),
       map(() => true),
       catchError(err => {
         const message = err?.error?.message ?? err?.message ?? 'Ocurrió un error al guardar la asistencia.';
+        this._error.set(message);
         return throwError(() => new Error(message));
       }),
       finalize(() => {
