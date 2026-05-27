@@ -1,5 +1,7 @@
 export type SubjectModality = 'FACE_TO_FACE' | 'BLENDED' | 'ONLINE';
-export type SubjectRecordStatus = 'DRAFT' | 'PUBLISHED' | 'INACTIVE' | 'CLOSED';
+
+// AÑADIDO: 'ACTIVE' para que coincida exactamente con tu Enum de Java
+export type SubjectRecordStatus = 'DRAFT' | 'PUBLISHED' | 'ACTIVE' | 'INACTIVE' | 'CLOSED';
 
 // Lo que devuelve el backend (SubjectResponse)
 export interface Subject {
@@ -38,6 +40,8 @@ export interface SubjectRequest {
   capacity: number;
   semesterId: number;
   teacherId: string;
+  // NUEVO: El campo opcional para que TypeScript deje pasar el estado al editar
+  recordStatus?: string; 
 }
 
 export interface SubjectCreateUpdateRequest {
@@ -47,4 +51,6 @@ export interface SubjectCreateUpdateRequest {
   capacity: number;
   semesterId: string;
   teacherId: string;
+  // NUEVO: Añadido aquí también por precaución si lo usas en otro componente
+  recordStatus?: string; 
 }

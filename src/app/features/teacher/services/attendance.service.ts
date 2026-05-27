@@ -204,6 +204,7 @@ export class AttendanceService {
       date: this._date(),
       records: draft.map(row => ({
         enrollmentId: row.enrollmentId,
+        studentId: row.enrollmentId, // <-- SOLUCIÓN: Agregado para que Spring Boot lo mapee correctamente
         status: row.status,
       })),
     };
