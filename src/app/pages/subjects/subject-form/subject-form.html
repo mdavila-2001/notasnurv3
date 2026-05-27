@@ -73,6 +73,18 @@
     [errorMessage]="teacherIdControl.hasError('required') && (teacherIdControl.dirty || teacherIdControl.touched) ? 'El docente es obligatorio.' : ''">
   </app-input>
 
+  <app-input
+    type="select"
+    label="Estado de la Materia"
+    placeholder="Seleccione el estado"
+    [options]="statusOptions"
+    [value]="recordStatusControl.value"
+    (valueChange)="onRecordStatusValueChange($event)"
+    [required]="true"
+    [showErrors]="recordStatusControl.invalid && (recordStatusControl.dirty || recordStatusControl.touched)"
+    [errorMessage]="recordStatusControl.hasError('required') && (recordStatusControl.dirty || recordStatusControl.touched) ? 'El estado es obligatorio.' : ''">
+  </app-input>
+
   <div class="form-actions">
     <app-button variant="secondary" (clicked)="onCancel()">Cancelar</app-button>
     <app-button variant="primary" type="submit">
@@ -81,4 +93,3 @@
     </app-button>
   </div>
 </form>
-
