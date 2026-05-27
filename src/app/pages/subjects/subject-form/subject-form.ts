@@ -3,7 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { SubjectModality, SubjectRequest, SubjectResponse } from '../../../core/models/subject.model';
+import {
+  SubjectModality,
+  SubjectRecordStatus,
+  SubjectRequest,
+  SubjectResponse,
+} from '../../../core/models/subject.model';
+
+type SubjectStatusOption = Omit<SelectOption, 'value'> & { value: SubjectRecordStatus };
 
 @Component({
   selector: 'app-subject-form',
@@ -34,7 +41,10 @@ export class SubjectFormComponent {
     semesterId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teacherId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     // NUEVO CAMPO: Agregado el control para el estado
-    recordStatus: new FormControl<string>('DRAFT', { nonNullable: true, validators: [Validators.required] }),
+    recordStatus: new FormControl<SubjectRecordStatus>('DRAFT', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
   readonly modalityOptions: SelectOption[] = [
@@ -44,7 +54,7 @@ export class SubjectFormComponent {
   ];
 
   // NUEVAS OPCIONES: Arreglo con los estados de la base de datos
-  readonly statusOptions: SelectOption[] = [
+  readonly statusOptions: SubjectStatusOption[] = [
     { label: 'Borrador', value: 'DRAFT' },
     { label: 'Publicada', value: 'PUBLISHED' },
     { label: 'Activa', value: 'ACTIVE' },
@@ -116,9 +126,21 @@ export class SubjectFormComponent {
   }
 
   // NUEVO EVENTO: Se ejecuta cuando cambias el select en la vista
-  onRecordStatusChange(value: string | number) {
-    this.recordStatusControl.setValue(String(value));
+  onRecordStatusValueChange(value: string | number) {
+    const normalizedValue = String(value);
+
+    if (!this.isSubjectRecordStatus(normalizedValue)) return;
+
+    this.onRecordStatusChange(normalizedValue);
+  }
+
+  onRecordStatusChange(value: SubjectRecordStatus) {
+    this.recordStatusControl.setValue(value);
     this.recordStatusControl.markAsTouched();
+  }
+
+  private isSubjectRecordStatus(value: string): value is SubjectRecordStatus {
+    return this.statusOptions.some(option => option.value === value);
   }
 
   onSubmit() {
