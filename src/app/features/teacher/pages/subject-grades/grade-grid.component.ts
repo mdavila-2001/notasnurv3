@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, concat, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
-import { GradeAcademicStatus, GradeBulkRequest, GradeRequest, GradeResponse, GradeRowUI } from '../../../../core/models/grade.models';
+import { GradeAcademicStatus, GradeRequest, GradeResponse, GradeRowUI } from '../../../../core/models/grade.models';
 import { EvaluationComponent, StudentOperational } from '../../../../core/models/operational.model';
 import { SubjectModality } from '../../../../core/models/subject.model';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
@@ -191,7 +191,7 @@ export class GradeGridComponent {
   readonly hasValidEnrollmentIds = computed(() =>
     this.gradeRowsDraft().every((row) => (row.enrollmentId?.trim().length ?? 0) > 0),
   );
-  readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
+  readonly saveableGradeCount = computed(() => this.buildSavePayload().length);
   readonly canSave = computed(() =>
     this.hasComponents() &&
     this.hasStudents() &&
@@ -227,7 +227,7 @@ export class GradeGridComponent {
         const components = this.components();
         const gradeLoadState = this.existingGradesState();
 
-        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading') {
+        if (!subjectId || this.subjectLoading() || this.studentsLoading() || gradeLoadState.status === 'loading') {
           return;
         }
 
@@ -338,7 +338,7 @@ export class GradeGridComponent {
 
     const payload = this.buildSavePayload();
 
-    if (payload.grades.length === 0) {
+    if (payload.length === 0) {
       this.toast.warning('Ingresa al menos una nota válida antes de guardar.', 'Sin notas');
       return;
     }
@@ -347,10 +347,14 @@ export class GradeGridComponent {
 
     try {
       await firstValueFrom(this.gradeApi.saveGrades(payload));
-      this.toast.success('Las notas se guardaron correctamente.', 'Guardado masivo');
+      this.toast.success('Notas guardadas correctamente', 'Guardado masivo');
       this.isSaveModalOpen.set(false);
     } catch (error) {
-      this.toast.error(this.extractErrorMessage(error, 'No se pudieron guardar las notas.'), 'Guardado fallido');
+      if (this.isConflictError(error)) {
+        this.toast.warning('Conflicto al guardar: ya existe una nota para ese componente', 'Conflicto');
+      } else {
+        this.toast.error(this.extractErrorMessage(error, 'No se pudieron guardar las notas.'), 'Guardado fallido');
+      }
     } finally {
       this.isSaving.set(false);
     }
@@ -439,7 +443,7 @@ export class GradeGridComponent {
     return { rows, invalidEnrollmentIds };
   }
 
-  private buildSavePayload(): GradeBulkRequest {
+  private buildSavePayload(): GradeRequest[] {
     const grades: GradeRequest[] = [];
 
     for (const row of this.gradeRowsDraft()) {
@@ -468,7 +472,7 @@ export class GradeGridComponent {
       }
     }
 
-    return { grades };
+    return grades;
   }
 
   private calculateFinalGrade(scores: Record<number, number | null>, components: EvaluationComponent[]): number {
@@ -603,6 +607,14 @@ export class GradeGridComponent {
     }
 
     return fallback;
+  }
+
+  private isConflictError(error: unknown): boolean {
+    if (typeof error !== 'object' || error === null || !('status' in error)) {
+      return false;
+    }
+
+    return (error as { status?: number }).status === 409;
   }
 
   goBack(): void {

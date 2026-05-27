@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map, of } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
-import { GradeBulkRequest, GradeResponse } from '../../../core/models/grade.models';
+import { GradeRequest, GradeResponse } from '../../../core/models/grade.models';
 
 @Injectable({ providedIn: 'root' })
 export class GradeApiService {
@@ -14,12 +14,12 @@ export class GradeApiService {
     );
   }
 
-  saveGrades(request: GradeBulkRequest): Observable<void> {
-    if (request.grades.length === 0) {
+  saveGrades(request: GradeRequest[]): Observable<void> {
+    if (request.length === 0) {
       return of(void 0);
     }
 
-    return this.api.post<void>('/grades/save', request).pipe(
+    return this.api.post<void>('/grades/bulk', request).pipe(
       map((response: ApiResponse<void>) => response.data),
     );
   }
