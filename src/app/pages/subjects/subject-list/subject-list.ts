@@ -23,7 +23,7 @@ const MODALITY_LABELS: Record<SubjectModality, string> = {
 const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
   DRAFT: 'Borrador',
   PUBLISHED: 'Publicada',
-  ACTIVE: 'Activa',      // <-- ¡Esta es la línea que faltaba!
+  ACTIVE: 'Activa',
   INACTIVE: 'Inactiva',
   CLOSED: 'Cerrada'
 };

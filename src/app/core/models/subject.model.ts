@@ -41,7 +41,7 @@ export interface SubjectRequest {
   semesterId: number;
   teacherId: string;
   // NUEVO: El campo opcional para que TypeScript deje pasar el estado al editar
-  recordStatus?: string; 
+  recordStatus?: SubjectRecordStatus; 
 }
 
 export interface SubjectCreateUpdateRequest {
@@ -52,5 +52,5 @@ export interface SubjectCreateUpdateRequest {
   semesterId: string;
   teacherId: string;
   // NUEVO: Añadido aquí también por precaución si lo usas en otro componente
-  recordStatus?: string; 
+  recordStatus?: SubjectRecordStatus; 
 }
