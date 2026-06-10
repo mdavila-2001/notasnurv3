@@ -1,0 +1,194 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Reportes y Actas Oficiales</h1>
+      <p class="page-subtitle">Consolidado general de materias de la gestión. Descarga documentos oficiales y gestiona el cierre de actas.</p>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <!-- Filters Panel -->
+    <div class="filters-card">
+      <div class="search-input-group">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="form-control filter-search"
+          placeholder="Buscar materia por nombre, código o docente..."
+          [ngModel]="searchFilter()"
+          (ngModelChange)="searchFilter.set($event)"
+        />
+      </div>
+
+      <div class="filter-actions">
+        <div class="select-wrapper">
+          <select
+            class="form-control select-filter"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="statusFilter.set($event)"
+          >
+            <option value="ALL">Todos los estados</option>
+            <option value="DRAFT">Borrador (Inactivas)</option>
+            <option value="ACTIVE">Activas (En curso)</option>
+            <option value="CLOSED">Cerradas</option>
+          </select>
+          <span class="material-symbols-outlined select-arrow">expand_more</span>
+        </div>
+        
+        <button class="btn-refresh" (click)="loadSubjects()" [disabled]="isLoading()">
+          <span class="material-symbols-outlined" [class.spinning]="isLoading()">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Display -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <app-loader size="lg" label="Cargando catálogo académico..." />
+      </div>
+    } @else if (filteredSubjects().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-outlined">folder_open</span>
+        <h3>No se encontraron materias</h3>
+        <p>Intenta cambiar los filtros de búsqueda o el estado seleccionado.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Nombre de Materia</th>
+              <th>Docente Titular</th>
+              <th>Estado Acta</th>
+              <th class="actions-header">Acciones y Documentos</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (subject of filteredSubjects(); track subject.id) {
+              <tr [class.closed-row]="subject.recordStatus === 'CLOSED'">
+                <td class="font-mono">{{ subject.code }}</td>
+                <td>
+                  <div class="subject-name-cell">
+                    <span class="subject-name">{{ subject.name }}</span>
+                    <span class="modality-tag" [class]="subject.modality">{{ subject.modality === 'FACE_TO_FACE' ? 'Presencial' : 'Semipresencial' }}</span>
+                  </div>
+                </td>
+                <td class="teacher-cell">
+                  <span class="material-symbols-outlined icon-user">person</span>
+                  <span>{{ subject.teacherName || 'Sin Docente' }}</span>
+                </td>
+                <td>
+                  <span class="status-badge" [class]="subject.recordStatus">
+                    {{ subject.recordStatus === 'DRAFT' ? 'Borrador' : subject.recordStatus === 'ACTIVE' ? 'Activa' : 'Cerrada' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <!-- PDF Acta Download -->
+                    <app-button
+                      variant="secondary"
+                      [disabled]="isDownloading() !== null"
+                      (clicked)="downloadPdf(subject)"
+                    >
+                      @if (isDownloading() === 'pdf-' + subject.id) {
+                        <app-loader size="sm" />
+                      } @else {
+                        <span class="btn-inner">
+                          <span class="material-symbols-outlined">picture_as_pdf</span>
+                          PDF
+                        </span>
+                      }
+                    </app-button>
+
+                    <!-- Excel Attendance Download -->
+                    <app-button
+                      variant="secondary"
+                      [disabled]="isDownloading() !== null"
+                      (clicked)="downloadExcel(subject)"
+                    >
+                      @if (isDownloading() === 'excel-' + subject.id) {
+                        <app-loader size="sm" />
+                      } @else {
+                        <span class="btn-inner">
+                          <span class="material-symbols-outlined">table_chart</span>
+                          Excel
+                        </span>
+                      }
+                    </app-button>
+
+                    <!-- Close Acta Button -->
+                    @if (subject.recordStatus !== 'CLOSED') {
+                      <app-button
+                        variant="absent"
+                        [disabled]="isClosingSubject() !== null"
+                        (clicked)="openCloseModal(subject)"
+                      >
+                        <span class="btn-inner">
+                          <span class="material-symbols-outlined">lock</span>
+                          Cerrar
+                        </span>
+                      </app-button>
+                    } @else {
+                      <span class="closed-label">
+                        <span class="material-symbols-outlined">verified</span>
+                        Cerrada
+                      </span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <p>Mostrando {{ filteredSubjects().length }} de {{ subjects().length }} materia(s) en total.</p>
+      </div>
+    }
+  </div>
+
+  <!-- Close Confirmation Modal -->
+  <app-modal
+    [isOpen]="isCloseModalOpen()"
+    title="Confirmación de Cierre Definitivo"
+    [disableBackdropClick]="isClosingSubject() !== null"
+    (closed)="closeCloseModal()"
+  >
+    @if (selectedSubject()) {
+      <div class="modal-warning">
+        <span class="material-symbols-outlined warning-icon">warning</span>
+        <div>
+          <h3>¿Está seguro de cerrar la materia?</h3>
+          <p class="warning-text">
+            Al cerrar la materia <strong>{{ selectedSubject()?.code }} - {{ selectedSubject()?.name }}</strong>,
+            se consolidarán las notas finales de todos los alumnos de forma definitiva. 
+            <strong>Esta acción bloqueará todo registro o cambio futuro de notas y asistencias.</strong>
+          </p>
+        </div>
+      </div>
+    }
+
+    <div modal-actions class="modal-actions">
+      <app-button
+        variant="tertiary"
+        [disabled]="isClosingSubject() !== null"
+        (clicked)="closeCloseModal()"
+      >
+        Cancelar
+      </app-button>
+
+      <app-button
+        variant="absent"
+        [disabled]="isClosingSubject() !== null"
+        (clicked)="confirmCloseSubject()"
+      >
+        @if (isClosingSubject() !== null) {
+          <app-loader size="sm" label="Cerrando..." />
+        } @else {
+          Cerrar Acta de Materia
+        }
+      </app-button>
+    </div>
+  </app-modal>
+</div>

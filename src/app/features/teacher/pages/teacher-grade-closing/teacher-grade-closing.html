@@ -1,0 +1,168 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Cierre de Actas de Notas</h1>
+    <p class="page-subtitle">Consolidación de notas finales y generación de actas en PDF para las materias asignadas.</p>
+  </div>
+
+  <div class="page-content">
+    <!-- Filters Panel -->
+    <div class="filters-card">
+      <div class="search-input-group">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="form-control filter-search"
+          placeholder="Buscar materia por nombre o código..."
+          [ngModel]="searchFilter()"
+          (ngModelChange)="searchFilter.set($event)"
+        />
+      </div>
+
+      <div class="filter-actions">
+        <div class="select-wrapper">
+          <select
+            class="form-control select-filter"
+            [ngModel]="statusFilter()"
+            (ngModelChange)="statusFilter.set($event)"
+          >
+            <option value="ALL">Todos los estados</option>
+            <option value="ACTIVE">Activas (Abiertas)</option>
+            <option value="CLOSED">Cerradas</option>
+          </select>
+          <span class="material-symbols-outlined select-arrow">expand_more</span>
+        </div>
+        
+        <button class="btn-refresh" (click)="loadSubjects()" [disabled]="isLoading()">
+          <span class="material-symbols-outlined" [class.spinning]="isLoading()">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Display -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <app-loader size="lg" label="Cargando materias..." />
+      </div>
+    } @else if (filteredSubjects().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-outlined">verified_user</span>
+        <h3>No se encontraron materias</h3>
+        <p>No tienes materias registradas o que coincidan con la búsqueda.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Materia</th>
+              <th>Modalidad</th>
+              <th>Estado Acta</th>
+              <th class="actions-header">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (subject of filteredSubjects(); track subject.id) {
+              <tr [class.closed-row]="subject.recordStatus === 'CLOSED'">
+                <td class="font-mono">{{ subject.code }}</td>
+                <td class="subject-name">{{ subject.name }}</td>
+                <td>
+                  <span class="modality-tag" [class]="subject.modality">
+                    {{ subject.modality === 'FACE_TO_FACE' ? 'Presencial' : 'Semipresencial' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge" [class]="subject.recordStatus">
+                    {{ subject.recordStatus === 'DRAFT' ? 'Borrador' : subject.recordStatus === 'ACTIVE' ? 'Abierta' : 'Cerrada' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions-cell">
+                    <!-- PDF Download -->
+                    <app-button
+                      variant="secondary"
+                      [disabled]="isDownloading() !== null"
+                      (clicked)="downloadPdf(subject)"
+                    >
+                      @if (isDownloading() === subject.id) {
+                        <app-loader size="sm" />
+                      } @else {
+                        <span class="btn-inner">
+                          <span class="material-symbols-outlined">picture_as_pdf</span>
+                          Acta PDF
+                        </span>
+                      }
+                    </app-button>
+
+                    <!-- Close Subject Button -->
+                    @if (subject.recordStatus !== 'CLOSED') {
+                      <app-button
+                        variant="absent"
+                        [disabled]="isClosingSubject() !== null"
+                        (clicked)="openCloseModal(subject)"
+                      >
+                        <span class="btn-inner">
+                          <span class="material-symbols-outlined">lock</span>
+                          Cerrar Acta
+                        </span>
+                      </app-button>
+                    } @else {
+                      <span class="closed-label">
+                        <span class="material-symbols-outlined text-green">verified</span>
+                        Cerrada
+                      </span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Close Confirmation Modal -->
+  <app-modal
+    [isOpen]="isCloseModalOpen()"
+    title="Confirmación de Cierre Definitivo"
+    [disableBackdropClick]="isClosingSubject() !== null"
+    (closed)="closeCloseModal()"
+  >
+    @if (selectedSubject()) {
+      <div class="modal-warning">
+        <span class="material-symbols-outlined warning-icon">warning</span>
+        <div>
+          <h3>¿Está seguro de cerrar la materia?</h3>
+          <p class="warning-text">
+            Al cerrar el acta de la materia <strong>{{ selectedSubject()?.code }} - {{ selectedSubject()?.name }}</strong>,
+            las calificaciones finales se calcularán y se consolidarán definitivamente.
+            <strong>Luego de esto, no se permitirá modificar notas ni asistencias para esta materia.</strong>
+          </p>
+        </div>
+      </div>
+    }
+
+    <div modal-actions class="modal-actions">
+      <app-button
+        variant="tertiary"
+        [disabled]="isClosingSubject() !== null"
+        (clicked)="closeCloseModal()"
+      >
+        Cancelar
+      </app-button>
+
+      <app-button
+        variant="absent"
+        [disabled]="isClosingSubject() !== null"
+        (clicked)="confirmCloseSubject()"
+      >
+        @if (isClosingSubject() !== null) {
+          <app-loader size="sm" label="Procesando cierre..." />
+        } @else {
+          Confirmar y Cerrar Materia
+        }
+      </app-button>
+    </div>
+  </app-modal>
+</div>

@@ -35,12 +35,12 @@ export const teacherRoutes: Routes = [
         ]
       },
       {
-        path: 'attendance',
-        loadComponent: () => import('../../shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+        path: 'attendance-reports',
+        loadComponent: () => import('./pages/teacher-attendance-report/teacher-attendance-report').then(m => m.TeacherAttendanceReport)
       },
       {
-        path: 'actas',
-        loadComponent: () => import('../../shared/components/under-construction/under-construction').then(m => m.UnderConstruction)
+        path: 'grade-closing',
+        loadComponent: () => import('./pages/teacher-grade-closing/teacher-grade-closing').then(m => m.TeacherGradeClosing)
       },
     ],
   },

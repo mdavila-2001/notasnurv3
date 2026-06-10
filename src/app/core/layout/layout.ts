@@ -70,8 +70,8 @@ export class Layout implements OnInit {
       this.menuItems.set([
         { path: '/teacher/dashboard', icon: 'dashboard', label: 'Inicio' },
         { path: '/teacher/subjects', icon: 'class', label: 'Mis Materias' },
-        { path: '/teacher/attendance', icon: 'assignment_late', label: 'Reportes de Faltas' },
-        { path: '/teacher/actas', icon: 'task_alt', label: 'Cierre de Actas' },
+        { path: '/teacher/attendance-reports', icon: 'assignment_late', label: 'Reportes de Faltas' },
+        { path: '/teacher/grade-closing', icon: 'task_alt', label: 'Cierre de Actas' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
     } else if (role === 'STUDENT') {
