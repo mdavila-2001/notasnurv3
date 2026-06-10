@@ -78,6 +78,10 @@ describe('TeacherGradeClosing', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });

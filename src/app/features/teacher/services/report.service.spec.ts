@@ -54,6 +54,7 @@ describe('ReportService', () => {
 
   afterEach(() => {
     httpMock.verify();
+    TestBed.resetTestingModule();
   });
 
   describe('reportOptions', () => {
@@ -64,15 +65,15 @@ describe('ReportService', () => {
     it('should have correct grades-pdf config', () => {
       const pdf = service.reportOptions.find(r => r.type === 'grades-pdf');
       expect(pdf?.label).toContain('PDF');
-      expect(pdf?.endpoint('99')).toBe('/reports/grades-pdf/99');
-      expect(pdf?.filename('99')).toBe('acta-materia-99.pdf');
+      expect(pdf?.endpoint('99')).toBe('/reports/subjects/99/grades-report/pdf');
+      expect(pdf?.filename('99')).toBe('grades-report-subject-99.pdf');
     });
 
     it('should have correct grades-excel config', () => {
       const excel = service.reportOptions.find(r => r.type === 'grades-excel');
       expect(excel?.label).toContain('Excel');
-      expect(excel?.endpoint('99')).toBe('/reports/grades-excel/99');
-      expect(excel?.filename('99')).toBe('reporte-notas-materia-99.xls');
+      expect(excel?.endpoint('99')).toBe('/reports/subjects/99/attendance/excel');
+      expect(excel?.filename('99')).toBe('attendance-report-subject-99.xlsx');
     });
   });
 
@@ -81,7 +82,7 @@ describe('ReportService', () => {
       let result = false;
       service.download('grades-pdf').subscribe(r => { result = r; });
 
-      const req = httpMock.expectOne('/api/reports/grades-pdf/99');
+      const req = httpMock.expectOne('/api/reports/subjects/99/grades-report/pdf');
       expect(req.request.method).toBe('GET');
       expect(req.request.responseType).toBe('blob');
       req.flush(new Blob(['%PDF'], { type: 'application/pdf' }));
@@ -101,10 +102,10 @@ describe('ReportService', () => {
       let result = false;
       service.download('grades-excel').subscribe(r => { result = r; });
 
-      const req = httpMock.expectOne('/api/reports/grades-excel/99');
+      const req = httpMock.expectOne('/api/reports/subjects/99/attendance/excel');
       expect(req.request.method).toBe('GET');
       expect(req.request.responseType).toBe('blob');
-      req.flush(new Blob(['EXCEL'], { type: 'application/vnd.ms-excel' }));
+      req.flush(new Blob(['EXCEL'], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
 
       expect(result).toBe(true);
       expect(mockToast.success).toHaveBeenCalledWith(
@@ -117,7 +118,7 @@ describe('ReportService', () => {
       let result = true;
       service.download('grades-pdf').subscribe(r => { result = r; });
 
-      const req = httpMock.expectOne('/api/reports/grades-pdf/99');
+      const req = httpMock.expectOne('/api/reports/subjects/99/grades-report/pdf');
       req.flush(null, { status: 500, statusText: 'Server Error' });
 
       expect(result).toBe(false);
@@ -132,7 +133,7 @@ describe('ReportService', () => {
       service.download('grades-pdf').subscribe();
       expect(service.isDownloading()).toBe('grades-pdf');
 
-      httpMock.expectOne('/api/reports/grades-pdf/99').flush(new Blob());
+      httpMock.expectOne('/api/reports/subjects/99/grades-report/pdf').flush(new Blob());
       expect(service.isDownloading()).toBeNull();
     });
 

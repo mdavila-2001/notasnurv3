@@ -154,6 +154,7 @@ export class AdminReports implements OnInit {
               s.id === subject.id ? { ...s, recordStatus: 'CLOSED' } : s
             )
           );
+          this.isClosingSubject.set(null);
           this.closeCloseModal();
         },
         error: (err) => {

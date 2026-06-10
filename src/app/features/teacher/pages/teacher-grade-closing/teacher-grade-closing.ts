@@ -122,6 +122,7 @@ export class TeacherGradeClosing implements OnInit {
           this.subjects.update((list) =>
             list.map((s) => (s.id === subject.id ? { ...s, recordStatus: 'CLOSED' } : s))
           );
+          this.isClosingSubject.set(null);
           this.closeCloseModal();
         },
         error: (err) => {
