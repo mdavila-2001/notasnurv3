@@ -129,22 +129,46 @@ describe('EvaluationPlanService', () => {
     });
   });
 
-  describe('componentsTotalWeight / canActivate', () => {
-    it('should compute componentsTotalWeight correctly', () => {
+  describe('componentsTotalWeight / canActivate (Req 4 y 9)', () => {
+    it('should compute componentsTotalWeight correctly and validate sum = 100 (valid case)', () => {
       service['_plan'].set(mockPlan);
       expect(service.componentsTotalWeight()).toBe(100);
+      expect(service.isComponentsWeightValid()).toBe(true);
       expect(service.canActivate()).toBe(true);
+      expect(service.componentsMissingWeight()).toBe(0);
+      expect(service.componentsExcessWeight()).toBe(0);
     });
 
-    it('should not activate when sum is not 100', () => {
+    it('should invalidate plan configuration when sum = 99 (boundary case)', () => {
       service['_plan'].set({
         ...mockPlan,
         components: [
-          { id: 1, name: 'Parcial 1', weight: 50, description: '' },
+          { id: 1, name: 'Parcial 1', weight: 30, description: '' },
+          { id: 2, name: 'Parcial 2', weight: 30, description: '' },
+          { id: 3, name: 'Prácticas', weight: 39, description: '' }, // Sum is 99
         ],
       });
-      expect(service.componentsTotalWeight()).toBe(50);
+      expect(service.componentsTotalWeight()).toBe(99);
+      expect(service.isComponentsWeightValid()).toBe(false);
       expect(service.canActivate()).toBe(false);
+      expect(service.componentsMissingWeight()).toBe(1);
+      expect(service.componentsExcessWeight()).toBe(0);
+    });
+
+    it('should invalidate plan configuration when sum = 101 (boundary case)', () => {
+      service['_plan'].set({
+        ...mockPlan,
+        components: [
+          { id: 1, name: 'Parcial 1', weight: 30, description: '' },
+          { id: 2, name: 'Parcial 2', weight: 30, description: '' },
+          { id: 3, name: 'Prácticas', weight: 41, description: '' }, // Sum is 101
+        ],
+      });
+      expect(service.componentsTotalWeight()).toBe(101);
+      expect(service.isComponentsWeightValid()).toBe(false);
+      expect(service.canActivate()).toBe(false);
+      expect(service.componentsMissingWeight()).toBe(0);
+      expect(service.componentsExcessWeight()).toBe(1);
     });
 
     it('should return 0 for empty plan', () => {

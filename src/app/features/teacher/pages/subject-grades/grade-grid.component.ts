@@ -17,6 +17,9 @@ import { Modal } from '../../../../shared/components/modal/modal';
 import { Table, TableColumn } from '../../../../shared/components/table/table';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { GradeApiService } from '../../services/grade-api.service';
+import { GlobalSettingsService } from '../../../../core/services/settings/global-settings.service';
+import { CURRENT_DATE } from '../../../../core/services/settings/current-date.token';
+import { GlobalSettingsResponse } from '../../../../core/models/settings.model';
 
 type GradeLoadState = {
   subjectId: string | null;
@@ -44,6 +47,11 @@ export class GradeGridComponent {
   private readonly attendanceService = inject(AttendanceService);
   private readonly gradeApi = inject(GradeApiService);
   private readonly toast = inject(ToastService);
+  private readonly settingsService = inject(GlobalSettingsService);
+  private readonly getCurrentDate = inject(CURRENT_DATE);
+
+  readonly globalSettings = signal<GlobalSettingsResponse | null>(null);
+  readonly currentDate = signal<Date>(this.getCurrentDate());
 
   readonly routeSubjectId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('subjectId') ?? params.get('id'))),
@@ -192,16 +200,59 @@ export class GradeGridComponent {
     this.gradeRowsDraft().every((row) => (row.enrollmentId?.trim().length ?? 0) > 0),
   );
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
+
+  readonly isGradesLocked = computed(() => {
+    const settings = this.globalSettings();
+    if (!settings) {
+      return false;
+    }
+
+    if (settings.institutional.allowLateGradesEntry) {
+      return false;
+    }
+
+    const deadlineStr = settings.academic.globalGradesDeadline;
+    if (!deadlineStr) {
+      return false;
+    }
+
+    const currentDate = this.currentDate();
+    const currentVal = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+
+    // Parse YYYY-MM-DD safely in local time
+    const parts = deadlineStr.split('-');
+    if (parts.length !== 3) {
+      return false;
+    }
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const deadlineVal = new Date(year, month, day).getTime();
+
+    return currentVal > deadlineVal;
+  });
+
   readonly canSave = computed(() =>
     this.hasComponents() &&
     this.hasStudents() &&
     this.saveableGradeCount() > 0 &&
     this.hasValidEnrollmentIds() &&
     !this.isLoading() &&
-    !this.isSaving(),
+    !this.isSaving() &&
+    !this.isGradesLocked(),
   );
 
   constructor() {
+    // Load global settings
+    this.settingsService.getGlobalSettings().subscribe({
+      next: (settings) => {
+        this.globalSettings.set(settings);
+      },
+      error: () => {
+        this.toast.error('No se pudieron cargar los parámetros de configuración global.', 'Configuración');
+      }
+    });
+
     effect(
       () => {
         const subjectId = this.routeSubjectId();
@@ -227,7 +278,7 @@ export class GradeGridComponent {
         const components = this.components();
         const gradeLoadState = this.existingGradesState();
 
-        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading') {
+        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading' || gradeLoadState.status === 'idle') {
           return;
         }
 
@@ -490,14 +541,14 @@ export class GradeGridComponent {
     absencesMap: Map<string, number>,
     absenceLimit: number,
   ): GradeAcademicStatus {
-    if (!this.isRowComplete(row, components)) {
-      return 'PENDIENTE';
-    }
-
     const absences = this.getAbsenceCount(row, absencesMap);
 
-    if (absences > absenceLimit) {
+    if (absences >= absenceLimit) {
       return 'REPROBADO_POR_FALTAS';
+    }
+
+    if (!this.isRowComplete(row, components)) {
+      return 'PENDIENTE';
     }
 
     if (finalGrade >= 51) {

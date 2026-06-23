@@ -93,7 +93,6 @@ export class Login implements OnInit {
     }
   }
 
-  // Getters for clean template access
   get idControl() { return this.loginForm.get('identifier'); }
   get passwordControl() { return this.loginForm.get('password'); }
 }

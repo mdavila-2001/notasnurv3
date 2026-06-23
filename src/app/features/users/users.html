@@ -43,19 +43,7 @@
         <p class="stat-label stat-label-gray">ACTIVOS</p>
         <div class="stat-number-row">
           <span class="stat-number stat-number-dark">{{ activeUsersCount() }}</span>
-          <span class="stat-trend">↑4%</span>
         </div>
-      </div>
-    </div>
-
-    <div class="stat-card stat-gradient">
-      <div class="stat-body">
-        <p class="stat-eval-label">Próxima Evaluación de Desempeño</p>
-        <span class="stat-eval-date">Lunes, 15 Octubre</span>
-        <p class="stat-eval-sub">85% de las plazas han sido notificadas.</p>
-      </div>
-      <div class="stat-chevron">
-        <span class="material-symbols-outlined">chevron_right</span>
       </div>
     </div>
   </div>
@@ -112,7 +100,7 @@
                 </div>
                 <div class="docente-info">
                   <span class="docente-name" [class.name-inactive]="user.status === 'INACTIVE'">
-                    {{ user.name }} {{ user.lastName }}
+                    {{ user.fullName }}
                   </span>
                   <span class="docente-id">ID: {{ user.id.substring(0,8) }}...</span>
                 </div>
@@ -174,28 +162,52 @@
     
     <div class="form-grid">
       <div class="form-group">
-        <label class="label-text">NOMBRE(S)</label>
+        <label class="label-text">PRIMER NOMBRE</label>
         <input type="text" class="custom-select" [(ngModel)]="newUser.name" placeholder="Ej: Juan">
       </div>
 
       <div class="form-group">
-        <label class="label-text">APELLIDOS</label>
+        <label class="label-text">SEGUNDO NOMBRE</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.middleName" placeholder="Ej: Carlos (Opcional)">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">APELLIDO PATERNO</label>
         <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" placeholder="Ej: Perez">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">APELLIDO MATERNO</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.motherLastName" placeholder="Ej: Gomez (Opcional)">
       </div>
 
       <div class="form-group full-width">
         <label class="label-text">CORREO INSTITUCIONAL</label>
-        <input type="email" class="custom-select" [(ngModel)]="newUser.email" placeholder="usuario@nur.edu.bo">
+        <input type="email" 
+               class="custom-select" 
+               [(ngModel)]="newUser.email" 
+               [disabled]="selectedTab() === 'Estudiante'" 
+               placeholder="usuario@nur.edu.bo"
+               autocomplete="username">
       </div>
 
       <div class="form-group">
         <label class="label-text">CI / DOCUMENTO</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.ci" placeholder="1234567">
+        <input type="text" 
+               class="custom-select" 
+               [(ngModel)]="newUser.ci" 
+               (ngModelChange)="onCiChange()" 
+               placeholder="1234567"
+               autocomplete="new-ci">
       </div>
 
       <div class="form-group">
         <label class="label-text">CONTRASEÑA</label>
-        <input type="password" class="custom-select" [(ngModel)]="newUser.password" placeholder="Mínimo 8 caracteres">
+        <input type="password" 
+               class="custom-select" 
+               [(ngModel)]="newUser.password" 
+               placeholder="Mínimo 8 caracteres"
+               autocomplete="new-password">
       </div>
 
       <div class="form-group full-width">

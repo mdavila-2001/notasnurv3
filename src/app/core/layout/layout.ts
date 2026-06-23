@@ -79,7 +79,7 @@ export class Layout implements OnInit {
         { path: '/student/dashboard', icon: 'dashboard', label: 'Inicio' },
         { path: '/student/subjects', icon: 'auto_stories', label: 'Mis Materias' },
         { path: '/student/attendance', icon: 'assignment_late', label: 'Asistencia' },
-        { path: '/student/schedule', icon: 'calendar_today', label: 'Horario de Clases' },
+        // Oculto temporalmente: { path: '/student/schedule', icon: 'calendar_today', label: 'Horario de Clases' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
     }

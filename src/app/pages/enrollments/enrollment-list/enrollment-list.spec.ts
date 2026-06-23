@@ -104,4 +104,26 @@ describe('EnrollmentListComponent', () => {
     });
     expect(component.isEnrollModalOpen()).toBe(false);
   });
+
+  it('should display error toast when enrollment fails due to duplicity (Req 3)', () => {
+    // Mock the backend API error response for duplicity
+    const mockErrorResponse = {
+      status: 409,
+      error: {
+        message: 'El estudiante ya se encuentra matriculado en esta materia.'
+      }
+    };
+    mockEnrollmentApiService.enrollStudent.mockReturnValue(throwError(() => mockErrorResponse));
+
+    component.selectedSubject.set(mockSubjects[0] as any);
+    component.userDegreeId.set(45);
+
+    // Call confirmEnroll which will fail with the mock error
+    component.confirmEnroll();
+
+    // Verify error toast display
+    expect(component.showToast()).toBe(true);
+    expect(component.toastType()).toBe('error');
+    expect(component.toastMessage()).toBe('El estudiante ya se encuentra matriculado en esta materia.');
+  });
 });
