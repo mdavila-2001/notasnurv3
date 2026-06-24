@@ -3,7 +3,8 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { signal, WritableSignal } from '@angular/core';
 import { of, throwError } from 'rxjs';
-import { vi } from 'vitest';
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { Location } from '@angular/common';
 
 import { GradeGridComponent } from './grade-grid.component';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
@@ -25,6 +26,7 @@ describe('GradeGridComponent', () => {
   let mockSettingsService: any;
   let mockToast: any;
   let mockCurrentDateFn: any;
+  let mockLocation: any;
 
   const mockStudents: StudentOperational[] = [
     {
@@ -92,8 +94,8 @@ describe('GradeGridComponent', () => {
       currentSubjectId: signal('101'),
       studentsLoading: signal(false),
       isLoading: signal(false),
-      contextError: signal(null),
-      studentsError: signal(null),
+      contextError: signal<string | null>(null),
+      studentsError: signal<string | null>(null),
       loadSubjectContext: vi.fn(),
       clearContextError: vi.fn(),
       clearStudentsError: vi.fn(),
@@ -102,8 +104,8 @@ describe('GradeGridComponent', () => {
 
     mockAttendanceService = {
       getSubjectAbsences: vi.fn().mockReturnValue(of(new Map([
-        ['enroll-1', 4], // Presencial (limit 5): 4 absences -> Regular / At Risk
-        ['enroll-2', 5]  // Presencial (limit 5): 5 absences -> Reprobado por Faltas
+        ['enroll-1', 4], // Presencial (limit 5): 4 absences
+        ['enroll-2', 5]  // Presencial (limit 5): 5 absences
       ])))
     };
 
@@ -122,7 +124,10 @@ describe('GradeGridComponent', () => {
       error: vi.fn()
     };
 
-    // By default, current date is BEFORE deadline
+    mockLocation = {
+      back: vi.fn()
+    };
+
     mockCurrentDateFn = vi.fn().mockReturnValue(new Date(2026, 5, 15));
 
     await TestBed.configureTestingModule({
@@ -132,6 +137,7 @@ describe('GradeGridComponent', () => {
         { provide: GlobalSettingsService, useValue: mockSettingsService },
         { provide: ToastService, useValue: mockToast },
         { provide: CURRENT_DATE, useValue: mockCurrentDateFn },
+        { provide: Location, useValue: mockLocation },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -159,6 +165,10 @@ describe('GradeGridComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
@@ -169,8 +179,6 @@ describe('GradeGridComponent', () => {
   });
 
   describe('Req 6: Grades Closing and Date Lock Validation', () => {
-    // Req 6: En el componente de entrada de notas, inyecta una fecha ficticia (mock date) y verifica que los inputs HTML se deshabiliten si la fecha actual es mayor a la fecha límite configurada.
-
     it('should NOT lock grades if current date is BEFORE deadline', () => {
       component.currentDate.set(new Date(2026, 5, 15));
       fixture.detectChanges();
@@ -192,7 +200,7 @@ describe('GradeGridComponent', () => {
       fixture.detectChanges();
 
       expect(component.isGradesLocked()).toBe(true);
-      expect(component.canSave()).toBe(false); // cannot save when locked
+      expect(component.canSave()).toBe(false);
     });
 
     it('should NOT lock grades even if date is AFTER deadline when allowLateGradesEntry is true', () => {
@@ -212,30 +220,23 @@ describe('GradeGridComponent', () => {
   });
 
   describe('Req 7: Academic Status computation based on absences and scores', () => {
-    // Req 7: Prueba la lógica condicional que alerta sobre estudiantes en riesgo / reprobados por faltas según modalidad.
-
     it('should evaluate student status correctly based on modality and absence limit (>= check)', () => {
-      // Carlos has 4 absences, which is < 5 limit for Presencial. Grade: 35 + 50 = 85 (>= 51 Passing grade)
       const data = component.tableData();
       const student1 = data.find(r => r.enrollmentId === 'enroll-1');
       expect(student1?.finalGrade).toBe(85);
       expect(student1?.academicStatus).toBe('APROBADO');
 
-      // Ana has 5 absences, which reaches/exceeds the 5 limit for Presencial.
-      // So she is Reprobado por Faltas despite final grade if completed or otherwise
       const student2 = data.find(r => r.enrollmentId === 'enroll-2');
       expect(student2?.academicStatus).toBe('REPROBADO_POR_FALTAS');
     });
 
     it('should handle Semi-presencial (BLENDED) absence limit of 3', () => {
-      // Change subject modality to BLENDED
       mockOperationalService.subject.set({
         ...mockSubject,
         modality: 'BLENDED'
       });
       fixture.detectChanges();
 
-      // Now limit is 3. Carlos has 4 absences. Since 4 >= 3, Carlos status is REPROBADO_POR_FALTAS
       const data = component.tableData();
       const student1 = data.find(r => r.enrollmentId === 'enroll-1');
       expect(student1?.academicStatus).toBe('REPROBADO_POR_FALTAS');
@@ -244,18 +245,16 @@ describe('GradeGridComponent', () => {
 
   describe('Grade entry and Save functionality', () => {
     it('should compute final grades dynamically upon changes', () => {
-      // Trigger grade change for Ana (enroll-2) on Component 2 (Examen 2)
       component.onGradeChange('enroll-2', 2, 45);
       fixture.detectChanges();
 
       const data = component.tableData();
       const student2 = data.find(r => r.enrollmentId === 'enroll-2');
-      expect(student2?.finalGrade).toBe(65); // 20 (Parcial 1) + 45 (Parcial 2)
-      expect(student2?.academicStatus).toBe('REPROBADO_POR_FALTAS'); // Still reprobado by absences (5 absences)
+      expect(student2?.finalGrade).toBe(65);
+      expect(student2?.academicStatus).toBe('REPROBADO_POR_FALTAS');
     });
 
     it('should trigger save bulk grades request and show success message', async () => {
-      // Ana (enroll-2) Component 2 is changed
       component.onGradeChange('enroll-2', 2, 45);
       expect(component.canSave()).toBe(true);
 
@@ -279,6 +278,150 @@ describe('GradeGridComponent', () => {
       await component.confirmSave();
 
       expect(mockToast.error).toHaveBeenCalledWith('Server error', 'Guardado fallido');
+    });
+  });
+
+  describe('Edge case functions and effects coverage', () => {
+    it('should handle settings service loading failure', async () => {
+      mockSettingsService.getGlobalSettings.mockReturnValue(throwError(() => new Error('Settings error')));
+      fixture = TestBed.createComponent(GradeGridComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(mockToast.error).toHaveBeenCalledWith(
+        'No se pudieron cargar los parámetros de configuración global.',
+        'Configuración'
+      );
+    });
+
+    it('should handle subject absences loading failure and toast warning', () => {
+      mockAttendanceService.getSubjectAbsences.mockReturnValue(throwError(() => new Error('Absence error')));
+      
+      fixture = TestBed.createComponent(GradeGridComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(mockToast.warning).toHaveBeenCalledWith(
+        'Absence error',
+        'Faltas no disponibles'
+      );
+    });
+
+    it('should show toast error when contextError or studentsError signals are set', () => {
+      mockOperationalService.contextError.set('Context loading failed');
+      fixture.detectChanges();
+      expect(mockToast.error).toHaveBeenCalledWith('Context loading failed', 'Carga de materia');
+      expect(mockOperationalService.clearContextError).toHaveBeenCalled();
+
+      mockOperationalService.studentsError.set('Students loading failed');
+      fixture.detectChanges();
+      expect(mockToast.error).toHaveBeenCalledWith('Students loading failed', 'Carga de estudiantes');
+      expect(mockOperationalService.clearStudentsError).toHaveBeenCalled();
+    });
+
+    it('should show toast warning and ignore if payload grades are empty', async () => {
+      // Clean components to trigger payload empty warning
+      component.onGradeChange('enroll-1', 1, '');
+      component.onGradeChange('enroll-1', 2, '');
+      component.onGradeChange('enroll-2', 1, '');
+      fixture.detectChanges();
+
+      // Override computed canSave property to bypass early exit validation
+      Object.defineProperty(component, 'canSave', {
+        value: () => true
+      });
+
+      await component.confirmSave();
+      expect(mockToast.warning).toHaveBeenCalledWith(
+        'Ingresa al menos una nota válida antes de guardar.',
+        'Sin notas'
+      );
+    });
+
+    it('should show error when students without valid enrollmentId are loaded', () => {
+      const mockInvalidStudents = [
+        { studentId: '', fullName: 'Ghost Student', ci: '999999', enrollmentId: '', degreeName: '', photoUrl: '' }
+      ];
+      // Reset initialization tracker to allow state rebuild
+      (component as any).initializedSubjectId.set(null);
+      mockOperationalService.students.set(mockInvalidStudents);
+      fixture.detectChanges();
+
+      expect(mockToast.error).toHaveBeenCalledWith(
+        expect.stringContaining('Se omitieron 1 estudiante(s) sin ID de matrícula válido'),
+        'Datos inválidos'
+      );
+    });
+
+    it('should navigate back on goBack()', () => {
+      component.goBack();
+      expect(mockLocation.back).toHaveBeenCalled();
+    });
+
+    it('should return correct component max weight, and default to 100 if not found', () => {
+      expect(component.getComponentMax('component-1')).toBe(40);
+      expect(component.getComponentMax('component-2')).toBe(60);
+      expect(component.getComponentMax('component-99')).toBe(100);
+    });
+
+    it('should check cell validation correctly using isCellInvalid', () => {
+      expect(component.isCellInvalid(null, 1)).toBe(false);
+      expect(component.isCellInvalid('non-existent', 1)).toBe(false);
+      expect(component.isCellInvalid('enroll-2', 1)).toBe(false);
+
+      // Directly update draft rows with invalid values (bypassing normalizer)
+      (component as any).gradeRowsDraft.update((rows: any[]) => 
+        rows.map(r => r.enrollmentId === 'enroll-2' ? { ...r, scores: { ...r.scores, 1: 150 } } : r)
+      );
+      expect(component.isCellInvalid('enroll-2', 1)).toBe(true);
+
+      (component as any).gradeRowsDraft.update((rows: any[]) => 
+        rows.map(r => r.enrollmentId === 'enroll-2' ? { ...r, scores: { ...r.scores, 1: -10 } } : r)
+      );
+      expect(component.isCellInvalid('enroll-2', 1)).toBe(true);
+
+      (component as any).gradeRowsDraft.update((rows: any[]) => 
+        rows.map(r => r.enrollmentId === 'enroll-2' ? { ...r, scores: { ...r.scores, 1: NaN } } : r)
+      );
+      expect(component.isCellInvalid('enroll-2', 1)).toBe(true);
+    });
+
+    it('should return cell value correctly using getCellValue', () => {
+      expect(component.getCellValue(null, 1)).toBe('');
+      expect(component.getCellValue('enroll-1', 1)).toBe(35);
+      expect(component.getCellValue('enroll-1', 99)).toBe('');
+    });
+
+    it('should extract error messages correctly from different types', () => {
+      const errObj = { error: { message: 'Custom Backend Error' } };
+      expect((component as any).extractErrorMessage(errObj, 'Fallback')).toBe('Custom Backend Error');
+
+      const errorInstance = new Error('Instance Error');
+      expect((component as any).extractErrorMessage(errorInstance, 'Fallback')).toBe('Instance Error');
+
+      expect((component as any).extractErrorMessage('simple string', 'Fallback')).toBe('Fallback');
+    });
+
+    it('should prevent modal close if saving', () => {
+      component.isSaving.set(true);
+      component.isSaveModalOpen.set(true);
+      component.closeSaveModal();
+      expect(component.isSaveModalOpen()).toBe(true);
+    });
+
+    it('should do nothing on openSaveModal if cannot save', () => {
+      component.isSaveModalOpen.set(false);
+      // Make canSave return false by setting isSaving to true
+      component.isSaving.set(true);
+      fixture.detectChanges();
+      component.openSaveModal();
+      expect(component.isSaveModalOpen()).toBe(false);
+    });
+
+    it('should ignore onGradeChange if enrollmentId is null', () => {
+      const spy = vi.spyOn(component as any, 'normalizeScoreValue');
+      component.onGradeChange(null, 1, 50);
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });
