@@ -116,7 +116,7 @@ describe('AdminDashboardService', () => {
       req.flush(mockBackendResponse);
     });
 
-    it('should fallback to mock critical subjects if response has empty subjects list', () => {
+    it('should return empty critical subjects if response has empty subjects list', () => {
       const mockBackendResponse = {
         totalStudents: 100,
         activeSubjects: 5,
@@ -125,8 +125,7 @@ describe('AdminDashboardService', () => {
 
       service.getSummary().subscribe((summary) => {
         expect(summary.totalStudents).toBe(100);
-        expect(summary.criticalSubjects.length).toBe(5);
-        expect(summary.criticalSubjects[0].code).toBe('MAT-101'); // First mock
+        expect(summary.criticalSubjects.length).toBe(0);
       });
 
       const req = httpMock.expectOne(`${baseUrl}/dashboard/admin`);

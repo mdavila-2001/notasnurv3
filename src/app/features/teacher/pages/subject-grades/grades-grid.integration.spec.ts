@@ -7,7 +7,7 @@ import { GlobalSettingsService } from '../../../../core/services/settings/global
 import { ToastService } from '../../../../shared/services/toast.service';
 import { ActivatedRoute } from '@angular/router';
 import { CURRENT_DATE } from '../../../../core/services/settings/current-date.token';
-import { environment } from '../../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { of } from 'rxjs';
 

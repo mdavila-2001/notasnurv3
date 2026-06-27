@@ -5,7 +5,7 @@ import { TeacherGradeClosing } from './teacher-grade-closing';
 import { TeacherService } from '../../services/teacher.service';
 import { AdminSubjectService } from '../../../admin/services/admin-subject.service';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { environment } from '../../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
 describe('ActasClosing Integration', () => {
