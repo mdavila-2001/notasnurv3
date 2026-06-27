@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Settings } from './settings';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { of } from 'rxjs';
-import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { of, throwError } from 'rxjs';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
 describe('Settings', () => {
   let component: Settings;
@@ -11,7 +11,7 @@ describe('Settings', () => {
   let mockAuthService: any;
   let mockToastService: any;
 
-  const mockProfile = {
+  const mockProfileTeacher = {
     success: true,
     message: '',
     data: {
@@ -24,9 +24,35 @@ describe('Settings', () => {
     }
   };
 
-  beforeEach(async () => {
+  const mockProfileAdmin = {
+    success: true,
+    message: '',
+    data: {
+      id: 'usr-admin',
+      ci: '111111',
+      fullName: 'Admin User',
+      email: 'admin@nur.edu',
+      role: 'ADMIN',
+      status: 'ACTIVE'
+    }
+  };
+
+  const mockProfileStudent = {
+    success: true,
+    message: '',
+    data: {
+      id: 'usr-student',
+      ci: '222222',
+      fullName: 'Student User',
+      email: 'student@nur.edu',
+      role: 'STUDENT',
+      status: 'ACTIVE'
+    }
+  };
+
+  beforeEach(() => {
     mockAuthService = {
-      getCurrentUserProfile: vi.fn().mockReturnValue(of(mockProfile))
+      getCurrentUserProfile: vi.fn().mockReturnValue(of(mockProfileTeacher))
     };
 
     mockToastService = {
@@ -34,6 +60,18 @@ describe('Settings', () => {
       error: vi.fn()
     };
 
+    // Clean up DOM and localStorage before each test
+    document.documentElement.classList.remove('dark-theme');
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    document.documentElement.classList.remove('dark-theme');
+    localStorage.clear();
+  });
+
+  async function createComponent() {
     await TestBed.configureTestingModule({
       imports: [Settings],
       providers: [
@@ -44,19 +82,32 @@ describe('Settings', () => {
 
     fixture = TestBed.createComponent(Settings);
     component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+  }
 
-  it('should create', () => {
+  it('should create', async () => {
+    await createComponent();
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should load user profile on init', () => {
+  it('should load user profile on init', async () => {
+    await createComponent();
+    fixture.detectChanges();
     expect(mockAuthService.getCurrentUserProfile).toHaveBeenCalled();
-    expect(component.profile()).toEqual(mockProfile.data);
+    expect(component.profile()).toEqual(mockProfileTeacher.data);
   });
 
-  it('should change active tab correctly', () => {
+  it('should handle profile load error gracefully', async () => {
+    mockAuthService.getCurrentUserProfile.mockReturnValue(throwError(() => new Error('Error')));
+    await createComponent();
+    fixture.detectChanges();
+    expect(component.isProfileLoading()).toBe(false);
+    expect(mockToastService.error).toHaveBeenCalledWith('No se pudo cargar la información del perfil.');
+  });
+
+  it('should change active tab correctly', async () => {
+    await createComponent();
+    fixture.detectChanges();
     expect(component.activeTab()).toBe('profile');
     component.setTab('preferences');
     expect(component.activeTab()).toBe('preferences');
@@ -64,10 +115,88 @@ describe('Settings', () => {
     expect(component.activeTab()).toBe('security');
   });
 
-  it('should toggle dark mode state and show toast', () => {
-    const initialDarkMode = component.isDarkMode();
+  it('should load tabs for TEACHER role (only base tabs)', async () => {
+    await createComponent();
+    fixture.detectChanges();
+    const tabs = component.tabs();
+    expect(tabs.length).toBe(3);
+    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences', 'security']);
+  });
+
+  it('should load extra tabs for ADMIN role', async () => {
+    mockAuthService.getCurrentUserProfile.mockReturnValue(of(mockProfileAdmin));
+    await createComponent();
+    fixture.detectChanges();
+    const tabs = component.tabs();
+    expect(tabs.length).toBe(5);
+    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences', 'security', 'system-academic', 'system-attendance']);
+  });
+
+  it('should load extra tabs for STUDENT role', async () => {
+    mockAuthService.getCurrentUserProfile.mockReturnValue(of(mockProfileStudent));
+    await createComponent();
+    fixture.detectChanges();
+    const tabs = component.tabs();
+    expect(tabs.length).toBe(4);
+    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences', 'security', 'subscriptions']);
+  });
+
+  it('should initialize dark theme if document contains dark-theme class', async () => {
+    document.documentElement.classList.add('dark-theme');
+    await createComponent();
+    fixture.detectChanges();
+    expect(component.isDarkMode()).toBe(true);
+  });
+
+  it('should initialize dark theme if localStorage contains dark theme key', async () => {
+    localStorage.setItem('theme', 'dark');
+    await createComponent();
+    fixture.detectChanges();
+    expect(component.isDarkMode()).toBe(true);
+    expect(document.documentElement.classList.contains('dark-theme')).toBe(true);
+  });
+
+  it('should toggle dark mode state, update document class/localStorage, and show success toast', async () => {
+    await createComponent();
+    fixture.detectChanges();
+    expect(component.isDarkMode()).toBe(false);
+
+    // Toggle ON
     component.toggleDarkMode();
-    expect(component.isDarkMode()).toBe(!initialDarkMode);
-    expect(mockToastService.success).toHaveBeenCalled();
+    expect(component.isDarkMode()).toBe(true);
+    expect(document.documentElement.classList.contains('dark-theme')).toBe(true);
+    expect(localStorage.getItem('theme')).toBe('dark');
+    expect(mockToastService.success).toHaveBeenCalledWith('Tema oscuro activado.');
+
+    // Toggle OFF
+    component.toggleDarkMode();
+    expect(component.isDarkMode()).toBe(false);
+    expect(document.documentElement.classList.contains('dark-theme')).toBe(false);
+    expect(localStorage.getItem('theme')).toBe('light');
+    expect(mockToastService.success).toHaveBeenCalledWith('Tema claro activado.');
+  });
+
+  it('should render corresponding components in template based on activeTab', async () => {
+    mockAuthService.getCurrentUserProfile.mockReturnValue(of(mockProfileAdmin));
+    await createComponent();
+    fixture.detectChanges();
+
+    // Tab default is profile
+    expect(fixture.nativeElement.querySelector('app-profile-view')).toBeTruthy();
+
+    // Switch to security
+    component.setTab('security');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-security-settings')).toBeTruthy();
+
+    // Switch to system-academic
+    component.setTab('system-academic');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-academic-settings')).toBeTruthy();
+
+    // Switch to system-attendance
+    component.setTab('system-attendance');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-attendance-settings')).toBeTruthy();
   });
 });

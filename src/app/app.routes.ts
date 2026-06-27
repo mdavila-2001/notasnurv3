@@ -39,10 +39,11 @@ export const routes: Routes = [
             path: 'attendance',
             loadComponent: () => import('./pages/student/student-attendance/student-attendance').then(m => m.StudentAttendance)
           },
-          {
-            path: 'schedule',
-            loadComponent: () => import('./pages/student/student-schedule/student-schedule').then(m => m.StudentSchedule)
-          }
+          // Oculto temporalmente:
+          // {
+          //   path: 'schedule',
+          //   loadComponent: () => import('./pages/student/student-schedule/student-schedule').then(m => m.StudentSchedule)
+          // }
         ]
       },
       { path: 'dashboard', redirectTo: '/admin/dashboard', pathMatch: 'full' },

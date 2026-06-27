@@ -29,6 +29,15 @@
       <app-loader [centered]="true" label="Cargando estudiantes, plan de evaluación y notas..." />
     </section>
   } @else {
+    @if (isGradesLocked()) {
+      <div class="alert-banner warning" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: var(--warning-subtle, #fef3c7); border: 1px solid var(--warning, #f59e0b); color: var(--warning-text, #92400e); display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined">warning</span>
+        <div>
+          <strong>El período de registro de calificaciones ha concluido.</strong> Las modificaciones están bloqueadas (Fecha límite: {{ globalSettings()?.academic?.globalGradesDeadline }}).
+        </div>
+      </div>
+    }
+
     <section class="summary-card">
       <div class="summary-head">
         <div>
@@ -93,7 +102,7 @@
                           [min]="0"
                           [max]="getComponentMax(column.key)"
                           [showErrors]="true"
-                          [disabled]="isSaving()"
+                          [disabled]="isSaving() || isGradesLocked()"
                           [value]="getCellValue(row.enrollmentId, getComponentIdFromColumnKey(column.key))"
                           (valueChange)="onGradeChange(row.enrollmentId, getComponentIdFromColumnKey(column.key), $event)"
                         />

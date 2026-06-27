@@ -121,7 +121,6 @@ export class AttendanceTab implements OnInit {
 
   handleSubmit(): void {
     const subjectId = this.operationalService.currentSubjectId() || this.getSubjectId();
-    console.log('[AttendanceTab] Intentando guardar con subjectId:', subjectId);
 
     if (!subjectId) {
       this.toast.error('No se pudo determinar la materia.', 'Error');
@@ -130,7 +129,6 @@ export class AttendanceTab implements OnInit {
 
     this.attendanceService.submit(subjectId).subscribe({
       next: (_success) => {
-        console.log('[AttendanceTab] Guardado exitoso');
         this.toast.success('La asistencia se guardó correctamente.', '¡Asistencia guardada!');
         // Recargar para confirmar la persistencia
         this.attendanceService.setDate(this.attendanceService.date());

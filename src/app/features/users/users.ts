@@ -174,6 +174,13 @@ export class Users implements OnInit {
     };
   }
 
+  onCiChange() {
+    if (this.selectedTab() === 'Estudiante') {
+      const ci = this.newUser.ci ? String(this.newUser.ci).trim() : '';
+      this.newUser.email = ci ? `${ci}@nur.edu.bo` : '';
+    }
+  }
+
   onSearch(event: Event) {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }

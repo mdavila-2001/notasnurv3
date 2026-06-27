@@ -61,13 +61,9 @@ export class AdminDashboardService {
     );
 
     const rawSubjects = source.criticalSubjects ?? source.materiasCriticas ?? [];
-    let criticalSubjects = Array.isArray(rawSubjects)
+    const criticalSubjects = Array.isArray(rawSubjects)
       ? rawSubjects.map((item) => this.normalizeCriticalSubject(item))
       : [];
-
-    if (criticalSubjects.length === 0) {
-      criticalSubjects = this.getMockCriticalSubjects();
-    }
 
     return {
       totalStudents,
@@ -109,51 +105,6 @@ export class AdminDashboardService {
       failureRate,
       status,
     };
-  }
-
-  private getMockCriticalSubjects(): CriticalSubject[] {
-    return [
-      {
-        id: '1',
-        code: 'MAT-101',
-        name: 'Álgebra Lineal',
-        teacherName: 'Ing. Carlos Mendoza',
-        failureRate: 45.5,
-        status: 'CERRADA',
-      },
-      {
-        id: '2',
-        code: 'INF-220',
-        name: 'Estructuras de Datos I',
-        teacherName: 'Lic. Martha Quiroga',
-        failureRate: 42.0,
-        status: 'ACTIVA',
-      },
-      {
-        id: '3',
-        code: 'FIS-102',
-        name: 'Física General II',
-        teacherName: 'Dr. Alejandro Rojas',
-        failureRate: 38.5,
-        status: 'CERRADA',
-      },
-      {
-        id: '4',
-        code: 'MAT-102',
-        name: 'Cálculo I',
-        teacherName: 'Ing. Roberto Gómez',
-        failureRate: 35.0,
-        status: 'ACTIVA',
-      },
-      {
-        id: '5',
-        code: 'INF-310',
-        name: 'Taller de Programación V',
-        teacherName: 'MSc. Marcelo Dávila',
-        failureRate: 15.2,
-        status: 'CERRADA',
-      },
-    ];
   }
 
   private resolveRate(
