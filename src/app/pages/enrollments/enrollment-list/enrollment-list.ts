@@ -2,6 +2,8 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import { AdminSubjectService, SubjectResponse } from '../../../features/admin/services/admin-subject.service';
 import { EnrollmentApiService, StudentEnrolledResponse, EnrollmentResponse } from '../../../features/teacher/services/enrollment-api.service';
+import { AdminDegreeService, DegreeResponse } from '../../../features/admin/services/admin-degree.service';
+import { UserDegreeService } from '../../../core/services/user-degree.service';
 import { Loader } from '../../../shared/components/loader/loader';
 import { Button } from '../../../shared/components/button/button';
 import { Modal } from '../../../shared/components/modal/modal';
@@ -20,6 +22,8 @@ export class EnrollmentListComponent implements OnInit {
   private readonly enrollmentApi = inject(EnrollmentApiService);
   private readonly subjectService = inject(AdminSubjectService);
   private readonly adminUserService = inject(AdminUserService);
+  private readonly degreeService = inject(AdminDegreeService);
+  private readonly userDegreeService = inject(UserDegreeService);
 
   readonly subjects = signal<SubjectResponse[]>([]);
   readonly selectedSubject = signal<SubjectResponse | null>(null);
@@ -41,6 +45,12 @@ export class EnrollmentListComponent implements OnInit {
   readonly selectedUserId = signal<string | null>(null);
   readonly isDegreesLoading = signal<boolean>(false);
   readonly degreesError = signal<string>('');
+
+  // Signals for creating a new academic record (UserDegree)
+  readonly isCreateRecordModalOpen = signal(false);
+  readonly allDegrees = signal<DegreeResponse[]>([]);
+  readonly selectedDegreeIdForRecord = signal<number | null>(null);
+  readonly isCreatingRecord = signal(false);
 
   readonly showToast = signal(false);
   readonly toastMessage = signal('');
@@ -225,6 +235,51 @@ export class EnrollmentListComponent implements OnInit {
         this.displayToast(this.extractErrorMessage(error, 'Error al dar de baja'), 'error');
       },
     });
+  }
+
+  openCreateRecordModal(): void {
+    this.selectedDegreeIdForRecord.set(null);
+    if (this.allDegrees().length === 0) {
+      this.degreeService.getAll().subscribe({
+        next: (res) => this.allDegrees.set(res.data ?? []),
+        error: () => this.displayToast('Error al cargar la lista de carreras', 'error'),
+      });
+    }
+    this.isCreateRecordModalOpen.set(true);
+  }
+
+  closeCreateRecordModal(): void {
+    this.isCreateRecordModalOpen.set(false);
+    this.selectedDegreeIdForRecord.set(null);
+  }
+
+  onDegreeForRecordSelected(value: string): void {
+    this.selectedDegreeIdForRecord.set(value ? Number(value) : null);
+  }
+
+  confirmCreateRecord(): void {
+    const userId = this.selectedUserId();
+    const degreeId = this.selectedDegreeIdForRecord();
+
+    if (!userId || !degreeId) {
+      this.displayToast('Selecciona una carrera para crear el expediente.', 'error');
+      return;
+    }
+
+    this.isCreatingRecord.set(true);
+    this.userDegreeService.openRecord({ userId, degreeId, type: 'STUDENT' })
+      .pipe(finalize(() => this.isCreatingRecord.set(false)))
+      .subscribe({
+        next: (res) => {
+          this.closeCreateRecordModal();
+          this.displayToast(`Expediente académico creado para la carrera seleccionada.`, 'success');
+          // Reload degrees for the student to unblock enrollment
+          this.onStudentSelected(userId);
+        },
+        error: (error: unknown) => {
+          this.displayToast(this.extractErrorMessage(error, 'Error al crear el expediente académico'), 'error');
+        },
+      });
   }
 
   displayToast(message: string, type: 'success' | 'error') {

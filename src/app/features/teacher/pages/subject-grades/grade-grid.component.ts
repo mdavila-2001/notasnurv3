@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, concat, firstValueFrom, Observable, of } from 'rxjs';
@@ -266,7 +266,9 @@ export class GradeGridComponent {
           return;
         }
 
-        this.operationalService.loadSubjectContext(subjectId);
+        untracked(() => {
+          this.operationalService.loadSubjectContext(subjectId);
+        });
       },
       { allowSignalWrites: true },
     );

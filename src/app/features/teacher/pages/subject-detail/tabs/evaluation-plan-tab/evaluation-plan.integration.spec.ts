@@ -65,6 +65,9 @@ describe('EvaluationPlan Integration', () => {
   });
 
   it('should flow through fetching empty plan, creating it, adding components, and activating it', () => {
+    // Trigger initial fetch manually since it's now handled by parent page context load
+    service.fetchPlan('12').subscribe();
+
     // 1. Initial render -> service fetches plan from API
     fixture.detectChanges();
 

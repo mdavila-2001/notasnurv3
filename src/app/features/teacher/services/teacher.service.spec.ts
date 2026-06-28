@@ -12,10 +12,8 @@ describe('TeacherService', () => {
 
   const mockDashboard: TeacherDashboardData = {
     welcomeMessage: 'Welcome Orlando',
-    averageAttendance: 85.5,
     pendingActasCount: 2,
     averageCourseGrade: 78.4,
-    nextExamDate: '2026-07-01',
     subjects: []
   };
 

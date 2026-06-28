@@ -126,6 +126,7 @@ describe('GradesGrid Integration', () => {
       ]
     });
 
+    await fixture.whenStable();
     fixture.detectChanges();
 
     // Verify recalculations
@@ -167,6 +168,7 @@ describe('GradesGrid Integration', () => {
     });
 
     saveReq.flush({ success: true });
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.isSaveModalOpen()).toBe(false);

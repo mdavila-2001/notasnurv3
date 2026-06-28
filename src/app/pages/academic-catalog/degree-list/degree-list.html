@@ -1,0 +1,41 @@
+<section class="list-page">
+  <header class="page-header">
+    <h1>Carreras</h1>
+    <app-button variant="primary" (clicked)="openNew()">Nueva Carrera</app-button>
+  </header>
+
+  @if (isLoading()) {
+    <p class="loading">Cargando carreras...</p>
+  }
+
+  <app-table
+    [columns]="columns"
+    [data]="rows()"
+    [showActions]="true"
+    (editClicked)="openEdit($event)"
+    (deleteClicked)="askDelete($event)">
+  </app-table>
+</section>
+
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selected() ? 'Editar Carrera' : 'Nueva Carrera'"
+  (closed)="closeForm()">
+  <app-degree-form
+    [degree]="selected()"
+    [faculties]="faculties()"
+    (save)="onSave($event)"
+    (cancel)="closeForm()">
+  </app-degree-form>
+</app-modal>
+
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar eliminación"
+  (closed)="cancelDelete()">
+  <p>¿Deseas eliminar la carrera <strong>{{ toDelete()?.name }}</strong>? Solo es posible si no tiene estudiantes inscritos.</p>
+  <div modal-actions class="actions-row">
+    <app-button variant="secondary" (clicked)="cancelDelete()">Cancelar</app-button>
+    <app-button variant="tertiary" (clicked)="confirmDelete()">Eliminar</app-button>
+  </div>
+</app-modal>

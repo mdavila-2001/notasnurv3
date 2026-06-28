@@ -48,6 +48,14 @@
     </div>
 
     <div class="topbar-right">
+      @if (currentPeriod(); as period) {
+        <div class="period-badge" [class.period-vacation]="period.isVacation">
+          <span class="material-symbols-outlined period-icon">
+            {{ period.isVacation ? 'beach_access' : 'calendar_today' }}
+          </span>
+          <span class="period-label">{{ period.label }}</span>
+        </div>
+      }
     </div>
   </header>
 

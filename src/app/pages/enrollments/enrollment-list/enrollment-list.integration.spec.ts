@@ -65,7 +65,7 @@ describe('EnrollmentList Integration', () => {
     expect(subjectsReq.request.method).toBe('GET');
     subjectsReq.flush({ success: true, message: '', data: mockSubjects });
 
-    const studentsReq = httpMock.expectOne(`${baseUrl}/users?role=STUDENT`);
+    const studentsReq = httpMock.expectOne(`${baseUrl}/users/role/STUDENT`);
     expect(studentsReq.request.method).toBe('GET');
     studentsReq.flush({ success: true, message: '', data: mockStudentsList });
 
@@ -74,7 +74,6 @@ describe('EnrollmentList Integration', () => {
     expect(component.subjects().length).toBe(1);
     expect(component.studentsList().length).toBe(1);
 
-    // 3. Select a subject and expect the HTTP request for enrolled students
     component.selectSubject(mockSubjects[0] as any);
     
     const enrolledReq = httpMock.expectOne(`${baseUrl}/enrollments/subjects/10/students`);
@@ -142,17 +141,16 @@ describe('EnrollmentList Integration', () => {
     const reloadSubjectsReq = httpMock.expectOne(`${baseUrl}/subjects`);
     reloadSubjectsReq.flush({ success: true, data: mockSubjects });
 
-    const reloadStudentsReq = httpMock.expectOne(`${baseUrl}/users?role=STUDENT`);
+    const reloadStudentsReq = httpMock.expectOne(`${baseUrl}/users/role/STUDENT`);
     reloadStudentsReq.flush({ success: true, data: mockStudentsList });
 
     fixture.detectChanges();
 
-    // 8. Assertions
     expect(component.isEnrollModalOpen()).toBe(false);
     expect(component.enrolledStudents().length).toBe(1);
     expect(component.enrolledStudents()[0].fullName).toBe('Carlos Gómez');
     expect(component.showToast()).toBe(true);
     expect(component.toastType()).toBe('success');
-    expect(component.toastMessage()).toBe('Carlos Gómez matriculado con éxito en Álgebra Lineal');
+    expect(component.toastMessage()).toBe('Carlos Gómez matriculado en Álgebra Lineal');
   });
 });

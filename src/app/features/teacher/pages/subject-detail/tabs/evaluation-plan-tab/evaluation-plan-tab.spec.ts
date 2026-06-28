@@ -21,7 +21,13 @@ describe('EvaluationPlanTab', () => {
     description: 'Primer parcial'
   };
 
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   beforeEach(async () => {
+    TestBed.resetTestingModule();
+
     mockEvaluationPlanService = {
       plan: signal({ id: 100, subjectId: 10, components: [] }),
       hasPlan: signal(true),

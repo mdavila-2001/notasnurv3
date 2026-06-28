@@ -1,0 +1,105 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-title-row">
+      <h1 class="page-title">Carreras</h1>
+      <app-button variant="primary" (clicked)="openFormModal()">
+        <span class="material-symbols-outlined btn-icon-left">add</span>
+        Nueva Carrera
+      </app-button>
+    </div>
+    <p class="page-subtitle">Gestiona las carreras académicas y su vinculación con las respectivas facultades.</p>
+  </header>
+
+  <div class="card-panel">
+    @if (isLoading()) {
+      <div style="display: flex; justify-content: center; align-items: center; padding: 3rem; color: var(--text-secondary);">
+        Cargando carreras...
+      </div>
+    } @else {
+      <app-table
+        [columns]="columns"
+        [data]="tableRows()"
+        [showActions]="true"
+        (editClicked)="openFormModal($event)"
+        (deleteClicked)="onDelete($event)">
+      </app-table>
+    }
+  </div>
+</div>
+
+<!-- Degree Form Modal -->
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selectedDegree() ? 'Editar Carrera' : 'Nueva Carrera'"
+  (closed)="closeFormModal()">
+  
+  <form (submit)="$event.preventDefault(); onSave()" style="display: flex; flex-direction: column; gap: 1.25rem; max-width: 450px; width: 100%;">
+    <div class="form-group">
+      <label class="label-text">NOMBRE DE LA CARRERA</label>
+      <input type="text" 
+             class="custom-select" 
+             [(ngModel)]="nameField" 
+             name="name" 
+             placeholder="Ej. Ingeniería de Sistemas"
+             required>
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">CÓDIGO DE CARRERA</label>
+      <input type="text" 
+             class="custom-select" 
+             [(ngModel)]="codeField" 
+             name="code" 
+             placeholder="Ej. SIS"
+             required>
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">FACULTAD DE LA CARRERA</label>
+      <div class="select-wrap" style="position: relative; width: 100%;">
+        <select class="custom-select" [(ngModel)]="facultyIdField" name="facultyId" required style="width: 100%; appearance: none; padding-right: 2.5rem;">
+          <option [value]="null" disabled selected>Selecciona una facultad...</option>
+          @for (fac of faculties(); track fac.id) {
+            <option [value]="fac.id">{{ fac.name }} ({{ fac.code }})</option>
+          }
+        </select>
+        <span class="material-symbols-outlined select-chevron" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-secondary);">
+          expand_more
+        </span>
+      </div>
+    </div>
+
+    <div modal-actions class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; width: 100%;">
+      <app-button type="button" variant="secondary" (clicked)="closeFormModal()">Cancelar</app-button>
+      <app-button type="submit" variant="primary">
+        <span class="material-symbols-outlined btn-icon-left">save</span>
+        {{ selectedDegree() ? 'Guardar Cambios' : 'Crear Carrera' }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar Eliminación"
+  (closed)="closeDeleteModal()">
+
+  <p style="margin: 0; color: var(--text-secondary); line-height: 1.5;">
+    ¿Estás seguro de eliminar la carrera <strong>"{{ degreeToDelete()?.name }}"</strong>?
+    Esta acción no se puede deshacer y desvinculará a los estudiantes asociados.
+  </p>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" (clicked)="closeDeleteModal()">Cancelar</app-button>
+    <app-button variant="primary" (clicked)="confirmDelete()">Sí, eliminar</app-button>
+  </div>
+</app-modal>
+
+@if (showToast()) {
+  <app-toast
+    [type]="toastType()"
+    [message]="toastMessage()"
+    (closed)="onToastClosed()">
+  </app-toast>
+}

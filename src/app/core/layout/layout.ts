@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from "../services/auth.service";
+import { AcademicManagementService } from "../services/academic-management/academic-management.service";
+import { Semester } from "../models/academic-management.model";
 import { Modal } from "../../shared/components/modal/modal";
 import { Button } from "../../shared/components/button/button";
 
@@ -19,11 +21,33 @@ interface MenuItem {
 export class Layout implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly academicService = inject(AcademicManagementService);
 
   userRole = signal<string>('');
   userName = signal<string>('Usuario');
   isLogoutModalOpen = signal<boolean>(false);
   isSidebarOpen = signal<boolean>(false);
+
+  private allSemesters = signal<Semester[]>([]);
+
+  currentPeriod = computed<{ label: string; isVacation: boolean } | null>(() => {
+    const semesters = this.allSemesters();
+    if (!semesters.length) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const active = semesters.find(s => {
+      const start = new Date(s.startDate + 'T00:00:00');
+      const end   = new Date(s.endDate   + 'T23:59:59');
+      return today >= start && today <= end;
+    });
+
+    if (active) {
+      return { label: `${active.managementYear}-${active.number}`, isVacation: false };
+    }
+    return { label: 'Vacaciones', isVacation: true };
+  });
 
   userRoleDisplay = computed(() => {
     const roleMap: Record<string, string> = {
@@ -52,6 +76,11 @@ export class Layout implements OnInit {
       },
       error: (err) => console.error('[Layout] Error al obtener perfil de usuario:', err)
     });
+
+    this.academicService.getSemesters().subscribe({
+      next: (semesters) => this.allSemesters.set(semesters),
+      error: () => {}
+    });
   }
 
   private buildMenu(role: string) {
@@ -60,9 +89,11 @@ export class Layout implements OnInit {
         { path: '/admin/dashboard', icon: 'dashboard', label: 'Panel' },
         { path: '/admin/managements', icon: 'calendar_month', label: 'Gestiones' },
         { path: '/admin/semesters', icon: 'date_range', label: 'Semestres' },
+        { path: '/admin/faculties', icon: 'corporate_fare', label: 'Facultades' },
+        { path: '/admin/degrees', icon: 'school', label: 'Carreras' },
         { path: '/admin/subjects', icon: 'auto_stories', label: 'Catálogo de Materias' },
         { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
-        { path: '/admin/enrollments', icon: 'school', label: 'Matrículas' },
+        { path: '/admin/enrollments', icon: 'how_to_reg', label: 'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
