@@ -95,6 +95,7 @@ export class Layout implements OnInit {
         { path: '/admin/users', icon: 'manage_accounts', label: 'Directorio Usuarios' },
         { path: '/admin/enrollments', icon: 'how_to_reg', label: 'Matrículas' },
         { path: '/admin/reports', icon: 'analytics', label: 'Reportes y Actas' },
+        { path: '/admin/audit-logs', icon: 'receipt_long', label: 'Auditoría y Logs' },
         { path: '/settings', icon: 'settings', label: 'Configuración' }
       ]);
     } else if (role === 'TEACHER') {
