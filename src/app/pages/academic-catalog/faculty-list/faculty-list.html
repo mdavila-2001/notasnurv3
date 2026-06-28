@@ -1,0 +1,40 @@
+<section class="list-page">
+  <header class="page-header">
+    <h1>Facultades</h1>
+    <app-button variant="primary" (clicked)="openNew()">Nueva Facultad</app-button>
+  </header>
+
+  @if (isLoading()) {
+    <p class="loading">Cargando facultades...</p>
+  }
+
+  <app-table
+    [columns]="columns"
+    [data]="rows()"
+    [showActions]="true"
+    (editClicked)="openEdit($event)"
+    (deleteClicked)="askDelete($event)">
+  </app-table>
+</section>
+
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selected() ? 'Editar Facultad' : 'Nueva Facultad'"
+  (closed)="closeForm()">
+  <app-faculty-form
+    [faculty]="selected()"
+    (save)="onSave($event)"
+    (cancel)="closeForm()">
+  </app-faculty-form>
+</app-modal>
+
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar eliminación"
+  (closed)="cancelDelete()">
+  <p>¿Deseas eliminar la facultad <strong>{{ toDelete()?.name }}</strong>? Solo es posible si no tiene carreras asociadas.</p>
+  <div modal-actions class="actions-row">
+    <app-button variant="secondary" (clicked)="cancelDelete()">Cancelar</app-button>
+    <app-button variant="tertiary" (clicked)="confirmDelete()">Eliminar</app-button>
+  </div>
+</app-modal>

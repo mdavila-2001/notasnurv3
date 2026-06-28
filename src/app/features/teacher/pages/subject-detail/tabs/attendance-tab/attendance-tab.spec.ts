@@ -26,7 +26,13 @@ describe('AttendanceTab', () => {
     }
   ];
 
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
   beforeEach(async () => {
+    TestBed.resetTestingModule();
+
     mockOperationalService = {
       isLoading: signal(false),
       students: signal([]),

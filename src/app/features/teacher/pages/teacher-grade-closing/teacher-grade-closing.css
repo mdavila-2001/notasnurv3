@@ -117,7 +117,7 @@
 }
 
 .btn-refresh:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-overlay);
   border-color: var(--primary, #6366f1);
 }
 
@@ -145,7 +145,7 @@
 }
 
 .custom-table th {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--surface-card-header);
   padding: 14px 20px;
   font-size: 0.8rem;
   font-weight: 700;
@@ -168,18 +168,18 @@
 }
 
 .custom-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--hover-overlay);
 }
 
 .closed-row {
   opacity: 0.95;
-  background: rgba(15, 23, 42, 0.15);
+  background: var(--hover-overlay);
 }
 
 .font-mono {
   font-family: monospace;
   font-weight: 600;
-  color: #a5b4fc;
+  color: var(--font-mono-color);
 }
 
 .subject-name {
@@ -298,7 +298,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-light);
   padding-top: 16px;
 }
 

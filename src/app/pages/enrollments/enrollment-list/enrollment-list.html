@@ -148,9 +148,13 @@
             <span>Buscando expedientes académicos...</span>
           </div>
         } @else if (degreesError()) {
-          <div class="degrees-error" style="color: var(--error-main, #dc2626); font-size: 0.875rem; background: var(--error-light, #fee2e2); border: 1px solid var(--error-border, #fca5a5); border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <div class="degrees-error" style="color: var(--error-main, #dc2626); font-size: 0.875rem; background: var(--error-light, #fee2e2); border: 1px solid var(--error-border, #fca5a5); border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
             <span class="material-symbols-outlined" style="font-size: 1.25rem;">error</span>
-            <span>{{ degreesError() }}</span>
+            <span style="flex: 1;">{{ degreesError() }}</span>
+            <app-button variant="primary" size="sm" (clicked)="openCreateRecordModal()">
+              <span class="material-symbols-outlined" style="font-size: 1rem; margin-right: 0.25rem; vertical-align: middle;">add_circle</span>
+              Crear Expediente Académico
+            </app-button>
           </div>
         } @else {
           <label class="form-label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
@@ -221,6 +225,51 @@
       } @else {
         Confirmar baja
       }
+    </app-button>
+  </div>
+</app-modal>
+
+<!-- Modal: Crear Expediente Académico -->
+<app-modal
+  [isOpen]="isCreateRecordModalOpen()"
+  title="Crear Expediente Académico"
+  (closed)="closeCreateRecordModal()">
+
+  <div class="enroll-form">
+    <p style="margin: 0 0 1rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+      El estudiante no tiene un expediente académico activo. Selecciona la carrera en la que deseas inscribirlo para crear su expediente.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label" for="degree-select-record" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Carrera
+      </label>
+      @if (allDegrees().length === 0) {
+        <div style="color: var(--text-secondary); font-size: 0.875rem; padding: 0.5rem 0;">
+          Cargando carreras...
+        </div>
+      } @else {
+        <select
+          id="degree-select-record"
+          title="Seleccionar carrera"
+          class="custom-select"
+          [value]="selectedDegreeIdForRecord() ?? ''"
+          (change)="onDegreeForRecordSelected($any($event.target).value)"
+          style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none;">
+          <option value="">-- Seleccionar Carrera --</option>
+          @for (degree of allDegrees(); track degree.id) {
+            <option [value]="degree.id">{{ degree.name }} ({{ degree.code }})</option>
+          }
+        </select>
+      }
+    </div>
+  </div>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" [disabled]="isCreatingRecord()" (clicked)="closeCreateRecordModal()">Cancelar</app-button>
+    <app-button variant="primary" [disabled]="isCreatingRecord() || !selectedDegreeIdForRecord()" (clicked)="confirmCreateRecord()">
+      <span class="material-symbols-outlined btn-icon-left">add_circle</span>
+      @if (isCreatingRecord()) { Creando... } @else { Crear Expediente }
     </app-button>
   </div>
 </app-modal>

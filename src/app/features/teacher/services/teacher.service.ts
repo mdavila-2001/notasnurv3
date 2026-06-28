@@ -15,10 +15,8 @@ export interface SubjectSummary {
 
 export interface TeacherDashboardData {
   welcomeMessage: string;
-  averageAttendance: number;
   pendingActasCount: number;
   averageCourseGrade: number;
-  nextExamDate: string;
   subjects: SubjectSummary[];
 }
 

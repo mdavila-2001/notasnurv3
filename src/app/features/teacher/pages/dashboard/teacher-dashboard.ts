@@ -6,6 +6,7 @@ import { TeacherService, TeacherDashboardData } from '../../services/teacher.ser
 import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { SubjectContextService } from '../../../../core/services/subject-context/subject-context.service';
 import { Loader } from '../../../../shared/components/loader/loader';
+import { AcademicManagementService } from '../../../../core/services/academic-management/academic-management.service';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -19,30 +20,54 @@ export class TeacherDashboard implements OnInit {
   private readonly contextService = inject(SubjectContextService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly academicService = inject(AcademicManagementService);
 
   subjects = signal<SubjectResponse[]>([]);
   dashboardData = signal<TeacherDashboardData | null>(null);
   isLoading = signal(true);
   userName = signal<string>('Docente');
+  academicPeriod = signal<string>('Vacaciones');
 
-  averageAttendance = signal<number>(0);
   pendingRecords = signal<number>(0);
-  nextExamDate = signal<string>('—');
   averageGrade = signal<number>(0);
 
   ngOnInit() {
     this.userName.set(this.authService.getUserFullName() || 'Docente');
     this.contextService.resetContext();
     this.loadAllData();
+    this.loadAcademicPeriod();
+  }
+
+  loadAcademicPeriod() {
+    this.academicService.getSemesters().subscribe({
+      next: (semesters) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const active = semesters.find(s => {
+          const start = new Date(s.startDate + 'T00:00:00');
+          const end   = new Date(s.endDate   + 'T23:59:59');
+          return today >= start && today <= end;
+        });
+
+        if (active) {
+          this.academicPeriod.set(`Periodo Académico ${active.managementYear}-${active.number}`);
+        } else {
+          this.academicPeriod.set('Vacaciones');
+        }
+      },
+      error: (err) => {
+        console.error('[TeacherDashboard] Error al obtener periodos académicos:', err);
+        this.academicPeriod.set('Vacaciones');
+      }
+    });
   }
 
   loadAllData() {
     this.isLoading.set(true);
-    // Cargar materias primero
     this.teacherService.getMySubjects().subscribe({
       next: (subjects) => {
         this.subjects.set(subjects);
-        // Una vez tenemos las materias, cargamos el dashboard para el progreso y stats
         this.loadDashboard();
       },
       error: (err) => {
@@ -59,13 +84,9 @@ export class TeacherDashboard implements OnInit {
           const data = response.data;
           this.dashboardData.set(data);
           
-          // Mapear stats principales
-          this.averageAttendance.set(data.averageAttendance);
           this.pendingRecords.set(data.pendingActasCount);
-          this.nextExamDate.set(data.nextExamDate || '—');
           this.averageGrade.set(data.averageCourseGrade);
 
-          // Enriquecer materias con el progreso del dashboard
           if (data.subjects && data.subjects.length > 0) {
             const enrichedSubjects = this.subjects().map(s => {
               const summary = data.subjects.find(ds => ds.id === Number(s.id));

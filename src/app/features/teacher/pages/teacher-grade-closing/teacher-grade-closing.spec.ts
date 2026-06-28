@@ -46,6 +46,8 @@ describe('TeacherGradeClosing', () => {
   ];
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
+
     mockTeacherService = {
       getMySubjects: vi.fn().mockReturnValue(of(mockSubjects)),
     };

@@ -92,10 +92,10 @@ describe('Navigation & Authentication Integration', () => {
     // Check menu items
     const menuLinks = fixture.nativeElement.querySelectorAll('.nav-link');
     const labels = Array.from(menuLinks).map((link: any) => link.textContent.trim());
-    expect(labels).toContain('Catálogo de Materias');
-    expect(labels).toContain('Matrículas');
-    expect(labels).toContain('Reportes y Actas');
-    expect(labels).not.toContain('Mis Materias'); // Teacher menu item
+    expect(labels.some(l => l.includes('Catálogo de Materias'))).toBe(true);
+    expect(labels.some(l => l.includes('Matrículas'))).toBe(true);
+    expect(labels.some(l => l.includes('Reportes y Actas'))).toBe(true);
+    expect(labels.some(l => l.includes('Mis Materias'))).toBe(false); // Teacher menu item
 
     // Simulate logout modal trigger
     component.openLogoutModal();
@@ -132,8 +132,8 @@ describe('Navigation & Authentication Integration', () => {
 
     const menuLinks = fixture.nativeElement.querySelectorAll('.nav-link');
     const labels = Array.from(menuLinks).map((link: any) => link.textContent.trim());
-    expect(labels).toContain('Asistencia');
-    expect(labels).not.toContain('Matrículas'); // Admin only
+    expect(labels.some(l => l.includes('Asistencia'))).toBe(true);
+    expect(labels.some(l => l.includes('Matrículas'))).toBe(false); // Admin only
 
     // Test Guard restriction: student attempting to access admin route redirects to student dashboard
     const routerSpy = vi.spyOn(router, 'navigate');

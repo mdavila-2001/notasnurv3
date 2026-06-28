@@ -56,7 +56,7 @@
 }
 
 .subject-item:hover {
-  background: rgba(255,255,255,0.04);
+  background: var(--hover-overlay);
 }
 
 .subject-item.selected {
@@ -218,9 +218,9 @@
 .form-input {
   padding: 10px 14px;
   border-radius: 8px;
-  border: 1px solid var(--border, rgba(255,255,255,0.12));
-  background: var(--surface-raised, #2a2a3e);
-  color: var(--text-primary, #e2e8f0);
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text-primary);
   font-size: 0.9rem;
   width: 100%;
   box-sizing: border-box;

@@ -1,0 +1,44 @@
+<form class="catalog-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="form-group">
+    <label for="faculty-select" class="form-label">Facultad <span class="required">*</span></label>
+    <select
+      id="faculty-select"
+      class="form-select"
+      formControlName="facultyId"
+      title="Seleccionar facultad"
+      [class.select-error]="facultyControl.touched && facultyControl.invalid">
+      <option [ngValue]="null" disabled>Seleccionar facultad...</option>
+      @for (f of faculties(); track f.id) {
+        <option [ngValue]="f.id">{{ f.name }}</option>
+      }
+    </select>
+    @if (facultyError) {
+      <span class="error-text">{{ facultyError }}</span>
+    }
+  </div>
+
+  <app-input
+    label="Nombre de la Carrera"
+    placeholder="Ej: Ingeniería de Sistemas"
+    [value]="nameControl.value ?? ''"
+    [required]="true"
+    [showErrors]="nameControl.touched"
+    [errorMessage]="nameError"
+    (valueChange)="nameControl.setValue($event.toString()); nameControl.markAsTouched()">
+  </app-input>
+
+  <app-input
+    label="Código"
+    placeholder="Ej: IS"
+    [value]="codeControl.value ?? ''"
+    [required]="true"
+    [showErrors]="codeControl.touched"
+    [errorMessage]="codeError"
+    (valueChange)="codeControl.setValue($event.toString()); codeControl.markAsTouched()">
+  </app-input>
+
+  <div class="form-actions">
+    <app-button variant="secondary" type="button" (clicked)="onCancel()">Cancelar</app-button>
+    <app-button variant="primary" type="submit">Guardar</app-button>
+  </div>
+</form>

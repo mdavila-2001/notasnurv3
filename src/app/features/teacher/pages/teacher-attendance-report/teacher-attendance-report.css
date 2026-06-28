@@ -119,8 +119,8 @@
 
 .card-header {
   padding: 16px 20px;
-  background: rgba(15, 23, 42, 0.4);
-  border-bottom: 1px solid var(--border-light, rgba(255, 255, 255, 0.05));
+  background: var(--surface-card-header);
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -129,7 +129,7 @@
 .subject-code {
   font-family: monospace;
   font-weight: 700;
-  color: #818cf8;
+  color: var(--font-mono-color);
   font-size: 0.95rem;
 }
 
@@ -183,8 +183,8 @@
 
 .card-footer {
   padding: 16px 20px;
-  border-top: 1px solid var(--border-light, rgba(255, 255, 255, 0.05));
-  background: rgba(15, 23, 42, 0.2);
+  border-top: 1px solid var(--border-light);
+  background: var(--surface-card-footer);
 }
 
 .card-footer ::ng-deep app-button,
