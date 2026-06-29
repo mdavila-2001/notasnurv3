@@ -8,6 +8,8 @@ import { authGuard } from '../guards/auth.guard';
 import { environment } from '../../../environments/environment';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { Component } from '@angular/core';
+import { AcademicManagementService } from '../services/academic-management/academic-management.service';
+import { of } from 'rxjs';
 
 @Component({ template: '<h1>Login</h1>', standalone: true })
 class TestLoginComponent {}
@@ -35,6 +37,12 @@ describe('Navigation & Authentication Integration', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         AuthService,
+        {
+          provide: AcademicManagementService,
+          useValue: {
+            getSemesters: () => of([])
+          }
+        },
         provideRouter([
           { path: 'login', component: TestLoginComponent },
           {

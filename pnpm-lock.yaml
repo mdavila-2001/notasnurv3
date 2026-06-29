@@ -42,6 +42,9 @@ importers:
       '@angular/compiler-cli':
         specifier: ^21.2.0
         version: 21.2.14(@angular/compiler@21.2.14)(typescript@5.9.3)
+      '@cypress/schematic':
+        specifier: ^5.0.0
+        version: 5.0.0(@angular/cli@21.2.12(chokidar@5.0.0))(@angular/core@21.2.14(@angular/compiler@21.2.14)(rxjs@7.8.2))(cypress@15.18.0)
       '@vitest/coverage-v8':
         specifier: ^4.1.8
         version: 4.1.8(vitest@4.1.7)
@@ -395,6 +398,13 @@ packages:
   '@cypress/request@4.0.1':
     resolution: {integrity: sha512-y20e+e6dFYkOUUJLVUZTsJRuTiXZaUQ32WD+R/ux/HBybbTx4ge7cNINcua0pU8+SNkKuRbOF12mBmzuzM8n5w==}
     engines: {node: '>= 14.17.0'}
+
+  '@cypress/schematic@5.0.0':
+    resolution: {integrity: sha512-z8+myDqT4SONCBvNI+cFzhADFCOOsSOcfp6mxMx4FxMMpyeaYbUNUCZlt886UnjnSsL5BWSX7WNJLhPptewKVw==}
+    peerDependencies:
+      '@angular/cli': '>=20.0.0'
+      '@angular/core': '>=20.0.0'
+      cypress: ^15.8.0
 
   '@cypress/xvfb@1.2.4':
     resolution: {integrity: sha512-skbBzPggOVYCbnGgV+0dmBdW/s77ZkAOXIC1knS8NagwDjBrNC1LuXtQJeiN6l+m7lzmHtaoUw/ctJKdqkG57Q==}
@@ -3579,6 +3589,15 @@ snapshots:
       tough-cookie: 5.1.2
       tunnel-agent: 0.6.0
 
+  '@cypress/schematic@5.0.0(@angular/cli@21.2.12(chokidar@5.0.0))(@angular/core@21.2.14(@angular/compiler@21.2.14)(rxjs@7.8.2))(cypress@15.18.0)':
+    dependencies:
+      '@angular/cli': 21.2.12(chokidar@5.0.0)
+      '@angular/core': 21.2.14(@angular/compiler@21.2.14)(rxjs@7.8.2)
+      cypress: 15.18.0
+      jsonc-parser: 3.3.1
+      rxjs: 7.8.2
+      semver: 7.8.1
+
   '@cypress/xvfb@1.2.4(supports-color@8.1.1)':
     dependencies:
       debug: 3.2.7(supports-color@8.1.1)
@@ -3973,7 +3992,7 @@ snapshots:
 
   '@npmcli/fs@5.0.0':
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.1
 
   '@npmcli/git@7.0.2':
     dependencies:
@@ -5422,7 +5441,7 @@ snapshots:
       graceful-fs: 4.2.11
       nopt: 9.0.0
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.1
       tar: 7.5.15
       tinyglobby: 0.2.16
       undici: 6.25.0
@@ -5440,7 +5459,7 @@ snapshots:
 
   npm-install-checks@8.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.1
 
   npm-normalize-package-bin@5.0.0: {}
 

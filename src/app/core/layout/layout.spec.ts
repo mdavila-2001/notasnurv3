@@ -80,7 +80,7 @@ describe('Layout', () => {
     expect(component.roleDisplayName()).toBe('Portal Administrador');
 
     const menu = component.menuItems();
-    expect(menu.length).toBe(10);
+    expect(menu.length).toBe(11);
     expect(menu.find(m => m.path === '/admin/users')).toBeTruthy();
   });
 

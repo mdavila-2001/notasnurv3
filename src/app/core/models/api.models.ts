@@ -39,3 +39,17 @@ export interface LoginRequest {
   id: string;
   password: string;
 }
+
+export interface AuditLogResponse {
+  id: string;
+  userId: string | null;
+  userFullName: string;
+  userEmail: string;
+  affectedTable: string;
+  recordId: string;
+  oldValue: string | null;
+  newValue: string | null;
+  action: string;
+  changedAt: string;
+  ipAddress: string | null;
+}
