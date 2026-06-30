@@ -1,3 +1,4 @@
+/// <reference types="cypress" />
 describe('Gestión de Periodos Académicos (Administrador)', () => {
   const randomYear = 2027 + Math.floor(Math.random() * 9);
 

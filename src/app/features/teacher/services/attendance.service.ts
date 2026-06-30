@@ -24,7 +24,6 @@ export class AttendanceService {
   private readonly _error = signal<string | null>(null);
   private readonly _successMessage = signal<string | null>(null);
 
-  // --- Selectores Públicos (Read-only) ---
   readonly attendanceDraft = computed(() => this._attendanceDraft());
   readonly date = computed(() => this._date());
   readonly isSaving = computed(() => this._isSaving());
@@ -51,7 +50,6 @@ export class AttendanceService {
     );
   }
 
-  // Selector derivado para las estadísticas del Header de la UI
   readonly recordCounts = computed(() => {
     const records = this._attendanceDraft();
     return {

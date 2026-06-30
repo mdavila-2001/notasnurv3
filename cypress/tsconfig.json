@@ -1,8 +1,12 @@
 {
-  "extends": "../tsconfig.json",
-  "include": ["**/*.ts"],
   "compilerOptions": {
-    "sourceMap": false,
-    "types": ["cypress"]
-  }
+    "target": "ES2022",
+    "lib": ["ES2022", "dom"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["cypress", "node", "mocha"],
+    "isolatedModules": false,
+    "strict": true
+  },
+  "include": ["**/*.ts"]
 }
