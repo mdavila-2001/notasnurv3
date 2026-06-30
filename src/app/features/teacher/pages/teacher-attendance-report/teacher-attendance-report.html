@@ -1,0 +1,77 @@
+<div class="page-wrapper">
+  <div class="page-header">
+    <h1 class="page-title">Reportes de Faltas y Asistencia</h1>
+    <p class="page-subtitle">Generación y exportación de reportes de asistencia en formato Excel para las materias a su cargo.</p>
+  </div>
+
+  <div class="page-content">
+    <!-- Filters Panel -->
+    <div class="filters-card">
+      <div class="search-input-group">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          class="form-control filter-search"
+          placeholder="Filtrar por nombre o código de materia..."
+          [ngModel]="searchFilter()"
+          (ngModelChange)="searchFilter.set($event)"
+        />
+      </div>
+      
+      <button class="btn-refresh" (click)="loadSubjects()" [disabled]="isLoading()">
+        <span class="material-symbols-outlined" [class.spinning]="isLoading()">refresh</span>
+      </button>
+    </div>
+
+    <!-- Data Display -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <app-loader size="lg" label="Cargando tus materias..." />
+      </div>
+    } @else if (filteredSubjects().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-outlined">assignment_turned_in</span>
+        <h3>No se encontraron materias asignadas</h3>
+        <p>No tienes materias registradas en esta gestión o no coinciden con la búsqueda.</p>
+      </div>
+    } @else {
+      <div class="subjects-grid">
+        @for (subject of filteredSubjects(); track subject.id) {
+          <div class="subject-card" [class.closed-card]="subject.recordStatus === 'CLOSED'">
+            <div class="card-header">
+              <span class="subject-code">{{ subject.code }}</span>
+              <span class="status-badge" [class]="subject.recordStatus">
+                {{ subject.recordStatus === 'DRAFT' ? 'Borrador' : subject.recordStatus === 'ACTIVE' ? 'Activa' : 'Cerrada' }}
+              </span>
+            </div>
+            
+            <div class="card-body">
+              <h3 class="subject-name">{{ subject.name }}</h3>
+              <p class="subject-modality">
+                <span class="material-symbols-outlined icon">school</span>
+                <span>{{ subject.modality === 'FACE_TO_FACE' ? 'Modalidad Presencial' : 'Modalidad Semipresencial' }}</span>
+              </p>
+            </div>
+
+            <div class="card-footer">
+              <app-button
+                variant="secondary"
+                [disabled]="isDownloading() !== null"
+                (clicked)="downloadExcel(subject)"
+              >
+                @if (isDownloading() === subject.id) {
+                  <app-loader size="sm" label="Generando..." />
+                } @else {
+                  <span class="btn-content">
+                    <span class="material-symbols-outlined">table_chart</span>
+                    Exportar Asistencias
+                  </span>
+                }
+              </app-button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

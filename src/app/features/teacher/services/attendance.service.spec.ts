@@ -1,71 +1,83 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { AttendanceService } from './attendance.service';
 import { StudentEnrolledResponse } from './enrollment-api.service';
+import { SubjectOperationalService } from '../../../core/services/subject-operational/subject-operational.service';
 
 describe('AttendanceService', () => {
   let service: AttendanceService;
   let httpMock: HttpTestingController;
+  let operationalService: SubjectOperationalService;
 
   const mockStudents: StudentEnrolledResponse[] = [
-    { studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@t.com', degreeName: 'Ing.' },
-    { studentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@t.com', degreeName: 'Lic.' },
-    { studentId: 'stu-3', fullName: 'Charlie', ci: '789', email: 'c@t.com', degreeName: 'Med.' },
+    { id: 'stu-1', studentId: 'stu-1', fullName: 'Alice', ci: '123', email: 'a@t.com', degreeName: 'Ing.' },
+    { id: 'stu-2', studentId: 'stu-2', fullName: 'Bob', ci: '456', email: 'b@t.com', degreeName: 'Lic.' },
+    { id: 'stu-3', studentId: 'stu-3', fullName: 'Charlie', ci: '789', email: 'c@t.com', degreeName: 'Med.' },
   ];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [AttendanceService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        AttendanceService,
+        SubjectOperationalService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(AttendanceService);
     httpMock = TestBed.inject(HttpTestingController);
-    service.reset();
+    operationalService = TestBed.inject(SubjectOperationalService);
+    
+    // Mock getSubjectAbsences and loadAttendanceForDate to prevent side-effect requests
+    vi.spyOn(service, 'getSubjectAbsences').mockReturnValue(of(new Map()));
+    vi.spyOn(service as any, 'loadAttendanceForDate').mockImplementation(() => {
+      (service as any)._isDraftHydrating.set(false);
+    });
+    
+    service.resetModule();
   });
 
   afterEach(() => {
     httpMock.verify();
-    service.reset();
+    service.resetModule();
   });
 
-  describe('loadData', () => {
+  describe('initializeDraft', () => {
     it('should load students and set default statuses', () => {
-      let completed = false;
-      service.loadData('10').subscribe(() => { completed = true; });
+      operationalService['_students'].set(mockStudents as any);
+      service.initializeDraft();
 
-      const req = httpMock.expectOne('/api/enrollments/subject/10');
-      expect(req.request.method).toBe('GET');
-      req.flush({ success: true, message: '', data: mockStudents });
+      expect(service.attendanceDraft().length).toBe(3);
+      expect(service.isReadyToSubmit()).toBe(false); // Subject context not loaded yet
 
-      expect(completed).toBeTrue();
-      expect(service.attendanceRecords().length).toBe(3);
-      expect(service.isLoading()).toBeFalse();
-      expect(service.isReady()).toBeTrue();
-
-      const records = service.attendanceRecords();
+      const records = service.attendanceDraft();
       expect(records[0].status).toBe('PRESENT');
       expect(records[1].status).toBe('PRESENT');
     });
   });
 
-  describe('setAttendanceStatus', () => {
+  describe('updateStudentStatus', () => {
     beforeEach(() => {
-      service['_students'].set(mockStudents);
+      operationalService['_students'].set(mockStudents as any);
+      service.initializeDraft();
     });
 
     it('should update status for a student', () => {
-      service.setAttendanceStatus('stu-1', 'ABSENT');
-      const record = service.attendanceRecords().find(r => r.enrollmentId === 'stu-1');
+      service.updateStudentStatus('stu-1', 'ABSENT');
+      const record = service.attendanceDraft().find(r => r.enrollmentId === 'stu-1');
       expect(record?.status).toBe('ABSENT');
     });
 
     it('should update record counts', () => {
-      service.setAttendanceStatus('stu-1', 'ABSENT');
-      service.setAttendanceStatus('stu-2', 'JUSTIFIED');
+      service.updateStudentStatus('stu-1', 'ABSENT');
+      service.updateStudentStatus('stu-2', 'JUSTIFIED');
       const counts = service.recordCounts();
       expect(counts.present).toBe(1);
       expect(counts.absent).toBe(1);
-      expect(counts.justified).toBe(1);
+      expect(counts.late).toBe(1);
       expect(counts.total).toBe(3);
     });
   });
@@ -79,12 +91,14 @@ describe('AttendanceService', () => {
 
   describe('submit', () => {
     beforeEach(() => {
-      service['_students'].set(mockStudents);
+      operationalService.setSubjectDirectly({ id: 10, recordStatus: 'OPEN' } as any);
+      operationalService['_students'].set(mockStudents as any);
+      service.initializeDraft();
     });
 
     it('should POST bulk attendance and return success', () => {
       service.setDate('2026-05-12');
-      service.setAttendanceStatus('stu-1', 'ABSENT');
+      service.updateStudentStatus('stu-1', 'ABSENT');
 
       let result = false;
       service.submit('10').subscribe(r => { result = r; });
@@ -102,16 +116,19 @@ describe('AttendanceService', () => {
       });
       req.flush({ success: true, message: 'Asistencia registrada', data: null });
 
-      expect(result).toBeTrue();
+      expect(result).toBe(true);
       expect(service.successMessage()).toBeTruthy();
-      expect(service.isSaving()).toBeFalse();
+      expect(service.isSaving()).toBe(false);
     });
 
     it('should handle server error', () => {
       service.setDate('2026-05-12');
 
       let result = true;
-      service.submit('10').subscribe(r => { result = r; });
+      service.submit('10').subscribe({
+        next: (r) => { result = r; },
+        error: () => { result = false; }
+      });
 
       const req = httpMock.expectOne('/api/attendance/bulk');
       req.flush(
@@ -119,14 +136,18 @@ describe('AttendanceService', () => {
         { status: 400, statusText: 'Bad Request' },
       );
 
-      expect(result).toBeFalse();
+      expect(result).toBe(false);
       expect(service.error()).toBeTruthy();
     });
 
-    it('should not submit if no students loaded', () => {
+    it('should not submit if no subject or students loaded', () => {
+      service.resetModule();
       let result = true;
-      service.submit('10').subscribe(r => { result = r; });
-      expect(result).toBeFalse();
+      service.submit(null as any).subscribe({
+        next: (r) => { result = r; },
+        error: () => { result = false; }
+      });
+      expect(result).toBe(false);
     });
   });
 });

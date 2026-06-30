@@ -3,7 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Input, SelectOption } from '../../../shared/components/input/input';
 import { Button } from '../../../shared/components/button/button';
-import { SubjectModality, SubjectRequest, SubjectResponse } from '../../../core/models/subject.model';
+import {
+  SubjectModality,
+  SubjectRecordStatus,
+  SubjectRequest,
+  SubjectResponse,
+} from '../../../core/models/subject.model';
+
+type SubjectStatusOption = Omit<SelectOption, 'value'> & { value: SubjectRecordStatus };
 
 @Component({
   selector: 'app-subject-form',
@@ -33,12 +40,26 @@ export class SubjectFormComponent {
     }),
     semesterId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teacherId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    // NUEVO CAMPO: Agregado el control para el estado
+    recordStatus: new FormControl<SubjectRecordStatus>('DRAFT', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
   readonly modalityOptions: SelectOption[] = [
     { label: 'Presencial', value: 'FACE_TO_FACE' },
     { label: 'Semi-presencial', value: 'BLENDED' },
     { label: 'Virtual', value: 'ONLINE' },
+  ];
+
+  // NUEVAS OPCIONES: Arreglo con los estados de la base de datos
+  readonly statusOptions: SubjectStatusOption[] = [
+    { label: 'Borrador', value: 'DRAFT' },
+    { label: 'Publicada', value: 'PUBLISHED' },
+    { label: 'Activa', value: 'ACTIVE' },
+    { label: 'Inactiva', value: 'INACTIVE' },
+    { label: 'Cerrada', value: 'CLOSED' },
   ];
 
   constructor() {
@@ -51,6 +72,8 @@ export class SubjectFormComponent {
         capacity: current?.capacity ?? null,
         semesterId: current?.semesterId ? String(current.semesterId) : '',
         teacherId: current?.teacherId ?? '',
+        // NUEVO VALOR INICIAL: Carga el estado que viene de la DB o pone Borrador por defecto
+        recordStatus: current?.recordStatus ?? 'DRAFT', 
       });
       // En modo edición, el código no debe cambiarse
       if (current) {
@@ -68,6 +91,8 @@ export class SubjectFormComponent {
   get capacityControl() { return this.form.controls.capacity; }
   get semesterIdControl() { return this.form.controls.semesterId; }
   get teacherIdControl() { return this.form.controls.teacherId; }
+  // NUEVO GETTER: Para acceder fácil al control del estado en el HTML
+  get recordStatusControl() { return this.form.controls.recordStatus; }
 
   onCodeChange(value: string | number) {
     this.codeControl.setValue(String(value));
@@ -100,6 +125,24 @@ export class SubjectFormComponent {
     this.teacherIdControl.markAsTouched();
   }
 
+  // NUEVO EVENTO: Se ejecuta cuando cambias el select en la vista
+  onRecordStatusValueChange(value: string | number) {
+    const normalizedValue = String(value);
+
+    if (!this.isSubjectRecordStatus(normalizedValue)) return;
+
+    this.onRecordStatusChange(normalizedValue);
+  }
+
+  onRecordStatusChange(value: SubjectRecordStatus) {
+    this.recordStatusControl.setValue(value);
+    this.recordStatusControl.markAsTouched();
+  }
+
+  private isSubjectRecordStatus(value: string): value is SubjectRecordStatus {
+    return this.statusOptions.some(option => option.value === value);
+  }
+
   onSubmit() {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
@@ -114,6 +157,8 @@ export class SubjectFormComponent {
       capacity: value.capacity,
       semesterId: Number(value.semesterId),
       teacherId: value.teacherId,
+      // NUEVO DATO ENVIADO: Se agrega al payload final para mandarlo al backend
+      recordStatus: value.recordStatus, 
     });
   }
 

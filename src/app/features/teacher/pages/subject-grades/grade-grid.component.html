@@ -1,11 +1,16 @@
 <div class="grade-grid-page">
   <header class="page-header">
-    <div>
-      <p class="eyebrow">US-10 · Registro de notas</p>
-      <h1 class="page-title">Cuadrícula dinámica de calificaciones</h1>
-      <p class="page-subtitle">
-        {{ currentSubjectId() ? 'Materia #' + currentSubjectId() : 'Cargando materia...' }}
-      </p>
+    <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+      <app-button variant="tertiary" (clicked)="goBack()">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </app-button>
+      <div>
+        <p class="eyebrow">US-10 · Registro de notas</p>
+        <h1 class="page-title">Cuadrícula dinámica de calificaciones</h1>
+        <p class="page-subtitle">
+          {{ currentSubjectId() ? 'Materia #' + currentSubjectId() : 'Cargando materia...' }}
+        </p>
+      </div>
     </div>
 
     <div class="header-actions">
@@ -24,11 +29,20 @@
       <app-loader [centered]="true" label="Cargando estudiantes, plan de evaluación y notas..." />
     </section>
   } @else {
+    @if (isGradesLocked()) {
+      <div class="alert-banner warning" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: var(--warning-subtle, #fef3c7); border: 1px solid var(--warning, #f59e0b); color: var(--warning-text, #92400e); display: flex; align-items: center; gap: 0.5rem;">
+        <span class="material-symbols-outlined">warning</span>
+        <div>
+          <strong>El período de registro de calificaciones ha concluido.</strong> Las modificaciones están bloqueadas (Fecha límite: {{ globalSettings()?.academic?.globalGradesDeadline }}).
+        </div>
+      </div>
+    }
+
     <section class="summary-card">
       <div class="summary-head">
         <div>
           <h2>Plan de evaluación</h2>
-          <p>Los hitos que componen el cálculo del promedio ponderado.</p>
+          <p>Los hitos que componen la suma total de puntajes.</p>
         </div>
         <span>{{ components().length }} componente(s)</span>
       </div>
@@ -44,11 +58,11 @@
       <div class="grid-head">
         <div>
           <h2>Registro por estudiante</h2>
-          <p>Escribe una nota entre 0 y 100 en cada celda. El promedio ponderado se recalcula al instante.</p>
+          <p>Escribe una nota entre 0 y el máximo de cada componente. La suma de puntajes se recalcula al instante.</p>
         </div>
 
         <div class="grid-meta">
-          <span>{{ gradeRows().length }} estudiante(s)</span>
+          <span>{{ tableData().length }} estudiante(s)</span>
           <span>{{ saveableGradeCount() }} nota(s) listas para guardar</span>
         </div>
       </div>
@@ -64,46 +78,71 @@
           <p>Primero debes configurar el plan de evaluación.</p>
         </div>
       } @else {
-        <app-table [columns]="gridColumns()" [data]="gradeRows()">
-          <ng-template #customRow let-row let-index="index">
-            <tr>
-              <td class="grid-cell sticky-column student-cell">
-                <span class="row-number">{{ index + 1 }}</span>
-                <span class="student-name">{{ row.studentName }}</span>
-                <span class="student-meta">Matrícula {{ row.enrollmentId }}</span>
-                @if (row.degreeName) {
-                  <span class="student-meta">{{ row.degreeName }}</span>
+        <div class="table-scroll-shell">
+          <app-table [columns]="tableColumns()" [data]="tableData()">
+            <ng-template #customRow let-row let-index="index">
+              <tr>
+                @for (column of tableColumns(); track column.key) {
+                  @if (isStudentColumn(column.key)) {
+                    <td class="grid-cell sticky-column student-cell">
+                      <div class="cell-content student-content">
+                        <span class="row-number">{{ index + 1 }}</span>
+                        <span class="student-name">{{ row.studentName }}</span>
+                        <span class="student-meta">Matrícula {{ row.enrollmentId || '—' }}</span>
+                        @if (row.degreeName) {
+                          <span class="student-meta">{{ row.degreeName }}</span>
+                        }
+                      </div>
+                    </td>
+                  } @else if (isComponentColumn(column.key)) {
+                    <td class="grid-cell score-cell">
+                      <div class="cell-content score-content">
+                        <app-input
+                          type="number"
+                          [min]="0"
+                          [max]="getComponentMax(column.key)"
+                          [showErrors]="true"
+                          [disabled]="isSaving() || isGradesLocked()"
+                          [value]="getCellValue(row.enrollmentId, getComponentIdFromColumnKey(column.key))"
+                          (valueChange)="onGradeChange(row.enrollmentId, getComponentIdFromColumnKey(column.key), $event)"
+                        />
+                      </div>
+                    </td>
+                  } @else if (isFinalGradeColumn(column.key)) {
+                    <td class="grid-cell final-cell">
+                      <div class="cell-content final-content">
+                        <span class="final-label">Nota final</span>
+                        <strong>{{ row.finalGrade | number:'1.2-2' }}</strong>
+                      </div>
+                    </td>
+                  } @else if (isAcademicStatusColumn(column.key)) {
+                    <td class="grid-cell status-cell">
+                      <div class="cell-content status-content">
+                        <span class="status-label">Estado académico</span>
+                        @if (row.academicStatus === 'REPROBADO_POR_FALTAS') {
+                          <app-badge color="danger">Reprobado por Faltas</app-badge>
+                        } @else if (row.academicStatus === 'APROBADO') {
+                          <app-badge color="success">Aprobado</app-badge>
+                        } @else if (row.academicStatus === 'REPROBADO') {
+                          <app-badge color="danger">Reprobado</app-badge>
+                        } @else {
+                          <app-badge color="warning">Pendiente</app-badge>
+                        }
+                      </div>
+                    </td>
+                  }
                 }
-              </td>
-
-              @for (component of components(); track component.id) {
-                <td class="grid-cell score-cell">
-                  <app-input
-                    type="number"
-                    [min]="0"
-                    [max]="100"
-                    [showErrors]="true"
-                    [disabled]="isSaving()"
-                    [value]="getCellValue(row.enrollmentId, component.id)"
-                    (valueChange)="onGradeChange(row.enrollmentId, component.id, $event)"
-                  />
-                </td>
-              }
-
-              <td class="grid-cell final-cell">
-                <span class="final-label">Promedio ponderado</span>
-                <strong>{{ row.finalGrade | number:'1.2-2' }}</strong>
-              </td>
-            </tr>
-          </ng-template>
-        </app-table>
+              </tr>
+            </ng-template>
+          </app-table>
+        </div>
       }
     </section>
   }
 
   <app-modal [isOpen]="isSaveModalOpen()" title="Confirmar guardado" (closed)="closeSaveModal()">
     <p class="modal-copy">
-      Vas a guardar {{ saveableGradeCount() }} nota(s) válidas para {{ gradeRows().length }} estudiante(s) en una sola petición masiva.
+      Vas a guardar {{ saveableGradeCount() }} nota(s) válidas para {{ tableData().length }} estudiante(s) en una sola petición masiva.
     </p>
 
     <div modal-actions class="modal-actions">

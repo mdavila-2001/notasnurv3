@@ -34,6 +34,10 @@ export class AuthService {
     return this.apiService.get<UserProfileResponse>('/auth/me');
   }
 
+  changePassword(dto: any): Observable<ApiResponse<void>> {
+    return this.apiService.post<void>('/auth/change-password', dto);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }

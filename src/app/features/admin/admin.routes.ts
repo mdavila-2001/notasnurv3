@@ -22,6 +22,22 @@ export const adminRoutes: Routes = [
       { path: 'managements', component: ManagementListComponent },
       { path: 'semesters', component: SemesterListComponent },
       { path: 'enrollments', component: EnrollmentListComponent },
+      {
+        path: 'faculties',
+        loadComponent: () => import('../../pages/academic-catalog/faculty-list/faculty-list').then(m => m.FacultyListComponent)
+      },
+      {
+        path: 'degrees',
+        loadComponent: () => import('../../pages/academic-catalog/degree-list/degree-list').then(m => m.DegreeListComponent)
+      },
+      {
+        path: 'reports',
+        loadComponent: () => import('./pages/admin-reports/admin-reports').then(m => m.AdminReports)
+      },
+      {
+        path: 'audit-logs',
+        loadComponent: () => import('./pages/audit-logs/audit-logs').then(m => m.AuditLogs)
+      },
     ],
   },
 ];

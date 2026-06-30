@@ -12,7 +12,6 @@ export const routes: Routes = [
     component: Layout,
     canActivate: [authGuard],
     children: [
-      // === Admin (lazy-loaded, role-protected) ===
       {
         path: 'admin',
         loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes),
@@ -24,18 +23,35 @@ export const routes: Routes = [
         loadChildren: () => import('./features/teacher/teacher.routes').then(m => m.teacherRoutes),
       },
 
-      // === Student ===
       {
         path: 'student',
         children: [
           { path: 'subjects', component: StudentSubjectsComponent },
+          {
+            path: 'dashboard',
+            loadComponent: () => import('./pages/student/student-portal/student-portal').then(m => m.StudentPortal)
+          },
+          {
+            path: 'subject/:id',
+            loadComponent: () => import('./pages/student/student-subject-detail/student-subject-detail').then(m => m.StudentSubjectDetail)
+          },
+          {
+            path: 'attendance',
+            loadComponent: () => import('./pages/student/student-attendance/student-attendance').then(m => m.StudentAttendance)
+          },
+          // Oculto temporalmente:
+          // {
+          //   path: 'schedule',
+          //   loadComponent: () => import('./pages/student/student-schedule/student-schedule').then(m => m.StudentSchedule)
+          // }
         ]
       },
-
-      // Redirect legacy /dashboard → role-appropriate dashboard
-      // El authGuard en la ruta padre ya verificó autenticación;
-      // la redirección se maneja en el login por rol.
       { path: 'dashboard', redirectTo: '/admin/dashboard', pathMatch: 'full' },
+
+      {
+        path: 'settings',
+        loadComponent: () => import('./pages/settings/settings').then(m => m.Settings)
+      },
     ]
   },
 

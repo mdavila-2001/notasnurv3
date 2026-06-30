@@ -13,6 +13,7 @@ describe('Toast', () => {
 
     fixture = TestBed.createComponent(Toast);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('message', 'Mensaje de prueba');
     await fixture.whenStable();
   });
 

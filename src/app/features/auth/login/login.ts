@@ -85,7 +85,7 @@ export class Login implements OnInit {
         this.router.navigate(['/teacher/dashboard']);
         break;
       case 'STUDENT':
-        this.router.navigate(['/student/subjects']);
+        this.router.navigate(['/student/dashboard']);
         break;
       default:
         this.router.navigate(['/login']);
@@ -93,7 +93,6 @@ export class Login implements OnInit {
     }
   }
 
-  // Getters for clean template access
   get idControl() { return this.loginForm.get('identifier'); }
   get passwordControl() { return this.loginForm.get('password'); }
 }

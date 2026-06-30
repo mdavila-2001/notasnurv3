@@ -23,10 +23,8 @@ export class StudentsTab {
 
   // Estados de carga y lista completa desde el Store
   readonly isLoading = this.operationalService.isLoading;
-  
-  // 👇 AQUÍ ESTÁ LA PROPIEDAD QUE EL HTML ESTABA PIDIENDO 👇
   readonly students = this.operationalService.students;
-  
+
   // Buscador reactivo
   readonly searchTerm = signal<string>('');
 

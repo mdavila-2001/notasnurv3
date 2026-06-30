@@ -43,19 +43,7 @@
         <p class="stat-label stat-label-gray">ACTIVOS</p>
         <div class="stat-number-row">
           <span class="stat-number stat-number-dark">{{ activeUsersCount() }}</span>
-          <span class="stat-trend">↑4%</span>
         </div>
-      </div>
-    </div>
-
-    <div class="stat-card stat-gradient">
-      <div class="stat-body">
-        <p class="stat-eval-label">Próxima Evaluación de Desempeño</p>
-        <span class="stat-eval-date">Lunes, 15 Octubre</span>
-        <p class="stat-eval-sub">85% de las plazas han sido notificadas.</p>
-      </div>
-      <div class="stat-chevron">
-        <span class="material-symbols-outlined">chevron_right</span>
       </div>
     </div>
   </div>
@@ -83,11 +71,6 @@
           <span class="material-symbols-outlined select-chevron">expand_more</span>
         </div>
       </div>
-
-      <div class="filter-icons-group">
-        <button class="filter-icon-btn"><span class="material-symbols-outlined">tune</span></button>
-        <button class="filter-icon-btn filter-icon-active"><span class="material-symbols-outlined">grid_view</span></button>
-      </div>
     </div>
 
     <div class="docentes-table-wrap">
@@ -96,7 +79,6 @@
           <tr>
             <th class="th-identity">IDENTIDAD DEL USUARIO</th>
             <th class="th-contact">CONTACTO</th>
-            <th class="th-rol">ROL</th>
             <th class="th-estado">ESTADO</th>
             <th class="th-acciones">ACCIONES</th>
           </tr>
@@ -113,7 +95,7 @@
                 </div>
                 <div class="docente-info">
                   <span class="docente-name" [class.name-inactive]="user.status === 'INACTIVE'">
-                    {{ user.name }} {{ user.lastName }}
+                    {{ user.fullName }}
                   </span>
                   <span class="docente-id">ID: {{ user.id.substring(0,8) }}...</span>
                 </div>
@@ -130,18 +112,14 @@
                 </div>
               </td>
 
-              <td class="td-rol">
-                <span class="badge badge-rol">
-                  {{ user.role }}
-                </span>
-              </td>
-
               <td class="td-estado">
                 <div class="estado-wrap">
                   <label class="toggle-switch">
-                    <input type="checkbox" 
-                           [checked]="user.status === 'ACTIVE'" 
-                           (change)="toggleEstado(user)">
+                    <input
+                      type="checkbox" 
+                      [checked]="user.status === 'ACTIVE'" 
+                      (change)="toggleEstado(user)"
+                    >
                     <span class="toggle-track"></span>
                   </label>
                   <span class="estado-text">{{ user.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</span>
@@ -149,6 +127,11 @@
               </td>
 
               <td class="td-acciones">
+                @if (selectedTab() === 'Estudiante') {
+                  <button class="action-icon-btn" title="Expediente Académico" (click)="openDegreesModal(user)">
+                    <span class="material-symbols-outlined">school</span>
+                  </button>
+                }
                 <button class="action-icon-btn" title="Historial"><span class="material-symbols-outlined">history</span></button>
                 <button class="action-icon-btn" title="Editar" (click)="onEdit(user)"><span class="material-symbols-outlined">edit</span></button>
                 <button class="action-icon-btn" title="Eliminar" (click)="onDelete(user)"><span class="material-symbols-outlined">delete</span></button>
@@ -179,28 +162,52 @@
     
     <div class="form-grid">
       <div class="form-group">
-        <label class="label-text">NOMBRE(S)</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.name" placeholder="Ej: Juan">
+        <label class="label-text">PRIMER NOMBRE</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.name" (ngModelChange)="onNameChange()" placeholder="Ej: Juan">
       </div>
 
       <div class="form-group">
-        <label class="label-text">APELLIDOS</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" placeholder="Ej: Perez">
+        <label class="label-text">SEGUNDO NOMBRE</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.middleName" placeholder="Ej: Carlos (Opcional)">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">APELLIDO PATERNO</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" (ngModelChange)="onNameChange()" placeholder="Ej: Perez">
+      </div>
+
+      <div class="form-group">
+        <label class="label-text">APELLIDO MATERNO</label>
+        <input type="text" class="custom-select" [(ngModel)]="newUser.motherLastName" placeholder="Ej: Gomez (Opcional)">
       </div>
 
       <div class="form-group full-width">
         <label class="label-text">CORREO INSTITUCIONAL</label>
-        <input type="email" class="custom-select" [(ngModel)]="newUser.email" placeholder="usuario@nur.edu.bo">
+        <input type="email" 
+               class="custom-select" 
+               [(ngModel)]="newUser.email" 
+               [disabled]="selectedTab() === 'Estudiante'" 
+               placeholder="usuario@nur.edu.bo"
+               autocomplete="username">
       </div>
 
       <div class="form-group">
         <label class="label-text">CI / DOCUMENTO</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.ci" placeholder="1234567">
+        <input type="text" 
+               class="custom-select" 
+               [(ngModel)]="newUser.ci" 
+               (ngModelChange)="onCiChange()" 
+               placeholder="1234567"
+               autocomplete="new-ci">
       </div>
 
       <div class="form-group">
         <label class="label-text">CONTRASEÑA</label>
-        <input type="password" class="custom-select" [(ngModel)]="newUser.password" placeholder="Mínimo 8 caracteres">
+        <input type="password" 
+               class="custom-select" 
+               [(ngModel)]="newUser.password" 
+               placeholder="Mínimo 8 caracteres"
+               autocomplete="new-password">
       </div>
 
       <div class="form-group full-width">
@@ -218,6 +225,85 @@
     </div>
   </app-modal>
 
+  <!-- Academic Record (Expediente) Modal -->
+  <app-modal
+    [isOpen]="isDegreesModalOpen()"
+    [title]="'Expediente Académico — ' + selectedUserForDegrees()?.fullName"
+    (closed)="closeDegreesModal()">
+    
+    <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px; width: 100%;">
+      <!-- List of active/inactive careers -->
+      <div>
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+          Carreras Registradas
+        </h3>
+        
+        @if (isUserDegreesLoading()) {
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Cargando carreras...</p>
+        } @else if (userDegreesList().length === 0) {
+          <p style="color: var(--text-secondary); font-size: 0.9rem; padding: 0.5rem 0;">
+            El estudiante no cuenta con ningún expediente académico activo.
+          </p>
+        } @else {
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+            @for (rec of userDegreesList(); track rec.id) {
+              <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-surface-hover, #f8fafc); border: 1px solid var(--border-color); border-radius: 0.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                  <span style="font-weight: 500; color: var(--text-primary); font-size: 0.9rem;">
+                    {{ rec.degreeName }}
+                  </span>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">
+                    Expediente #{{ rec.id }}
+                  </span>
+                </div>
+                <span class="status-badge" [class]="rec.status" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 1rem; font-weight: 500; text-transform: uppercase;">
+                  {{ rec.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Form to assign a new career -->
+      <div style="border-top: 1px dashed var(--border-color); padding-top: 1.5rem;">
+        <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem;">
+          Matricular en Nueva Carrera
+        </h3>
+        
+        <form (submit)="$event.preventDefault(); assignDegree()">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="label-text" style="display: block; margin-bottom: 0.5rem;">SELECCIONAR CARRERA</label>
+            <div class="select-wrap" style="position: relative; width: 100%;">
+              <select class="custom-select" [ngModel]="selectedDegreeIdToAssign()" (ngModelChange)="selectedDegreeIdToAssign.set($event)" name="degreeToAssign" required style="width: 100%; appearance: none; padding-right: 2.5rem;">
+                <option [value]="null" disabled selected>Selecciona una carrera...</option>
+                @for (deg of availableDegrees(); track deg.id) {
+                  <option [value]="deg.id">{{ deg.name }} ({{ deg.code }})</option>
+                }
+              </select>
+              <span class="material-symbols-outlined select-chevron" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-secondary);">
+                expand_more
+              </span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+            <app-button type="button" variant="secondary" (clicked)="closeDegreesModal()">
+              Cerrar
+            </app-button>
+            <app-button type="submit" variant="primary" [disabled]="isAssigningDegree() || selectedDegreeIdToAssign() === null">
+              @if (isAssigningDegree()) {
+                Registrando...
+              } @else {
+                Matricular en Carrera
+              }
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </app-modal>
+  
   <!-- Delete Confirmation Modal -->
   <app-modal
     [isOpen]="isDeleteModalOpen()"

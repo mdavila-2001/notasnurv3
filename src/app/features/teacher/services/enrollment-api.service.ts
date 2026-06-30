@@ -2,19 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { ApiResponse } from '../../../core/models/api.models';
+import { StudentEnrolledResponse } from '../../../core/models/enrollment.model';
 
-export interface StudentEnrolledResponse {
-  studentId?: string;
-  id?: string;
-  fullName?: string;
-  name?: string;
-  firstName?: string;
-  lastName?: string;
-  ci?: string;
-  email?: string;
-  degreeName?: string;
-  degreeNameDto?: string;
-}
+export type { StudentEnrolledResponse } from '../../../core/models/enrollment.model';
 
 export interface EnrollmentResponse {
   id: string;
@@ -42,7 +32,7 @@ export class EnrollmentApiService {
   private readonly api = inject(ApiService);
 
   getStudentsBySubject(subjectId: string): Observable<ApiResponse<StudentEnrolledResponse[]>> {
-    // El backend expone estudiantes de la materia en /enrollments/subjects/{id}/students.
+    // Ruta corregida: el backend expone /enrollments/subjects/{id}/students (plural + /students)
     return this.api.get<StudentEnrolledResponse[]>(`/enrollments/subjects/${subjectId}/students`);
   }
 
@@ -56,5 +46,9 @@ export class EnrollmentApiService {
 
   withdrawStudent(enrollmentId: string): Observable<ApiResponse<void>> {
     return this.api.delete<void>(`/enrollments/${enrollmentId}`);
+  }
+
+  getUserDegreesByUserId(userId: string): Observable<ApiResponse<any[]>> {
+    return this.api.get<any[]>(`/user-degrees/user/${userId}`);
   }
 }

@@ -48,16 +48,14 @@
     </div>
 
     <div class="topbar-right">
-      <button class="icon-btn" aria-label="Notificaciones">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="badge-dot"></span>
-      </button>
-      
-      <button class="icon-btn" aria-label="Ayuda">
-        <span class="material-symbols-outlined">help_outline</span>
-      </button>
-      
-      <div class="divider"></div>
+      @if (currentPeriod(); as period) {
+        <div class="period-badge" [class.period-vacation]="period.isVacation">
+          <span class="material-symbols-outlined period-icon">
+            {{ period.isVacation ? 'beach_access' : 'calendar_today' }}
+          </span>
+          <span class="period-label">{{ period.label }}</span>
+        </div>
+      }
     </div>
   </header>
 

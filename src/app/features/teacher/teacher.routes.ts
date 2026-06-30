@@ -23,16 +23,22 @@ export const teacherRoutes: Routes = [
       {
         path: 'subject/:id',
         loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetail),
-        // 👇 ESTA ES LA MAGIA QUE FALTABA 👇
         children: [
-          // Si entra a subject/2 nomás, lo redirigimos automático a la pestaña students
-          { path: '', redirectTo: 'students', pathMatch: 'full' }, 
+          // Por defecto, la vista de detalle muestra la pestaña de estudiantes
+          { path: '', redirectTo: 'students', pathMatch: 'full' },
           {
             path: 'students',
-            // Asegúrate de que esta ruta llegue correctamente a donde creamos tu componente
-          loadComponent: () => import('./pages/subject-detail/tabs/students-tab/students-tab').then(m => m.StudentsTab)
-          }
+            loadComponent: () => import('./pages/subject-detail/tabs/students-tab/students-tab').then(m => m.StudentsTab),
+          },
         ]
+      },
+      {
+        path: 'attendance-reports',
+        loadComponent: () => import('./pages/teacher-attendance-report/teacher-attendance-report').then(m => m.TeacherAttendanceReport)
+      },
+      {
+        path: 'grade-closing',
+        loadComponent: () => import('./pages/teacher-grade-closing/teacher-grade-closing').then(m => m.TeacherGradeClosing)
       },
     ],
   },

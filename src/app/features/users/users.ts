@@ -11,6 +11,8 @@ import { FormsModule } from '@angular/forms';
 import { Button } from '../../shared/components/button/button';
 import { Modal } from '../../shared/components/modal/modal';
 import { AdminUserService, UserRequest } from '../admin/services/admin-user.service';
+import { AdminDegreeService, DegreeResponse } from '../admin/services/admin-degree.service';
+import { UserDegreeService, UserDegreeResponse } from '../../core/services/user-degree.service';
 import { UserResponse } from '../../core/models/api.models';
 import { ToastService } from '../../shared/services/toast.service';
 
@@ -24,6 +26,8 @@ import { ToastService } from '../../shared/services/toast.service';
 })
 export class Users implements OnInit {
   private readonly adminUserService = inject(AdminUserService);
+  private readonly adminDegreeService = inject(AdminDegreeService);
+  private readonly userDegreeService = inject(UserDegreeService);
   private readonly toastService = inject(ToastService);
 
   allUsers = signal<UserResponse[]>([]);
@@ -34,6 +38,15 @@ export class Users implements OnInit {
   // Delete confirmation modal state
   isDeleteModalOpen = signal(false);
   userToDelete = signal<UserResponse | null>(null);
+
+  // Academic record (degrees) state signals
+  isDegreesModalOpen = signal(false);
+  selectedUserForDegrees = signal<UserResponse | null>(null);
+  userDegreesList = signal<UserDegreeResponse[]>([]);
+  isUserDegreesLoading = signal(false);
+  availableDegrees = signal<DegreeResponse[]>([]);
+  selectedDegreeIdToAssign = signal<number | null>(null);
+  isAssigningDegree = signal(false);
 
   newUser: Partial<UserRequest & { id: string; password: string }> = this.getEmptyUserStructure();
 
@@ -174,8 +187,101 @@ export class Users implements OnInit {
     };
   }
 
+  onCiChange() {
+    if (this.selectedTab() === 'Estudiante') {
+      const ci = this.newUser.ci ? String(this.newUser.ci).trim() : '';
+      this.newUser.email = ci ? `${ci}@nur.edu.bo` : '';
+    }
+  }
+
+  onNameChange() {
+    if (this.selectedTab() === 'Docente') {
+      const normalizeStr = (str: string) => {
+        return str
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Elimina acentos/diacríticos (ej: á -> a, ñ -> n)
+          .replace(/ø/g, 'o')
+          .replace(/Ø/g, 'o')
+          .replace(/æ/g, 'ae')
+          .replace(/Æ/g, 'ae')
+          .replace(/ß/g, 'ss')
+          .replace(/[^a-zA-Z0-9]/g, ''); // Elimina cualquier otro caracter especial restante
+      };
+
+      const name = this.newUser.name ? normalizeStr(this.newUser.name.trim().toLowerCase()) : '';
+      const lastName = this.newUser.lastName ? normalizeStr(this.newUser.lastName.trim().toLowerCase()) : '';
+      
+      const firstLetter = name.charAt(0);
+      
+      if (firstLetter || lastName) {
+        this.newUser.email = `${firstLetter}${lastName}@nur.edu.bo`;
+      } else {
+        this.newUser.email = '';
+      }
+    }
+  }
+
   onSearch(event: Event) {
     this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  openDegreesModal(user: UserResponse) {
+    this.selectedUserForDegrees.set(user);
+    this.isDegreesModalOpen.set(true);
+    this.selectedDegreeIdToAssign.set(null);
+    this.isUserDegreesLoading.set(true);
+
+    this.userDegreeService.getByUserId(user.id).subscribe({
+      next: (response) => {
+        this.userDegreesList.set(response.data ?? []);
+        this.isUserDegreesLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar expedientes del estudiante');
+        this.isUserDegreesLoading.set(false);
+      }
+    });
+
+    this.adminDegreeService.getAll().subscribe({
+      next: (response) => {
+        this.availableDegrees.set(response.data ?? []);
+      },
+      error: () => this.toastService.error('Error al cargar catálogo de carreras')
+    });
+  }
+
+  closeDegreesModal() {
+    this.isDegreesModalOpen.set(false);
+    this.selectedUserForDegrees.set(null);
+    this.userDegreesList.set([]);
+    this.availableDegrees.set([]);
+    this.selectedDegreeIdToAssign.set(null);
+  }
+
+  assignDegree() {
+    const user = this.selectedUserForDegrees();
+    const degreeId = this.selectedDegreeIdToAssign();
+    if (!user || !degreeId) return;
+
+    this.isAssigningDegree.set(true);
+    this.userDegreeService.openRecord({
+      userId: user.id,
+      degreeId: Number(degreeId),
+      type: 'STUDENT'
+    }).subscribe({
+      next: () => {
+        this.toastService.success('¡Estudiante matriculado en la carrera correctamente!');
+        this.isAssigningDegree.set(false);
+        this.selectedDegreeIdToAssign.set(null);
+        // Refresh list
+        this.userDegreeService.getByUserId(user.id).subscribe(r => this.userDegreesList.set(r.data ?? []));
+      },
+      error: (err: any) => {
+        const backendMessage = err?.message || err?.error?.message;
+        this.toastService.error(backendMessage || 'Error al matricular en la carrera');
+        this.isAssigningDegree.set(false);
+      }
+    });
   }
 }
 

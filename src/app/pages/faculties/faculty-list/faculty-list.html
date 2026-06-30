@@ -1,0 +1,90 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-title-row">
+      <h1 class="page-title">Facultades</h1>
+      <app-button variant="primary" (clicked)="openFormModal()">
+        <span class="material-symbols-outlined btn-icon-left">add</span>
+        Nueva Facultad
+      </app-button>
+    </div>
+    <p class="page-subtitle">Gestiona las facultades de la universidad para clasificar carreras y materias.</p>
+  </header>
+
+  <div class="card-panel">
+    @if (isLoading()) {
+      <div style="display: flex; justify-content: center; align-items: center; padding: 3rem; color: var(--text-secondary);">
+        Cargando facultades...
+      </div>
+    } @else {
+      <app-table
+        [columns]="columns"
+        [data]="tableRows()"
+        [showActions]="true"
+        (editClicked)="openFormModal($event)"
+        (deleteClicked)="onDelete($event)">
+      </app-table>
+    }
+  </div>
+</div>
+
+<!-- Faculty Form Modal -->
+<app-modal
+  [isOpen]="isFormModalOpen()"
+  [title]="selectedFaculty() ? 'Editar Facultad' : 'Nueva Facultad'"
+  (closed)="closeFormModal()">
+  
+  <form (submit)="$event.preventDefault(); onSave()" style="display: flex; flex-direction: column; gap: 1.25rem; max-width: 450px; width: 100%;">
+    <div class="form-group">
+      <label class="label-text">NOMBRE DE LA FACULTAD</label>
+      <input type="text" 
+             class="custom-select" 
+             [(ngModel)]="nameField" 
+             name="name" 
+             placeholder="Ej. Facultad de Ingeniería y Tecnología"
+             required>
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">CÓDIGO DE FACULTAD</label>
+      <input type="text" 
+             class="custom-select" 
+             [(ngModel)]="codeField" 
+             name="code" 
+             placeholder="Ej. FIT"
+             required>
+    </div>
+
+    <div modal-actions class="modal-actions" style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem; width: 100%;">
+      <app-button type="button" variant="secondary" (clicked)="closeFormModal()">Cancelar</app-button>
+      <app-button type="submit" variant="primary">
+        <span class="material-symbols-outlined btn-icon-left">save</span>
+        {{ selectedFaculty() ? 'Guardar Cambios' : 'Crear Facultad' }}
+      </app-button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Delete Confirmation Modal -->
+<app-modal
+  [isOpen]="isDeleteModalOpen()"
+  title="Confirmar Eliminación"
+  (closed)="closeDeleteModal()">
+
+  <p style="margin: 0; color: var(--text-secondary); line-height: 1.5;">
+    ¿Estás seguro de eliminar la facultad <strong>"{{ facultyToDelete()?.name }}"</strong>?
+    Esta acción no se puede deshacer y puede afectar a las carreras vinculadas.
+  </p>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" (clicked)="closeDeleteModal()">Cancelar</app-button>
+    <app-button variant="primary" (clicked)="confirmDelete()">Sí, eliminar</app-button>
+  </div>
+</app-modal>
+
+@if (showToast()) {
+  <app-toast
+    [type]="toastType()"
+    [message]="toastMessage()"
+    (closed)="onToastClosed()">
+  </app-toast>
+}

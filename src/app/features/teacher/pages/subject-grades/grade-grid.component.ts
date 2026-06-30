@@ -1,19 +1,25 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { concat, firstValueFrom, of } from 'rxjs';
+import { combineLatest, concat, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
-import { GradeBulkRequest, GradeRequest, GradeResponse, GradeRowUI } from '../../../../core/models/grade.models';
+import { GradeAcademicStatus, GradeBulkRequest, GradeRequest, GradeResponse, GradeRowUI } from '../../../../core/models/grade.models';
 import { EvaluationComponent, StudentOperational } from '../../../../core/models/operational.model';
+import { SubjectModality } from '../../../../core/models/subject.model';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
+import { AttendanceService } from '../../../../features/teacher/services/attendance.service';
 import { Button } from '../../../../shared/components/button/button';
+import { Badge } from '../../../../shared/components/badge/badge';
 import { Input } from '../../../../shared/components/input/input';
 import { Loader } from '../../../../shared/components/loader/loader';
 import { Modal } from '../../../../shared/components/modal/modal';
 import { Table, TableColumn } from '../../../../shared/components/table/table';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { GradeApiService } from '../../services/grade-api.service';
+import { GlobalSettingsService } from '../../../../core/services/settings/global-settings.service';
+import { CURRENT_DATE } from '../../../../core/services/settings/current-date.token';
+import { GlobalSettingsResponse } from '../../../../core/models/settings.model';
 
 type GradeLoadState = {
   subjectId: string | null;
@@ -29,16 +35,23 @@ type GradeGridRow = GradeRowUI & {
 @Component({
   selector: 'app-grade-grid',
   standalone: true,
-  imports: [CommonModule, Button, Input, Loader, Modal, Table],
+  imports: [CommonModule, Button, Badge, Input, Loader, Modal, Table],
   templateUrl: './grade-grid.component.html',
   styleUrl: './grade-grid.component.css',
-  providers: [GradeApiService],
+  providers: [AttendanceService, GradeApiService],
 })
 export class GradeGridComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
   private readonly operationalService = inject(SubjectOperationalService);
+  private readonly attendanceService = inject(AttendanceService);
   private readonly gradeApi = inject(GradeApiService);
   private readonly toast = inject(ToastService);
+  private readonly settingsService = inject(GlobalSettingsService);
+  private readonly getCurrentDate = inject(CURRENT_DATE);
+
+  readonly globalSettings = signal<GlobalSettingsResponse | null>(null);
+  readonly currentDate = signal<Date>(this.getCurrentDate());
 
   readonly routeSubjectId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('subjectId') ?? params.get('id'))),
@@ -59,7 +72,7 @@ export class GradeGridComponent {
 
   readonly summaryColumns = computed<TableColumn[]>(() => [
     { key: 'name', label: 'Componente' },
-    { key: 'weight', label: 'Peso (%)' },
+    { key: 'weight', label: 'Puntaje máximo' },
     { key: 'description', label: 'Descripción' },
   ]);
 
@@ -67,19 +80,23 @@ export class GradeGridComponent {
     this.components().map((component) => ({
       id: component.id,
       name: component.name,
-      weight: `${component.weight}%`,
+      weight: `${component.weight} pts`,
       description: component.description || '—',
     })),
   );
 
-  readonly gridColumns = computed<TableColumn[]>(() => [
+  readonly tableColumns = computed<TableColumn[]>(() => [
     { key: 'student', label: 'Estudiante' },
     ...this.components().map((component) => ({
       key: `component-${component.id}`,
       label: component.name,
     })),
-    { key: 'finalGrade', label: 'Promedio ponderado' },
+    { key: 'finalGrade', label: 'Nota final' },
+    { key: 'academicStatus', label: 'Estado académico' },
   ]);
+
+  readonly absencesMap = signal<Map<string, number>>(new Map());
+  readonly absencesLoading = signal(false);
 
   readonly existingGradesState = toSignal(
     toObservable(this.routeSubjectId).pipe(
@@ -149,33 +166,93 @@ export class GradeGridComponent {
     return map;
   });
 
-  readonly gradeRows = computed<GradeGridRow[]>(() => {
+  readonly tableData = computed<GradeGridRow[]>(() => {
     const components = this.components();
+    const attendanceMap = this.absencesMap();
+    const absenceLimit = this.getAbsenceLimit(this.operationalService.subject()?.modality ?? null);
 
-    return this.gradeRowsDraft().map((row) => ({
-      ...row,
-      finalGrade: this.calculateFinalGrade(row.scores, components),
-    }));
+    return this.gradeRowsDraft().map((row) => {
+      const finalGrade = this.calculateFinalGrade(row.scores, components);
+
+      return {
+        ...row,
+        finalGrade,
+        academicStatus: this.resolveAcademicStatus(row, components, finalGrade, attendanceMap, absenceLimit),
+      };
+    });
+  });
+
+  readonly academicStatus = computed(() => {
+    const statuses = new Map<string, GradeAcademicStatus>();
+
+    for (const row of this.tableData()) {
+      statuses.set(this.getRowKey(row), row.academicStatus);
+    }
+
+    return statuses;
   });
 
   readonly hasComponents = computed(() => this.components().length > 0);
   readonly hasStudents = computed(() => this.students().length > 0);
   readonly isGradesLoading = computed(() => this.existingGradesState().status === 'loading');
-  readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading());
+  readonly isLoading = computed(() => this.subjectLoading() || this.studentsLoading() || this.isGradesLoading() || this.absencesLoading());
   readonly hasValidEnrollmentIds = computed(() =>
     this.gradeRowsDraft().every((row) => (row.enrollmentId?.trim().length ?? 0) > 0),
   );
   readonly saveableGradeCount = computed(() => this.buildSavePayload().grades.length);
+
+  readonly isGradesLocked = computed(() => {
+    const settings = this.globalSettings();
+    if (!settings) {
+      return false;
+    }
+
+    if (settings.institutional.allowLateGradesEntry) {
+      return false;
+    }
+
+    const deadlineStr = settings.academic.globalGradesDeadline;
+    if (!deadlineStr) {
+      return false;
+    }
+
+    const currentDate = this.currentDate();
+    const currentVal = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+
+    // Parse YYYY-MM-DD safely in local time
+    const parts = deadlineStr.split('-');
+    if (parts.length !== 3) {
+      return false;
+    }
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const deadlineVal = new Date(year, month, day).getTime();
+
+    return currentVal > deadlineVal;
+  });
+
   readonly canSave = computed(() =>
     this.hasComponents() &&
     this.hasStudents() &&
     this.saveableGradeCount() > 0 &&
     this.hasValidEnrollmentIds() &&
     !this.isLoading() &&
-    !this.isSaving(),
+    !this.isSaving() &&
+    !this.isGradesLocked(),
   );
 
   constructor() {
+    // Load global settings
+    this.settingsService.getGlobalSettings().subscribe({
+      next: (settings) => {
+        this.globalSettings.set(settings);
+      },
+      error: () => {
+        this.toast.error('No se pudieron cargar los parámetros de configuración global.', 'Configuración');
+      }
+    });
+
     effect(
       () => {
         const subjectId = this.routeSubjectId();
@@ -189,7 +266,9 @@ export class GradeGridComponent {
           return;
         }
 
-        this.operationalService.loadSubjectContext(subjectId);
+        untracked(() => {
+          this.operationalService.loadSubjectContext(subjectId);
+        });
       },
       { allowSignalWrites: true },
     );
@@ -201,7 +280,7 @@ export class GradeGridComponent {
         const components = this.components();
         const gradeLoadState = this.existingGradesState();
 
-        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading') {
+        if (!subjectId || this.studentsLoading() || gradeLoadState.status === 'loading' || gradeLoadState.status === 'idle') {
           return;
         }
 
@@ -249,6 +328,41 @@ export class GradeGridComponent {
           this.toast.error(message, 'Carga de estudiantes');
           this.operationalService.clearStudentsError();
         }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      (onCleanup) => {
+        const subjectId = this.routeSubjectId();
+
+        if (!subjectId) {
+          this.absencesMap.set(new Map());
+          this.absencesLoading.set(false);
+          return;
+        }
+
+        this.absencesLoading.set(true);
+
+        const subscription = this.attendanceService.getSubjectAbsences(subjectId).pipe(
+          catchError((error) => {
+            const message = this.extractErrorMessage(error, 'No se pudieron cargar las faltas. Se asumirá 0 por estudiante.');
+            this.toast.warning(message, 'Faltas no disponibles');
+            return of(new Map<string, number>());
+          }),
+        ).subscribe({
+          next: (absences) => {
+            this.absencesMap.set(absences);
+          },
+          complete: () => {
+            this.absencesLoading.set(false);
+          },
+          error: () => {
+            this.absencesLoading.set(false);
+          },
+        });
+
+        onCleanup(() => subscription.unsubscribe());
       },
       { allowSignalWrites: true },
     );
@@ -371,6 +485,7 @@ export class GradeGridComponent {
         ci: student.ci,
         degreeName: student.degreeName,
         scores,
+        academicStatus: 'PENDIENTE' as GradeAcademicStatus,
       };
     });
 
@@ -417,13 +532,96 @@ export class GradeGridComponent {
         return total;
       }
 
-      return total + (score * component.weight) / 100;
+      return total + score;
     }, 0);
   }
 
+  private resolveAcademicStatus(
+    row: GradeRowUI,
+    components: EvaluationComponent[],
+    finalGrade: number,
+    absencesMap: Map<string, number>,
+    absenceLimit: number,
+  ): GradeAcademicStatus {
+    const absences = this.getAbsenceCount(row, absencesMap);
+
+    if (absences >= absenceLimit) {
+      return 'REPROBADO_POR_FALTAS';
+    }
+
+    if (!this.isRowComplete(row, components)) {
+      return 'PENDIENTE';
+    }
+
+    if (finalGrade >= 51) {
+      return 'APROBADO';
+    }
+
+    return 'REPROBADO';
+  }
+
+  private isRowComplete(row: GradeRowUI, components: EvaluationComponent[]): boolean {
+    for (const component of components) {
+      const score = row.scores[component.id];
+
+      if (score === null || score === undefined) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private getAbsenceCount(row: GradeRowUI, absencesMap: Map<string, number>): number {
+    const enrollmentKey = row.enrollmentId?.trim();
+
+    if (!enrollmentKey) {
+      return 0;
+    }
+
+    return absencesMap.get(enrollmentKey) ?? 0;
+  }
+
+  private getAbsenceLimit(modality: SubjectModality | null): number {
+    return modality === 'BLENDED' ? 3 : 5;
+  }
+
+  isStudentColumn(columnKey: string): boolean {
+    return columnKey === 'student';
+  }
+
+  isFinalGradeColumn(columnKey: string): boolean {
+    return columnKey === 'finalGrade';
+  }
+
+  isAcademicStatusColumn(columnKey: string): boolean {
+    return columnKey === 'academicStatus';
+  }
+
+  isComponentColumn(columnKey: string): boolean {
+    return columnKey.startsWith('component-');
+  }
+
+  getComponentIdFromColumnKey(columnKey: string): number {
+    return Number(columnKey.replace('component-', ''));
+  }
+
+  getComponentMax(columnKey: string): number {
+    const componentId = this.getComponentIdFromColumnKey(columnKey);
+    const component = this.components().find((item) => item.id === componentId);
+
+    return component?.weight ?? 100;
+  }
+
+  private getRowKey(row: GradeRowUI): string {
+    return row.enrollmentId?.trim() || row.studentId;
+  }
+
   private resolveEnrollmentId(student: StudentOperational): string | null {
-    const enrollmentId = student.enrollmentId?.trim() || student.studentId?.trim();
-    return enrollmentId || null;
+    const enrollmentId = student.enrollmentId?.trim();
+    const fallbackEnrollmentId = student.studentId?.trim();
+
+    return enrollmentId || fallbackEnrollmentId || null;
   }
 
   private normalizeScoreValue(value: string | number): number | null {
@@ -458,5 +656,9 @@ export class GradeGridComponent {
     }
 
     return fallback;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 }

@@ -593,3 +593,39 @@
   transition: background 0.15s;
 }
 .btn-modal-save:hover { background: #0284c7; }
+
+/* ── FORM GRID / LAYOUT FIX ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group .label-text {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.form-group input,
+.form-group select {
+  box-sizing: border-box;
+  width: 100%;
+}

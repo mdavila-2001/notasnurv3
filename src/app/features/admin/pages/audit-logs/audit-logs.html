@@ -1,0 +1,249 @@
+<div class="page-wrapper">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Historial de Auditoría y Logs</h1>
+    <p class="page-subtitle">Registro y monitoreo detallado de todas las acciones de creación, edición y eliminación de calificaciones y asistencias en el sistema.</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card stat-white">
+      <div class="stat-body">
+        <p class="stat-label stat-label-gray">TOTAL DE REGISTROS</p>
+        <div class="stat-number-row">
+          <span class="stat-number stat-number-dark">{{ totalElements() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Table Panel -->
+  <div class="card-panel">
+    <div class="filters-row">
+      <!-- Search -->
+      <div class="filter-col search-col">
+        <label class="filter-label-text">BUSCAR POR DOCENTE O CORREO</label>
+        <div class="select-wrap">
+          <input type="text" 
+                 class="custom-select" 
+                 placeholder="Ej: nombre, apellido, correo..." 
+                 [value]="searchQuery()"
+                 (input)="onSearch($event)">
+          <span class="material-symbols-outlined input-icon">search</span>
+        </div>
+      </div>
+
+      <!-- Action Filter -->
+      <div class="filter-col">
+        <label class="filter-label-text">TIPO DE ACCIÓN</label>
+        <div class="select-wrap">
+          <select class="custom-select" [(ngModel)]="selectedAction" (change)="onFilterChange()">
+            <option value="">Todas las Acciones</option>
+            <option value="CREATE">CREATE (Creación)</option>
+            <option value="UPDATE">UPDATE (Actualización)</option>
+            <option value="DELETE">DELETE (Eliminación)</option>
+          </select>
+          <span class="material-symbols-outlined select-chevron">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Table Filter -->
+      <div class="filter-col">
+        <label class="filter-label-text">TABLA AFECTADA</label>
+        <div class="select-wrap">
+          <select class="custom-select" [(ngModel)]="selectedTable" (change)="onFilterChange()">
+            <option value="">Todas las Tablas</option>
+            <option value="grade">Notas (grade)</option>
+            <option value="attendance">Asistencias (attendance)</option>
+          </select>
+          <span class="material-symbols-outlined select-chevron">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Clear Filters -->
+      <div class="filter-col action-col">
+        <button class="filter-icon-btn reset-btn" (click)="clearFilters()" title="Limpiar Filtros">
+          <span class="material-symbols-outlined">filter_alt_off</span>
+          <span>Limpiar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+      @if (isLoading()) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Cargando registros de auditoría...</p>
+        </div>
+      }
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>USUARIO / OPERADOR</th>
+            <th>ACCIÓN</th>
+            <th>TABLA</th>
+            <th>ID REGISTRO</th>
+            <th>FECHA Y HORA</th>
+            <th>DIRECCIÓN IP</th>
+            <th class="th-actions">DETALLES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of logs(); track log.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">{{ log.userFullName.charAt(0) }}</div>
+                  <div class="user-info">
+                    <span class="user-name">{{ log.userFullName }}</span>
+                    <span class="user-email">{{ log.userEmail }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge" [class]="'badge-' + log.action.toLowerCase()">
+                  {{ log.action }}
+                </span>
+              </td>
+              <td>
+                <span class="table-tag" [class]="log.affectedTable">
+                  {{ log.affectedTable }}
+                </span>
+              </td>
+              <td>
+                <span class="record-id" [title]="log.recordId">{{ log.recordId.substring(0, 8) }}...</span>
+              </td>
+              <td>
+                <span class="timestamp">{{ log.changedAt | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+              </td>
+              <td>
+                <span class="ip-address">{{ log.ipAddress || '127.0.0.1' }}</span>
+              </td>
+              <td class="td-actions">
+                <button class="action-icon-btn" title="Ver Detalles de Cambio" (click)="openDetail(log)">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            @if (!isLoading()) {
+              <tr>
+                <td colspan="7" class="empty-cell">
+                  <span class="material-symbols-outlined empty-icon">receipt_long</span>
+                  <p>No se encontraron registros de auditoría que coincidan con los filtros aplicados.</p>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Row -->
+    @if (totalPages() > 0) {
+      <div class="pagination-row">
+        <span class="pagination-info">
+          Mostrando de <strong>{{ currentPage() * pageSize() + 1 }}</strong> a 
+          <strong>{{ (currentPage() + 1) * pageSize() > totalElements() ? totalElements() : (currentPage() + 1) * pageSize() }}</strong> 
+          de <strong>{{ totalElements() }}</strong> registros.
+        </span>
+        <div class="pagination-actions">
+          <button class="pag-btn" [disabled]="currentPage() === 0" (click)="setPage(currentPage() - 1)">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          
+          @for (page of pagesList(); track page) {
+            <button class="pag-btn" [class.pag-active]="page === currentPage()" (click)="setPage(page)">
+              {{ page + 1 }}
+            </button>
+          }
+          
+          <button class="pag-btn" [disabled]="currentPage() === totalPages() - 1" (click)="setPage(currentPage() + 1)">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Detail Modal -->
+  <app-modal [isOpen]="isDetailModalOpen()" title="Detalles del Registro de Auditoría" (closed)="closeDetail()">
+    @if (selectedLog(); as log) {
+      <div class="modal-body-content">
+        <!-- Log Info Overview -->
+        <div class="overview-grid">
+          <div class="overview-item">
+            <span class="overview-label">Operador:</span>
+            <span class="overview-value">{{ log.userFullName }} ({{ log.userEmail }})</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Fecha y Hora:</span>
+            <span class="overview-value">{{ log.changedAt | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Acción / Tabla:</span>
+            <span class="overview-value font-bold">
+              <span class="badge" [class]="'badge-' + log.action.toLowerCase()">{{ log.action }}</span>
+              en <span class="table-tag" [class]="log.affectedTable">{{ log.affectedTable }}</span>
+            </span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Dirección IP:</span>
+            <span class="overview-value font-mono">{{ log.ipAddress || '127.0.0.1' }}</span>
+          </div>
+        </div>
+
+        <h4 class="changes-title">Cambios en el Registro</h4>
+        
+        <!-- Changes comparison Table -->
+        <div class="changes-table-container">
+          <table class="changes-table">
+            <thead>
+              <tr>
+                <th>CAMPO</th>
+                <th>VALOR ANTERIOR</th>
+                <th>VALOR NUEVO</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (diff of getParsedDiffs(); track diff.field) {
+                <tr>
+                  <td class="font-bold">{{ diff.field }}</td>
+                  <td class="val-old">{{ diff.oldVal }}</td>
+                  <td class="val-new">{{ diff.newVal }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="no-changes-cell">
+                    No se detectaron diferencias legibles en los valores antiguos/nuevos.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Raw JSON collapsible option -->
+        <details class="raw-json-details">
+          <summary>Ver Datos JSON Crudos</summary>
+          <div class="raw-json-flex">
+            <div class="json-box">
+              <h5>Valor Anterior (JSON)</h5>
+              <pre><code>{{ log.oldValue || 'null' }}</code></pre>
+            </div>
+            <div class="json-box">
+              <h5>Valor Nuevo (JSON)</h5>
+              <pre><code>{{ log.newValue || 'null' }}</code></pre>
+            </div>
+          </div>
+        </details>
+      </div>
+      
+      <div class="modal-footer">
+        <app-button variant="primary" (clicked)="closeDetail()">Cerrar</app-button>
+      </div>
+    }
+  </app-modal>
+</div>

@@ -85,20 +85,20 @@
                 </tr>
               </thead>
               <tbody>
-                @for (student of enrolledStudents(); track student.studentId) {
+                @for (student of enrolledStudents(); track student.id ?? student.studentId) {
                   <tr>
                     <td>{{ student.fullName }}</td>
                     <td>{{ student.ci }}</td>
                     <td>{{ student.email }}</td>
                     <td>{{ student.degreeName || '—' }}</td>
                     <td>
-                      <button
-                        class="btn-withdraw"
+                      <app-button
+                        variant="tertiary"
                         title="Dar de baja"
-                        (click)="requestWithdrawStudent(student.id, student.fullName)">
+                        (clicked)="openWithdrawModal(student.id, student.fullName)">
                         <span class="material-symbols-outlined">person_remove</span>
                         Dar de baja
-                      </button>
+                      </app-button>
                     </td>
                   </tr>
                 }
@@ -120,30 +120,74 @@
 
   <div class="enroll-form">
     <div class="form-group">
-      <label class="form-label">Alumno</label>
-      <select
-        class="form-input"
-        [(ngModel)]="selectedStudentId">
-        <option value="">— Selecciona un alumno —</option>
-        @for (option of studentOptions(); track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <label class="form-label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Seleccionar Estudiante
+      </label>
+      <div class="select-container" style="position: relative;">
+        <select 
+          class="custom-select" 
+          [value]="selectedUserId() ?? ''"
+          (change)="onStudentSelected($any($event.target).value)"
+          style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+          <option value="">-- Seleccionar de la Nómina --</option>
+          @for (student of studentsList(); track student.id) {
+            <option [value]="student.id">
+              {{ student.fullName }} (CI: {{ student.ci }})
+            </option>
+          }
+        </select>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">ID de Expediente Académico (userDegreeId)</label>
-      <input
-        type="number"
-        class="form-input"
-        [(ngModel)]="userDegreeId"
-        placeholder="Ej: 1"
-        min="1" />
-      <p class="form-hint">
-        <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
-        El ID del expediente académico del estudiante en esta carrera.
-      </p>
-    </div>
+    <!-- Active academic records (carreras) dynamic list -->
+    @if (selectedUserId()) {
+      <div class="form-group" style="margin-top: 1.5rem;">
+        @if (isDegreesLoading()) {
+          <div class="degrees-loading" style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.9rem; padding: 0.5rem 0;">
+            <app-loader variant="spinner" size="sm"></app-loader>
+            <span>Buscando expedientes académicos...</span>
+          </div>
+        } @else if (degreesError()) {
+          <div class="degrees-error" style="color: var(--error-main, #dc2626); font-size: 0.875rem; background: var(--error-light, #fee2e2); border: 1px solid var(--error-border, #fca5a5); border-radius: 0.5rem; padding: 0.75rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">error</span>
+            <span style="flex: 1;">{{ degreesError() }}</span>
+            <app-button variant="primary" size="sm" (clicked)="openCreateRecordModal()">
+              <span class="material-symbols-outlined" style="font-size: 1rem; margin-right: 0.25rem; vertical-align: middle;">add_circle</span>
+              Crear Expediente Académico
+            </app-button>
+          </div>
+        } @else {
+          <label class="form-label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+            Carrera / Expediente Académico Activo
+          </label>
+          <div class="select-container">
+            <select 
+              class="custom-select"
+              [value]="userDegreeId() ?? ''"
+              (change)="onUserDegreeSelected($any($event.target).value)"
+              style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none; transition: border-color 0.2s;">
+              <option value="">-- Seleccionar Carrera Activa --</option>
+              @for (degree of userDegrees(); track degree.id) {
+                <option [value]="degree.id">
+                  {{ degree.degreeName }} (Expediente #{{ degree.id }})
+                </option>
+              }
+            </select>
+          </div>
+          @if (userDegrees().length > 1) {
+            <p class="form-hint" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+              <span class="material-symbols-outlined" style="font-size: 0.85rem;">info</span>
+              El estudiante tiene múltiples carreras activas. Por favor selecciona una.
+            </p>
+          } @else if (userDegrees().length === 1) {
+            <p class="form-hint" style="font-size: 0.75rem; color: var(--success-main, #16a34a); margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+              <span class="material-symbols-outlined" style="font-size: 0.85rem;">check_circle</span>
+              Se autoseleccionó la única carrera activa del estudiante.
+            </p>
+          }
+        }
+      </div>
+    }
 
     @if (selectedSubject()) {
       <div class="enroll-summary">
@@ -162,15 +206,71 @@
   </div>
 </app-modal>
 
+<!-- Modal: Confirmar baja -->
 <app-modal
   [isOpen]="isWithdrawModalOpen()"
-  title="Confirmar baja de matrícula"
+  title="Confirmar baja"
   (closed)="closeWithdrawModal()">
-  <p>¿Dar de baja a {{ pendingWithdrawStudentName() }} de esta materia?</p>
+
+  <p class="form-hint">
+    Vas a dar de baja a <strong>{{ pendingWithdrawStudentName() }}</strong> de esta materia.
+    Esta acción eliminará la matrícula asociada.
+  </p>
 
   <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
-    <app-button variant="secondary" (clicked)="closeWithdrawModal()">Cancelar</app-button>
-    <app-button variant="primary" (clicked)="confirmWithdrawStudent()">Confirmar baja</app-button>
+    <app-button variant="secondary" [disabled]="isWithdrawing()" (clicked)="closeWithdrawModal()">Cancelar</app-button>
+    <app-button variant="tertiary" [disabled]="isWithdrawing()" (clicked)="confirmWithdraw()">
+      @if (isWithdrawing()) {
+        Procesando...
+      } @else {
+        Confirmar baja
+      }
+    </app-button>
+  </div>
+</app-modal>
+
+<!-- Modal: Crear Expediente Académico -->
+<app-modal
+  [isOpen]="isCreateRecordModalOpen()"
+  title="Crear Expediente Académico"
+  (closed)="closeCreateRecordModal()">
+
+  <div class="enroll-form">
+    <p style="margin: 0 0 1rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+      El estudiante no tiene un expediente académico activo. Selecciona la carrera en la que deseas inscribirlo para crear su expediente.
+    </p>
+
+    <div class="form-group">
+      <label class="form-label" for="degree-select-record" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Carrera
+      </label>
+      @if (allDegrees().length === 0) {
+        <div style="color: var(--text-secondary); font-size: 0.875rem; padding: 0.5rem 0;">
+          Cargando carreras...
+        </div>
+      } @else {
+        <select
+          id="degree-select-record"
+          title="Seleccionar carrera"
+          class="custom-select"
+          [value]="selectedDegreeIdForRecord() ?? ''"
+          (change)="onDegreeForRecordSelected($any($event.target).value)"
+          style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border-color, #e5e7eb); background: var(--background-secondary, #fff); color: var(--text-primary); font-size: 0.95rem; cursor: pointer; outline: none;">
+          <option value="">-- Seleccionar Carrera --</option>
+          @for (degree of allDegrees(); track degree.id) {
+            <option [value]="degree.id">{{ degree.name }} ({{ degree.code }})</option>
+          }
+        </select>
+      }
+    </div>
+  </div>
+
+  <div modal-actions style="display: flex; gap: 12px; justify-content: flex-end; width: 100%;">
+    <app-button variant="secondary" [disabled]="isCreatingRecord()" (clicked)="closeCreateRecordModal()">Cancelar</app-button>
+    <app-button variant="primary" [disabled]="isCreatingRecord() || !selectedDegreeIdForRecord()" (clicked)="confirmCreateRecord()">
+      <span class="material-symbols-outlined btn-icon-left">add_circle</span>
+      @if (isCreatingRecord()) { Creando... } @else { Crear Expediente }
+    </app-button>
   </div>
 </app-modal>
 

@@ -1,0 +1,59 @@
+<div class="tab-panel animated-panel">
+  <h2 class="panel-title">Seguridad de la Cuenta</h2>
+  <p class="panel-desc">Mantenga su cuenta protegida actualizando su contraseña periódicamente.</p>
+  
+  <div class="divider"></div>
+
+  <form [formGroup]="passwordForm" (ngSubmit)="onChangePasswordSubmit()" class="security-form">
+    <div class="form-grid">
+      <app-input
+        type="password"
+        label="Contraseña Actual"
+        placeholder="Introduzca su contraseña actual"
+        [value]="currentPasswordControl?.value || ''"
+        (valueChange)="currentPasswordControl?.setValue($event.toString())"
+        [errorMessage]="currentPasswordControl?.touched && currentPasswordControl?.invalid ? 'La contraseña actual es obligatoria.' : ''"
+        [disabled]="isPasswordSaving()">
+      </app-input>
+
+      <app-input
+        type="password"
+        label="Nueva Contraseña"
+        placeholder="Mínimo 6 caracteres"
+        [value]="newPasswordControl?.value || ''"
+        (valueChange)="newPasswordControl?.setValue($event.toString())"
+        [errorMessage]="newPasswordControl?.hasError('minlength') ? 'La contraseña debe tener al menos 6 caracteres.' : (newPasswordControl?.touched && newPasswordControl?.invalid ? 'La nueva contraseña es obligatoria.' : '')"
+        [disabled]="isPasswordSaving()">
+      </app-input>
+
+      <app-input
+        type="password"
+        label="Confirmar Nueva Contraseña"
+        placeholder="Repita la nueva contraseña"
+        [value]="confirmPasswordControl?.value || ''"
+        (valueChange)="confirmPasswordControl?.setValue($event.toString())"
+        [errorMessage]="confirmPasswordControl?.touched && passwordForm.hasError('passwordMismatch') ? 'Las contraseñas no coinciden.' : (confirmPasswordControl?.touched && confirmPasswordControl?.invalid ? 'Debe confirmar su nueva contraseña.' : '')"
+        [disabled]="isPasswordSaving()">
+      </app-input>
+    </div>
+
+    <div class="form-actions">
+      <app-button 
+        variant="primary" 
+        type="submit" 
+        [disabled]="isPasswordSaving() || passwordForm.invalid">
+        @if (isPasswordSaving()) {
+          <span class="btn-loader-wrapper">
+            <span class="material-symbols-outlined spin-icon">sync</span>
+            Guardando Cambios...
+          </span>
+        } @else {
+          <span class="btn-content-wrapper">
+            <span class="material-symbols-outlined">save</span>
+            Actualizar Contraseña
+          </span>
+        }
+      </app-button>
+    </div>
+  </form>
+</div>

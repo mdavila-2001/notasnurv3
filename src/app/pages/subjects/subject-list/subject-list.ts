@@ -23,8 +23,9 @@ const MODALITY_LABELS: Record<SubjectModality, string> = {
 const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
   DRAFT: 'Borrador',
   PUBLISHED: 'Publicada',
+  ACTIVE: 'Activa',
   INACTIVE: 'Inactiva',
-  CLOSED: 'Cerrada',
+  CLOSED: 'Cerrada'
 };
 
 @Component({
