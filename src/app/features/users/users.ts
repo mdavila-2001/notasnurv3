@@ -194,6 +194,33 @@ export class Users implements OnInit {
     }
   }
 
+  onNameChange() {
+    if (this.selectedTab() === 'Docente') {
+      const normalizeStr = (str: string) => {
+        return str
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '') // Elimina acentos/diacríticos (ej: á -> a, ñ -> n)
+          .replace(/ø/g, 'o')
+          .replace(/Ø/g, 'o')
+          .replace(/æ/g, 'ae')
+          .replace(/Æ/g, 'ae')
+          .replace(/ß/g, 'ss')
+          .replace(/[^a-zA-Z0-9]/g, ''); // Elimina cualquier otro caracter especial restante
+      };
+
+      const name = this.newUser.name ? normalizeStr(this.newUser.name.trim().toLowerCase()) : '';
+      const lastName = this.newUser.lastName ? normalizeStr(this.newUser.lastName.trim().toLowerCase()) : '';
+      
+      const firstLetter = name.charAt(0);
+      
+      if (firstLetter || lastName) {
+        this.newUser.email = `${firstLetter}${lastName}@nur.edu.bo`;
+      } else {
+        this.newUser.email = '';
+      }
+    }
+  }
+
   onSearch(event: Event) {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
