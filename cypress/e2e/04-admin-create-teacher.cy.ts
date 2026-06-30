@@ -7,7 +7,6 @@ describe('Registro de Docente de Pruebas (Administrador)', () => {
   const teacherPassword = '12345678';
 
   before(() => {
-    // Leer el ultimo CI base 101000, incrementarlo y actualizar el fixture
     cy.readFile('cypress/fixtures/last-teacher-ci.json').then((data) => {
       const lastCi = data && data.ci ? Number(data.ci) : 101000;
       const nextCi = lastCi + 1;
@@ -25,19 +24,15 @@ describe('Registro de Docente de Pruebas (Administrador)', () => {
     cy.contains('button.tab-btn', 'Docentes').click();
     cy.contains('button', 'Registrar Nuevo Docente').click();
 
-    // Probar la normalización de caracteres especiales y acentos en el correo
     cy.get('input[placeholder="Ej: Juan"]').type('René');
     cy.get('input[placeholder="Ej: Perez"]').type('Muñoz Ørberg');
     cy.get('input[placeholder="usuario@nur.edu.bo"]').should('have.value', 'rmunozorberg@nur.edu.bo');
 
-    // Poner los datos definitivos del test
     cy.get('input[placeholder="Ej: Juan"]').clear().type(teacherName);
     cy.get('input[placeholder="Ej: Perez"]').clear().type(teacherLastName);
     
-    // Esperar a que el correo se autogenere basado en teacherName y teacherLastName
     cy.get('input[placeholder="usuario@nur.edu.bo"]').should('contain.value', '@nur.edu.bo');
 
-    // Lo leemos directamente del input para guardarlo en el fixture
     cy.get('input[placeholder="usuario@nur.edu.bo"]').invoke('val').then((val) => {
       const generatedEmail = val as string;
       
@@ -45,10 +40,8 @@ describe('Registro de Docente de Pruebas (Administrador)', () => {
       cy.get('input[placeholder="Mínimo 8 caracteres"]').type(teacherPassword);
       cy.contains('app-modal button', 'Guardar en Base de Datos').click();
       
-      // Verificar que se listó
       cy.get('.docentes-table').should('contain', teacherName);
 
-      // Guardar los nombres generados en un archivo de fixture
       cy.writeFile('cypress/fixtures/teacher.json', {
         name: teacherName,
         lastName: teacherLastName,
