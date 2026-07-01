@@ -9,7 +9,6 @@ import { ProfileView } from './components/profile-view/profile-view';
 import { SecuritySettings } from './components/security-settings/security-settings';
 import { AcademicSettings } from './components/academic-settings/academic-settings';
 import { AttendanceSettings } from './components/attendance-settings/attendance-settings';
-import { StudentSubscriptions } from './components/student-subscriptions/student-subscriptions';
 
 @Component({
   selector: 'app-settings',
@@ -19,8 +18,7 @@ import { StudentSubscriptions } from './components/student-subscriptions/student
     ProfileView,
     SecuritySettings,
     AcademicSettings,
-    AttendanceSettings,
-    StudentSubscriptions
+    AttendanceSettings
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
@@ -38,22 +36,15 @@ export class Settings implements OnInit {
     const role = this.profile()?.role;
     const base = [
       { id: 'profile', label: 'Mi Perfil', icon: 'person', desc: 'Datos institucionales' },
-      { id: 'preferences', label: 'Preferencias', icon: 'palette', desc: 'Personalizar apariencia' },
-      { id: 'security', label: 'Seguridad', icon: 'security', desc: 'Cambiar contraseña' }
+      { id: 'preferences', label: 'Preferencias', icon: 'palette', desc: 'Personalizar apariencia' }
     ];
     
     if (role === 'ADMIN') {
       return [
         ...base,
+        { id: 'security', label: 'Seguridad', icon: 'security', desc: 'Cambiar contraseña' },
         { id: 'system-academic', label: 'Ajustes Académicos', icon: 'gavel', desc: 'Reglas académicas' },
         { id: 'system-attendance', label: 'Ajustes Asistencia', icon: 'fact_check', desc: 'Límites de faltas' }
-      ];
-    }
-    
-    if (role === 'STUDENT') {
-      return [
-        ...base,
-        { id: 'subscriptions', label: 'Alertas', icon: 'notifications_active', desc: 'Alertas de faltas' }
       ];
     }
     

@@ -1,3 +1,20 @@
+if (typeof localStorage === 'undefined') {
+  const mockStorage = new Map<string, string>();
+  const mockLocalStorage = {
+    getItem: (key: string) => mockStorage.get(key) ?? null,
+    setItem: (key: string, value: string) => mockStorage.set(key, String(value)),
+    removeItem: (key: string) => mockStorage.delete(key),
+    clear: () => mockStorage.clear(),
+    key: (index: number) => Array.from(mockStorage.keys())[index] ?? null,
+    get length() { return mockStorage.size; }
+  };
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: mockLocalStorage,
+    writable: true,
+    configurable: true
+  });
+}
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';

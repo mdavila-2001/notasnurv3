@@ -1,5 +1,5 @@
 describe('Gestión de Periodos Académicos (Administrador)', () => {
-  let yearToUse = 2027;
+  let yearToUse = 2026;
 
   beforeEach(() => {
     cy.loginAdmin();
@@ -11,7 +11,7 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
     cy.get('body').then($body => {
       const text = $body.text();
       let found = false;
-      for (let y = 2027; y <= 2036; y++) {
+      for (let y = 2026; y <= 2036; y++) {
         if (!text.includes(y.toString())) {
           yearToUse = y;
           found = true;
@@ -25,7 +25,7 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
         cy.contains('app-management-form button', 'Guardar').click().wait(1500);
         cy.get('app-table').should('contain', yearToUse.toString());
       } else {
-        yearToUse = 2027 + Math.floor(Math.random() * 10);
+        yearToUse = 2026 + Math.floor(Math.random() * 10);
         cy.log(`Todos los años de prueba ya existen. Reutilizando: ${yearToUse}`);
       }
     });
@@ -43,8 +43,8 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
         cy.contains('button', 'Nuevo Semestre').click().wait(1500);
         cy.get('select[title="Gestión"]').select(yearToUse.toString()).wait(1500);
         cy.get('select[title="Número"]').select('1').wait(1500);
-        cy.get('input[title="Fecha inicio"]').type(`${yearToUse}-01-15`).wait(1500);
-        cy.get('input[title="Fecha fin"]').type(`${yearToUse}-06-30`).wait(1500);
+        cy.get('input[title="Fecha inicio"]').type(`${yearToUse}-03-09`).wait(1500);
+        cy.get('input[title="Fecha fin"]').type(`${yearToUse}-07-18`).wait(1500);
         cy.contains('app-semester-form button', 'Guardar').click().wait(1500);
         
         cy.get('app-table')
