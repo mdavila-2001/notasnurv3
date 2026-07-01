@@ -166,24 +166,6 @@
             <!-- Statistics Cards -->
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-icon credits">
-                  <span class="material-symbols-outlined">grade</span>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Créditos Totales</span>
-                  <span class="stat-value">{{ kardexStats().totalCredits }}</span>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon earned">
-                  <span class="material-symbols-outlined">done_all</span>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Créditos Ganados</span>
-                  <span class="stat-value">{{ kardexStats().earnedCredits }}</span>
-                </div>
-              </div>
-              <div class="stat-card">
                 <div class="stat-icon gpa">
                   <span class="material-symbols-outlined">assessment</span>
                 </div>
@@ -236,7 +218,6 @@
                     </td>
                     <td class="semester">{{ row.semester }}</td>
                     <td class="grade">{{ row.grade }}</td>
-                    <td class="credits">{{ row.credits }}</td>
                     <td class="status">
                       <span [class]="'status-badge ' + getGradeStatusClass(row.status)">
                         {{ getStatusLabel(row.status) }}

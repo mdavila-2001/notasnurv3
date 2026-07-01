@@ -27,7 +27,6 @@ interface DashboardCard {
         <div>
           <span class="eyebrow">Panel gerencial</span>
           <h1>Dashboard de Administración</h1>
-          <p>Resumen institucional generado desde el DashboardController del backend.</p>
         </div>
 
         @if (summary()?.generatedAt) {

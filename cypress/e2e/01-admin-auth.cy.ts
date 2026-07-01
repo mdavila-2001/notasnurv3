@@ -1,6 +1,5 @@
 describe('Autenticación de Administrador', () => {
   beforeEach(() => {
-    // Limpiar localStorage y sessionStorage para asegurar un estado limpio
     cy.window().then((win) => {
       win.localStorage.clear();
       win.sessionStorage.clear();
@@ -8,29 +7,25 @@ describe('Autenticación de Administrador', () => {
   });
 
   it('debería mostrar error con credenciales incorrectas', () => {
-    cy.visit('/login');
-    cy.get('input[type="text"]').type('error@nur.edu.bo');
-    cy.get('input[type="password"]').type('wrongpass');
-    cy.get('button[type="submit"]').click();
+    cy.visit('/login').wait(1500);
+    cy.get('input[type="text"]').type('error@nur.edu.bo').wait(1500);
+    cy.get('input[type="password"]').type('wrongpass').wait(1500);
+    cy.get('button[type="submit"]').click().wait(1500);
 
-    // Debería mostrar un banner de error
     cy.get('.error-banner').should('be.visible');
     cy.url().should('include', '/login');
   });
 
   it('debería iniciar sesión con credenciales correctas y luego cerrar sesión', () => {
-    // Usamos el comando personalizado loginAdmin
     cy.loginAdmin();
+    cy.wait(1500);
 
-    // Debería estar en el dashboard de admin
     cy.url().should('include', '/admin/dashboard');
     cy.get('.welcome-name').should('contain', 'Admin');
 
-    // Cerrar sesión
-    cy.contains('button', 'Cerrar Sesión').click({ force: true });
-    cy.contains('button', 'Sí, cerrar sesión').click();
+    cy.contains('button', 'Cerrar Sesión').click({ force: true }).wait(1500);
+    cy.contains('button', 'Sí, cerrar sesión').click().wait(1500);
 
-    // Debería redirigir al login
     cy.url().should('include', '/login');
   });
 });
