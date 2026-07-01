@@ -207,11 +207,11 @@ export class GradeGridComponent {
       return false;
     }
 
-    if (settings.institutional.allowLateGradesEntry) {
+    if (settings?.institutional?.allowLateGradesEntry) {
       return false;
     }
 
-    const deadlineStr = settings.academic.globalGradesDeadline;
+    const deadlineStr = settings?.academic?.globalGradesDeadline;
     if (!deadlineStr) {
       return false;
     }
@@ -232,6 +232,26 @@ export class GradeGridComponent {
     return currentVal > deadlineVal;
   });
 
+  readonly hasValidationErrors = computed(() => {
+    const draft = this.gradeRowsDraft();
+    const components = this.components();
+
+    for (const row of draft) {
+      if (!row.enrollmentId) {
+        continue;
+      }
+      for (const component of components) {
+        const value = row.scores[component.id];
+        if (value !== null && Number.isFinite(value)) {
+          if (value < 0 || value > component.weight) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  });
+
   readonly canSave = computed(() =>
     this.hasComponents() &&
     this.hasStudents() &&
@@ -239,7 +259,8 @@ export class GradeGridComponent {
     this.hasValidEnrollmentIds() &&
     !this.isLoading() &&
     !this.isSaving() &&
-    !this.isGradesLocked(),
+    !this.isGradesLocked() &&
+    !this.hasValidationErrors(),
   );
 
   constructor() {
@@ -453,8 +474,12 @@ export class GradeGridComponent {
     }
 
     const value = row.scores[componentId];
+    if (value === null) {
+      return false;
+    }
 
-    return value !== null && (!Number.isFinite(value) || value < 0 || value > 100);
+    const maxScore = this.components().find((c) => c.id === componentId)?.weight ?? 100;
+    return !Number.isFinite(value) || value < 0 || value > maxScore;
   }
 
   private buildDraftRows(

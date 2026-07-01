@@ -16,8 +16,8 @@ describe('Flujo de Estudiante: Portal, Notas y Asistencia', () => {
 
     cy.get('body').then($body => {
       if ($body.find('app-table').length > 0) {
-        cy.contains('Parcial 1').should('be.visible');
-        cy.contains('Parcial 2').should('be.visible');
+        cy.contains('1er Parcial').should('be.visible');
+        cy.contains('2do Parcial').should('be.visible');
         cy.contains('Examen Final').should('be.visible');
         cy.contains('20').should('be.visible');
       }
