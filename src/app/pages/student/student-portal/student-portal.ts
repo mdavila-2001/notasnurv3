@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { StudentPortalService } from '../../../core/services/student-portal.service';
 import { Loader } from '../../../shared/components/loader/loader';
 import { Button } from '../../../shared/components/button/button';
@@ -30,6 +30,11 @@ interface KardexTableRow {
 })
 export class StudentPortal implements OnInit {
   private readonly studentPortalService = inject(StudentPortalService);
+  private readonly router = inject(Router);
+
+  navigateToSubject(subjectCode: string): void {
+    this.router.navigate(['/student/subject', subjectCode]);
+  }
 
   // ===== STATE SIGNALS =====
   readonly isLoading = signal<boolean>(true);

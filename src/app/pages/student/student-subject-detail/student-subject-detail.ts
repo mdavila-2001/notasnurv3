@@ -12,7 +12,6 @@ interface GradeTableRow {
   componentName: string;
   weight: string;
   obtainedScore: string;
-  contribution: string;
 }
 
 @Component({
@@ -33,15 +32,12 @@ export class StudentSubjectDetail implements OnInit {
   readonly subjectDetail = signal<any | null>(null);
   readonly error = signal<string>('');
 
-  // Table structure
   readonly columns = signal<TableColumn[]>([
     { key: 'componentName', label: 'Componente / Hito de Evaluación' },
     { key: 'weight', label: 'Ponderación (%)' },
-    { key: 'obtainedScore', label: 'Nota Obtenida (sobre 100)' },
-    { key: 'contribution', label: 'Contribución a Nota Final' }
+    { key: 'obtainedScore', label: 'Nota Obtenida' }
   ]);
 
-  // Derived signals
   readonly finalGrade = computed(() => {
     const detail = this.subjectDetail();
     if (!detail) return 0;
@@ -91,14 +87,12 @@ export class StudentSubjectDetail implements OnInit {
     return detail.gradeBreakdown.map((item: any, index: number) => {
       const weight = item.weight ?? 0;
       const score = item.score ?? 0;
-      const contribution = (score * weight) / 100;
 
       return {
         id: `grade-comp-${index}`,
         componentName: item.name || 'Componente de Evaluación',
         weight: `${weight}%`,
-        obtainedScore: score.toFixed(2),
-        contribution: contribution.toFixed(2)
+        obtainedScore: score.toFixed(2)
       };
     });
   });
@@ -128,9 +122,8 @@ export class StudentSubjectDetail implements OnInit {
           return;
         }
 
-        // Match subject either by subjectCode or subjectId
-        const subject = dashboardData.enrolledSubjects.find((s: any) => 
-          s.subjectCode === id || 
+        const subject = dashboardData.enrolledSubjects.find((s: any) =>
+          s.subjectCode === id ||
           s.subjectId?.toString() === id
         );
 
