@@ -243,7 +243,6 @@ export class GradeGridComponent {
   );
 
   constructor() {
-    // Load global settings
     this.settingsService.getGlobalSettings().subscribe({
       next: (settings) => {
         this.globalSettings.set(settings);

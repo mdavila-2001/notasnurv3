@@ -1,15 +1,16 @@
 describe('Flujo de Estudiante: Portal, Notas y Asistencia', () => {
   beforeEach(() => {
     cy.readFile('cypress/fixtures/student.json').then((student) => {
-      cy.loginStudent(student.email, student.password);
+      cy.loginStudent(student.ci, student.password);
+      cy.wait(1500);
     });
   });
 
   it('debería visualizar su dashboard, detalle de notas y registro de asistencia', () => {
-    cy.visit('/student/dashboard');
+    cy.visit('/student/dashboard').wait(1500);
     
     cy.get('.subject-card').should('have.length.greaterThan', 0);
-    cy.get('.subject-card').first().click();
+    cy.get('.subject-card').first().click().wait(1500);
     
     cy.url().should('include', '/student/subject/');
 
@@ -22,7 +23,7 @@ describe('Flujo de Estudiante: Portal, Notas y Asistencia', () => {
       }
     });
 
-    cy.visit('/student/attendance');
+    cy.visit('/student/attendance').wait(1500);
     cy.get('.attendance-summary-card, app-table').should('exist');
   });
 });
