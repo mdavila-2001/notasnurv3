@@ -4,10 +4,6 @@
     <div class="header-title-row">
       <h1 class="page-title">Gestión de Usuarios</h1>
       <div class="header-actions">
-        <button class="btn-carga-masiva">
-          <span class="material-symbols-outlined btn-icon-left">description</span>
-          Carga Masiva
-        </button>
         <button class="btn-registrar" (click)="openRegisterModal()">
           <span class="material-symbols-outlined btn-icon-left">add</span>
           Registrar Nuevo {{ selectedTab() === 'Docente' ? 'Docente' : 'Estudiante' }}
