@@ -45,6 +45,9 @@ importers:
       '@cypress/schematic':
         specifier: ^5.0.0
         version: 5.0.0(@angular/cli@21.2.12(@types/node@26.0.1)(chokidar@5.0.0))(@angular/core@21.2.14(@angular/compiler@21.2.14)(rxjs@7.8.2))(cypress@15.18.0)
+      '@faker-js/faker':
+        specifier: ^10.5.0
+        version: 10.5.0
       '@types/cypress':
         specifier: ^0.1.6
         version: 0.1.6
@@ -591,6 +594,10 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@faker-js/faker@10.5.0':
+    resolution: {integrity: sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@gar/promise-retry@1.0.3':
     resolution: {integrity: sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA==}
@@ -3722,6 +3729,8 @@ snapshots:
 
   '@exodus/bytes@1.15.1': {}
 
+  '@faker-js/faker@10.5.0': {}
+
   '@gar/promise-retry@1.0.3': {}
 
   '@harperfast/extended-iterable@1.0.3':
@@ -4051,7 +4060,7 @@ snapshots:
       lru-cache: 11.5.0
       npm-pick-manifest: 11.0.3
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.1
       which: 6.0.1
 
   '@npmcli/installed-package-contents@4.0.0':
@@ -4068,7 +4077,7 @@ snapshots:
       hosted-git-info: 9.0.3
       json-parse-even-better-errors: 5.0.0
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.1
       spdx-expression-parse: 4.0.0
 
   '@npmcli/promise-spawn@9.0.1':
@@ -5220,7 +5229,7 @@ snapshots:
       '@babel/parser': 7.29.3
       '@istanbuljs/schema': 0.1.6
       istanbul-lib-coverage: 3.2.2
-      semver: 7.7.4
+      semver: 7.8.1
     transitivePeerDependencies:
       - supports-color
 
@@ -5537,7 +5546,7 @@ snapshots:
       npm-install-checks: 8.0.0
       npm-normalize-package-bin: 5.0.0
       npm-package-arg: 13.0.2
-      semver: 7.7.4
+      semver: 7.8.1
 
   npm-registry-fetch@19.1.1:
     dependencies:

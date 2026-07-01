@@ -163,7 +163,7 @@
     <div class="form-grid">
       <div class="form-group">
         <label class="label-text">PRIMER NOMBRE</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.name" placeholder="Ej: Juan">
+        <input type="text" class="custom-select" [(ngModel)]="newUser.name" (ngModelChange)="onNameChange()" placeholder="Ej: Juan">
       </div>
 
       <div class="form-group">
@@ -173,7 +173,7 @@
 
       <div class="form-group">
         <label class="label-text">APELLIDO PATERNO</label>
-        <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" placeholder="Ej: Perez">
+        <input type="text" class="custom-select" [(ngModel)]="newUser.lastName" (ngModelChange)="onNameChange()" placeholder="Ej: Perez">
       </div>
 
       <div class="form-group">

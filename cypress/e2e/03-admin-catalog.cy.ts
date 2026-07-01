@@ -49,6 +49,7 @@ describe('Gestión de Catálogo Académico (Administrador)', () => {
     cy.get('input[title="Capacidad (cupos)"]').clear().type('35');
 
     // Seleccionar semestre (tomamos la primera opción disponible después de la vacía)
+    cy.get('select[title="Semestre"] option:not([disabled])').should('have.length.greaterThan', 0);
     cy.get('select[title="Semestre"]').then(($select) => {
       const optionVal = $select.find('option:not([disabled])').eq(0).val();
       if (optionVal) {
@@ -57,6 +58,7 @@ describe('Gestión de Catálogo Académico (Administrador)', () => {
     });
 
     // Seleccionar docente (tomamos la primera opción disponible)
+    cy.get('select[title="Docente"] option:not([disabled])').should('have.length.greaterThan', 0);
     cy.get('select[title="Docente"]').then(($select) => {
       const optionVal = $select.find('option:not([disabled])').eq(0).val();
       if (optionVal) {
