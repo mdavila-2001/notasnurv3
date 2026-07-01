@@ -1,3 +1,20 @@
+if (typeof localStorage === 'undefined') {
+  const mockStorage = new Map<string, string>();
+  const mockLocalStorage = {
+    getItem: (key: string) => mockStorage.get(key) ?? null,
+    setItem: (key: string, value: string) => mockStorage.set(key, String(value)),
+    removeItem: (key: string) => mockStorage.delete(key),
+    clear: () => mockStorage.clear(),
+    key: (index: number) => Array.from(mockStorage.keys())[index] ?? null,
+    get length() { return mockStorage.size; }
+  };
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: mockLocalStorage,
+    writable: true,
+    configurable: true
+  });
+}
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Settings } from './settings';
 import { AuthService } from '../../core/services/auth.service';
@@ -119,8 +136,8 @@ describe('Settings', () => {
     await createComponent();
     fixture.detectChanges();
     const tabs = component.tabs();
-    expect(tabs.length).toBe(3);
-    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences', 'security']);
+    expect(tabs.length).toBe(2);
+    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences']);
   });
 
   it('should load extra tabs for ADMIN role', async () => {
@@ -137,8 +154,8 @@ describe('Settings', () => {
     await createComponent();
     fixture.detectChanges();
     const tabs = component.tabs();
-    expect(tabs.length).toBe(4);
-    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences', 'security', 'subscriptions']);
+    expect(tabs.length).toBe(2);
+    expect(tabs.map(t => t.id)).toEqual(['profile', 'preferences']);
   });
 
   it('should initialize dark theme if document contains dark-theme class', async () => {

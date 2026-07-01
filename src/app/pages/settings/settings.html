@@ -82,8 +82,8 @@
         </div>
       }
 
-      <!-- PESTAÑA: SEGURIDAD -->
-      @if (activeTab() === 'security') {
+      <!-- PESTAÑA: SEGURIDAD (ADMIN ONLY) -->
+      @if (activeTab() === 'security' && profile()?.role === 'ADMIN') {
         <app-security-settings></app-security-settings>
       }
 
@@ -95,11 +95,6 @@
       <!-- PESTAÑA: AJUSTES ASISTENCIA (ADMIN ONLY) -->
       @if (activeTab() === 'system-attendance' && profile()?.role === 'ADMIN') {
         <app-attendance-settings></app-attendance-settings>
-      }
-
-      <!-- PESTAÑA: SUSCRIPCIONES / ALERTAS (STUDENT ONLY) -->
-      @if (activeTab() === 'subscriptions' && profile()?.role === 'STUDENT') {
-        <app-student-subscriptions></app-student-subscriptions>
       }
     </div>
   </div>
