@@ -6,9 +6,8 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
   });
 
   it('debería crear una nueva gestión anual o identificar una existente', () => {
-    cy.visit('/admin/managements');
+    cy.visit('/admin/managements').wait(1500);
 
-    // Leer los años existentes en el cuerpo de la página
     cy.get('body').then($body => {
       const text = $body.text();
       let found = false;
@@ -21,12 +20,11 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
       }
 
       if (found) {
-        cy.contains('button', 'Nueva Gestión').click();
-        cy.get('input[title="Año"]').clear().type(yearToUse.toString());
-        cy.contains('app-management-form button', 'Guardar').click();
+        cy.contains('button', 'Nueva Gestión').click().wait(1500);
+        cy.get('input[title="Año"]').clear().type(yearToUse.toString()).wait(1500);
+        cy.contains('app-management-form button', 'Guardar').click().wait(1500);
         cy.get('app-table').should('contain', yearToUse.toString());
       } else {
-        // Si ya están creados todos, reutilizamos uno que ya exista
         yearToUse = 2027 + Math.floor(Math.random() * 10);
         cy.log(`Todos los años de prueba ya existen. Reutilizando: ${yearToUse}`);
       }
@@ -34,23 +32,21 @@ describe('Gestión de Periodos Académicos (Administrador)', () => {
   });
 
   it('debería crear un nuevo semestre asociado a la gestión', () => {
-    cy.visit('/admin/semesters');
+    cy.visit('/admin/semesters').wait(1500);
 
     cy.get('body').then($body => {
       const text = $body.text();
 
-      // Si el año ya figura en la tabla, asumimos que el semestre ya existe para esta prueba
-      if (text.includes(yearToUse.toString())) {
+      if (text.includes(`${yearToUse}-1`) || (text.includes(yearToUse.toString()) && text.includes('1'))) {
         cy.log(`El semestre para la gestión ${yearToUse} ya existe. Omitiendo creación.`);
       } else {
-        cy.contains('button', 'Nuevo Semestre').click();
-        cy.get('select[title="Gestión"]').select(yearToUse.toString());
-        cy.get('select[title="Número"]').select('1');
-        cy.get('input[title="Fecha inicio"]').type(`${yearToUse}-02-01`);
-        cy.get('input[title="Fecha fin"]').type(`${yearToUse}-06-30`);
-        cy.contains('app-semester-form button', 'Guardar').click();
+        cy.contains('button', 'Nuevo Semestre').click().wait(1500);
+        cy.get('select[title="Gestión"]').select(yearToUse.toString()).wait(1500);
+        cy.get('select[title="Número"]').select('1').wait(1500);
+        cy.get('input[title="Fecha inicio"]').type(`${yearToUse}-01-15`).wait(1500);
+        cy.get('input[title="Fecha fin"]').type(`${yearToUse}-06-30`).wait(1500);
+        cy.contains('app-semester-form button', 'Guardar').click().wait(1500);
         
-        // Verificar que aparezcan el año y el número del semestre en la tabla
         cy.get('app-table')
           .should('contain', yearToUse.toString())
           .and('contain', '1');

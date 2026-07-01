@@ -17,7 +17,6 @@ interface KardexTableRow {
   subjectName: string;
   semester: string;
   grade: string;
-  credits: number;
   status: string;
   entry?: KardexEntryDTO;
 }
@@ -86,7 +85,6 @@ export class StudentPortal implements OnInit {
     { key: 'subjectName', label: 'Materia' },
     { key: 'semester', label: 'Semestre' },
     { key: 'grade', label: 'Calificación' },
-    { key: 'credits', label: 'Créditos' },
     { key: 'status', label: 'Estado' }
   ]);
 
@@ -97,7 +95,6 @@ export class StudentPortal implements OnInit {
       subjectName: entry.subjectName,
       semester: entry.semester,
       grade: this.formatGrade(entry.grade),
-      credits: entry.credits,
       status: entry.status,
       entry: entry
     }));
