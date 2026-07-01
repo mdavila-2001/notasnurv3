@@ -15,7 +15,7 @@ export class Toast implements OnInit, OnDestroy {
 
   closed = output<void>();
 
-  private timeoutId: any;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit() {
     if (this.duration() > 0) {
@@ -26,6 +26,7 @@ export class Toast implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
   }
 

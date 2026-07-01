@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AttendanceSettings } from './attendance-settings';
 import { GlobalSettingsService } from '../../../../core/services/settings/global-settings.service';
 import { ToastService } from '../../../../shared/services/toast.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { GlobalSettingsResponse } from '../../../../core/models/settings.model';
@@ -85,5 +85,41 @@ describe('AttendanceSettings', () => {
       }
     });
     expect(mockToastService.success).toHaveBeenCalledWith('Configuración de asistencia guardada exitosamente.');
+  });
+
+  it('should show toast error and stop loading when getGlobalSettings fails', () => {
+    mockSettingsService.getGlobalSettings.mockReturnValue(throwError(() => new Error('Load failed')));
+    component.ngOnInit();
+
+    expect(mockToastService.error).toHaveBeenCalledWith('Error al cargar la configuración de asistencia.');
+    expect(component.isLoading()).toBe(false);
+  });
+
+  it('should mark form as touched and not submit if form is invalid', () => {
+    component.maxAbsencesPresencialControl?.setValue(-5); // invalid
+    const markAllAsTouchedSpy = vi.spyOn(component.attendanceForm, 'markAllAsTouched');
+    
+    component.onSubmit();
+
+    expect(markAllAsTouchedSpy).toHaveBeenCalled();
+    expect(mockSettingsService.saveGlobalSettings).not.toHaveBeenCalled();
+  });
+
+  it('should show toast error on submit when saveGlobalSettings fails', () => {
+    mockSettingsService.saveGlobalSettings.mockReturnValue(throwError(() => ({ message: 'Save error' })));
+    component.maxAbsencesPresencialControl?.setValue(6);
+    component.onSubmit();
+
+    expect(mockToastService.error).toHaveBeenCalledWith('Save error');
+    expect(component.isSaving()).toBe(false);
+  });
+
+  it('should show default toast error on submit when saveGlobalSettings fails with no message', () => {
+    mockSettingsService.saveGlobalSettings.mockReturnValue(throwError(() => new Error()));
+    component.maxAbsencesPresencialControl?.setValue(6);
+    component.onSubmit();
+
+    expect(mockToastService.error).toHaveBeenCalledWith('Error al guardar la configuración de asistencia.');
+    expect(component.isSaving()).toBe(false);
   });
 });
