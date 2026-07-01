@@ -3,6 +3,7 @@ import { SubjectListComponent } from './subject-list';
 import { AdminSubjectService } from '../../../features/admin/services/admin-subject.service';
 import { AdminUserService } from '../../../features/admin/services/admin-user.service';
 import { AcademicManagementService } from '../../../core/services/academic-management/academic-management.service';
+import { ToastService } from '../../../shared/services/toast.service';
 import { SubjectResponse, SubjectRequest } from '../../../core/models/subject.model';
 import { Semester } from '../../../core/models/academic-management.model';
 import { UserResponse } from '../../../core/models/api.models';
@@ -12,6 +13,7 @@ import { describe, beforeEach, it, expect, vi } from 'vitest';
 describe('SubjectListComponent', () => {
   let component: SubjectListComponent;
   let fixture: ComponentFixture<SubjectListComponent>;
+  let mockToastService: any;
 
   const mockAdminSubjectService = {
     getAll: vi.fn(),
@@ -70,12 +72,18 @@ describe('SubjectListComponent', () => {
     mockAcademicService.getSemesters.mockReturnValue(of(mockSemesters));
     mockAdminUserService.getByRole.mockReturnValue(of({ data: mockTeachers }));
 
+    mockToastService = {
+      success: vi.fn(),
+      error: vi.fn()
+    };
+
     await TestBed.configureTestingModule({
       imports: [SubjectListComponent],
       providers: [
         { provide: AdminSubjectService, useValue: mockAdminSubjectService },
         { provide: AdminUserService, useValue: mockAdminUserService },
         { provide: AcademicManagementService, useValue: mockAcademicService },
+        { provide: ToastService, useValue: mockToastService },
       ],
     }).compileComponents();
 
@@ -137,9 +145,7 @@ describe('SubjectListComponent', () => {
     mockAdminSubjectService.getAll.mockReturnValue(throwError(() => new Error('Error')));
     component.loadData();
 
-    expect(component.showToast()).toBe(true);
-    expect(component.toastMessage()).toBe('Error al cargar los datos');
-    expect(component.toastType()).toBe('error');
+    expect(mockToastService.error).toHaveBeenCalledWith('Error al cargar los datos');
   });
 
   it('should open and close form modal', () => {
@@ -175,9 +181,7 @@ describe('SubjectListComponent', () => {
         ...savePayload,
         semesterId: '1',
       });
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Materia creada exitosamente');
-      expect(component.toastType()).toBe('success');
+      expect(mockToastService.success).toHaveBeenCalledWith('Materia creada exitosamente');
       expect(component.isFormModalOpen()).toBe(false);
       expect(loadDataSpy).toHaveBeenCalled();
     });
@@ -193,9 +197,7 @@ describe('SubjectListComponent', () => {
         ...savePayload,
         semesterId: '1',
       });
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Materia actualizada exitosamente');
-      expect(component.toastType()).toBe('success');
+      expect(mockToastService.success).toHaveBeenCalledWith('Materia actualizada exitosamente');
       expect(component.isFormModalOpen()).toBe(false);
       expect(loadDataSpy).toHaveBeenCalled();
     });
@@ -207,9 +209,7 @@ describe('SubjectListComponent', () => {
 
       component.onSave(savePayload);
 
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('El código de materia ya existe');
-      expect(component.toastType()).toBe('error');
+      expect(mockToastService.error).toHaveBeenCalledWith('El código de materia ya existe');
     });
 
     it('should display generic error toast when onSave fails without message', () => {
@@ -218,9 +218,7 @@ describe('SubjectListComponent', () => {
 
       component.onSave(savePayload);
 
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Error al guardar la materia');
-      expect(component.toastType()).toBe('error');
+      expect(mockToastService.error).toHaveBeenCalledWith('Error al guardar la materia');
     });
   });
 
@@ -232,9 +230,7 @@ describe('SubjectListComponent', () => {
       component.onActivate(mockSubjects[0]);
 
       expect(mockAdminSubjectService.activate).toHaveBeenCalledWith('s1');
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Materia activada correctamente');
-      expect(component.toastType()).toBe('success');
+      expect(mockToastService.success).toHaveBeenCalledWith('Materia activada correctamente');
       expect(loadDataSpy).toHaveBeenCalled();
     });
 
@@ -244,9 +240,7 @@ describe('SubjectListComponent', () => {
 
       component.onActivate(mockSubjects[0]);
 
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Falta configurar ponderación');
-      expect(component.toastType()).toBe('error');
+      expect(mockToastService.error).toHaveBeenCalledWith('Falta configurar ponderación');
     });
 
     it('should show fallback error message when activation fails without message', () => {
@@ -254,9 +248,7 @@ describe('SubjectListComponent', () => {
 
       component.onActivate(mockSubjects[0]);
 
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Error al activar la materia. Verifica que las ponderaciones sumen 100.');
-      expect(component.toastType()).toBe('error');
+      expect(mockToastService.error).toHaveBeenCalledWith('Error al activar la materia. Verifica que las ponderaciones sumen 100.');
     });
   });
 
@@ -287,9 +279,7 @@ describe('SubjectListComponent', () => {
       component.confirmDelete();
 
       expect(mockAdminSubjectService.delete).toHaveBeenCalledWith('s1');
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Materia eliminada');
-      expect(component.toastType()).toBe('success');
+      expect(mockToastService.success).toHaveBeenCalledWith('Materia eliminada');
       expect(component.isDeleteModalOpen()).toBe(false);
       expect(loadDataSpy).toHaveBeenCalled();
     });
@@ -302,19 +292,9 @@ describe('SubjectListComponent', () => {
       component.confirmDelete();
 
       expect(mockAdminSubjectService.delete).toHaveBeenCalledWith('s1');
-      expect(component.showToast()).toBe(true);
-      expect(component.toastMessage()).toBe('Error al eliminar la materia');
-      expect(component.toastType()).toBe('error');
+      expect(mockToastService.error).toHaveBeenCalledWith('Error al eliminar la materia');
       expect(component.isDeleteModalOpen()).toBe(false);
       expect(loadDataSpy).not.toHaveBeenCalled();
     });
-  });
-
-  it('should close toast onToastClosed', () => {
-    component.displayToast('Test Message', 'success');
-    expect(component.showToast()).toBe(true);
-
-    component.onToastClosed();
-    expect(component.showToast()).toBe(false);
   });
 });

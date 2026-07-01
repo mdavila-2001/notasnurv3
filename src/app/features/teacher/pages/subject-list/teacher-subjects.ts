@@ -5,7 +5,6 @@ import { finalize } from 'rxjs/operators';
 import { TeacherService } from '../../services/teacher.service';
 import { SubjectResponse } from '../../../admin/services/admin-subject.service';
 import { SubjectOperationalService } from '../../../../core/services/subject-operational/subject-operational.service';
-import { EvaluationPlanService } from '../../services/evaluation-plan.service';
 import { Table } from '../../../../shared/components/table/table';
 import { Button } from '../../../../shared/components/button/button';
 import { Loader } from '../../../../shared/components/loader/loader';
@@ -17,8 +16,7 @@ import { ToastService } from '../../../../shared/services/toast.service';
   standalone: true,
   imports: [CommonModule, Table, Button, Loader, EvaluationPlanTab],
   templateUrl: './teacher-subjects.html',
-  styleUrl: './teacher-subjects.css',
-  providers: [EvaluationPlanService]
+  styleUrl: './teacher-subjects.css'
 })
 export class TeacherSubjects implements OnInit {
   private readonly teacherService = inject(TeacherService);

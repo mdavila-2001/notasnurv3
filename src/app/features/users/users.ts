@@ -15,11 +15,12 @@ import { AdminDegreeService, DegreeResponse } from '../admin/services/admin-degr
 import { UserDegreeService, UserDegreeResponse } from '../../core/services/user-degree.service';
 import { UserResponse } from '../../core/models/api.models';
 import { ToastService } from '../../shared/services/toast.service';
+import { Input } from '../../shared/components/input/input';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button, Modal],
+  imports: [CommonModule, FormsModule, Button, Modal, Input],
   templateUrl: './users.html',
   styleUrl: './users.css',
   changeDetection: ChangeDetectionStrategy.OnPush

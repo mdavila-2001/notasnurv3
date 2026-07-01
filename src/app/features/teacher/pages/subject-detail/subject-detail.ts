@@ -92,6 +92,11 @@ export class SubjectDetail implements OnInit, OnDestroy {
     if (subjectId) {
       this.operationalService.loadSubjectContext(subjectId);
     }
+
+    const tabParam = this.route.snapshot.queryParamMap?.get('tab');
+    if (tabParam && ['students', 'evaluation-plan', 'grades', 'attendance', 'reports'].includes(tabParam)) {
+      this.activeTab.set(tabParam as TabId);
+    }
   }
 
   ngOnDestroy(): void {

@@ -189,21 +189,23 @@
 
       <div class="form-group">
         <label class="label-text">CI / DOCUMENTO</label>
-        <input type="text" 
-               class="custom-select" 
-               [(ngModel)]="newUser.ci" 
-               (ngModelChange)="onCiChange()" 
-               placeholder="1234567"
-               autocomplete="new-ci">
+        <input type="text"
+          class="custom-select"
+          [(ngModel)]="newUser.ci"
+          (ngModelChange)="onCiChange()"
+          placeholder="1234567"
+          autocomplete="new-ci">
       </div>
 
       <div class="form-group">
         <label class="label-text">CONTRASEÑA</label>
-        <input type="password" 
-               class="custom-select" 
-               [(ngModel)]="newUser.password" 
-               placeholder="Mínimo 8 caracteres"
-               autocomplete="new-password">
+        <app-input
+          type="password"
+          placeholder="Mínimo 8 caracteres"
+          [value]="newUser.password ?? ''"
+          (valueChange)="newUser.password = $event.toString()"
+          autocomplete="new-password"
+        />
       </div>
 
       <div class="form-group full-width">

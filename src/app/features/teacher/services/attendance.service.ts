@@ -32,11 +32,12 @@ export class AttendanceService {
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
 
-  getSubjectAbsences(subjectId: string): Observable<Map<string, number>> {
-    const cachedAbsences = this._absencesCache().get(subjectId);
-
-    if (cachedAbsences) {
-      return of(cachedAbsences);
+  getSubjectAbsences(subjectId: string, forceRefresh = false): Observable<Map<string, number>> {
+    if (!forceRefresh) {
+      const cachedAbsences = this._absencesCache().get(subjectId);
+      if (cachedAbsences) {
+        return of(cachedAbsences);
+      }
     }
 
     return this.api.get<AttendanceAbsenceRecord[]>(`/attendance/subject/${subjectId}/absences`).pipe(
@@ -125,12 +126,27 @@ export class AttendanceService {
     this._date.set(date);
     this.clearFeedback();
     
-    // Al cambiar la fecha, intentar cargar las asistencias registradas para ese día
     const subjectId = this.operationalService.currentSubjectId();
     const students = this.operationalService.students();
     
     if (subjectId && students.length > 0) {
-      this.loadAttendanceForDate(subjectId, date, students);
+      this._isDraftHydrating.set(true);
+      
+      this.getSubjectAbsences(subjectId, true).subscribe({
+        next: (absencesMap) => {
+          this._attendanceDraft.update(currentDraft =>
+            currentDraft.map((row) => ({
+              ...row,
+              totalAbsences: absencesMap.get(row.enrollmentId) ?? 0,
+              absencesCount: absencesMap.get(row.enrollmentId) ?? 0,
+            })),
+          );
+          this.loadAttendanceForDate(subjectId, date, students);
+        },
+        error: () => {
+          this.loadAttendanceForDate(subjectId, date, students);
+        }
+      });
     }
   }
 
