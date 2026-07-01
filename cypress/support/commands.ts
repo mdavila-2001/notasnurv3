@@ -3,7 +3,7 @@ declare global {
     interface Chainable {
       loginAdmin(): Chainable<void>;
       loginTeacher(email?: string, password?: string): Chainable<void>;
-      loginStudent(email?: string, password?: string): Chainable<void>;
+      loginStudent(ciOrEmail?: string, password?: string): Chainable<void>;
     }
   }
 }
@@ -24,12 +24,12 @@ Cypress.Commands.add('loginTeacher', (email?: string, password?: string) => {
   cy.url().should('not.include', '/login');
 });
 
-Cypress.Commands.add('loginStudent', (email?: string, password?: string) => {
+Cypress.Commands.add('loginStudent', (ciOrEmail?: string, password?: string) => {
   cy.visit('/login');
-  cy.get('input[type="text"]').type(email || '20202001@nur.edu.bo');
+  cy.get('input[type="text"]').type(ciOrEmail || '202001');
   cy.get('input[type="password"]').type(password || '1234');
   cy.get('button[type="submit"]').click();
   cy.url().should('not.include', '/login');
 });
 
-export {};
+export const dummy = true;

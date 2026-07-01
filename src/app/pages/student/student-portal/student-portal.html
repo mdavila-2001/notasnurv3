@@ -75,7 +75,7 @@
           } @else {
             <div class="subjects-grid">
               @for (subject of mySubjects(); track subject.subjectCode) {
-                <div class="subject-card">
+                <div class="subject-card" (click)="navigateToSubject(subject.subjectCode)" style="cursor: pointer;">
                   <div class="card-header">
                     <h3 class="subject-code">{{ subject.subjectCode }}</h3>
                     @if (subject.modality) {
@@ -112,7 +112,7 @@
                     }
                   </div>
                   <div class="card-footer" style="padding: 1.25rem; border-top: 1px solid var(--border-color, #e5e7eb); display: flex; justify-content: flex-end; background: var(--background-hover, #fafafa);">
-                    <a [routerLink]="['/student/subject', subject.subjectCode]" class="subject-detail-link" style="text-decoration: none;">
+                    <a [routerLink]="['/student/subject', subject.subjectCode]" class="subject-detail-link" style="text-decoration: none;" (click)="$event.stopPropagation()">
                       <app-button variant="secondary" size="sm">
                         Ver Notas y Asistencia
                         <span class="material-symbols-outlined" style="font-size: 1rem; margin-left: 0.25rem; vertical-align: middle;">arrow_forward</span>
@@ -166,24 +166,6 @@
             <!-- Statistics Cards -->
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-icon credits">
-                  <span class="material-symbols-outlined">grade</span>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Créditos Totales</span>
-                  <span class="stat-value">{{ kardexStats().totalCredits }}</span>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon earned">
-                  <span class="material-symbols-outlined">done_all</span>
-                </div>
-                <div class="stat-content">
-                  <span class="stat-label">Créditos Ganados</span>
-                  <span class="stat-value">{{ kardexStats().earnedCredits }}</span>
-                </div>
-              </div>
-              <div class="stat-card">
                 <div class="stat-icon gpa">
                   <span class="material-symbols-outlined">assessment</span>
                 </div>
@@ -236,7 +218,6 @@
                     </td>
                     <td class="semester">{{ row.semester }}</td>
                     <td class="grade">{{ row.grade }}</td>
-                    <td class="credits">{{ row.credits }}</td>
                     <td class="status">
                       <span [class]="'status-badge ' + getGradeStatusClass(row.status)">
                         {{ getStatusLabel(row.status) }}

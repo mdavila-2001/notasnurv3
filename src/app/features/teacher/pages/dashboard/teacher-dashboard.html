@@ -36,15 +36,6 @@
                     <h4 class="subject-name">{{ subject.name }}</h4>
                     <p class="subject-meta">{{ subject.semesterName }} • {{ subject.capacity }} Cupos</p>
             
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>Progreso del programa</span>
-                            <span class="progress-percentage">{{ ($any(subject).progressPercentage || 0) | number:'1.0-0' }}%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill" [style.width.%]="$any(subject).progressPercentage || 0"></div>
-                        </div>
-                    </div>
 
                     <div class="card-actions-grid">
                         <button class="action-btn" title="Registro de Notas" (click)="openGrades(subject); $event.stopPropagation()">

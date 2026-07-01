@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { StudentPortalService } from '../../../core/services/student-portal.service';
 import { Loader } from '../../../shared/components/loader/loader';
 import { Button } from '../../../shared/components/button/button';
@@ -17,7 +17,6 @@ interface KardexTableRow {
   subjectName: string;
   semester: string;
   grade: string;
-  credits: number;
   status: string;
   entry?: KardexEntryDTO;
 }
@@ -31,6 +30,11 @@ interface KardexTableRow {
 })
 export class StudentPortal implements OnInit {
   private readonly studentPortalService = inject(StudentPortalService);
+  private readonly router = inject(Router);
+
+  navigateToSubject(subjectCode: string): void {
+    this.router.navigate(['/student/subject', subjectCode]);
+  }
 
   // ===== STATE SIGNALS =====
   readonly isLoading = signal<boolean>(true);
@@ -86,7 +90,6 @@ export class StudentPortal implements OnInit {
     { key: 'subjectName', label: 'Materia' },
     { key: 'semester', label: 'Semestre' },
     { key: 'grade', label: 'Calificación' },
-    { key: 'credits', label: 'Créditos' },
     { key: 'status', label: 'Estado' }
   ]);
 
@@ -97,7 +100,6 @@ export class StudentPortal implements OnInit {
       subjectName: entry.subjectName,
       semester: entry.semester,
       grade: this.formatGrade(entry.grade),
-      credits: entry.credits,
       status: entry.status,
       entry: entry
     }));

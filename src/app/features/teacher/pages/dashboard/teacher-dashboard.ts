@@ -87,13 +87,7 @@ export class TeacherDashboard implements OnInit {
           this.pendingRecords.set(data.pendingActasCount);
           this.averageGrade.set(data.averageCourseGrade);
 
-          if (data.subjects && data.subjects.length > 0) {
-            const enrichedSubjects = this.subjects().map(s => {
-              const summary = data.subjects.find(ds => ds.id === Number(s.id));
-              return summary ? { ...s, progressPercentage: summary.progressPercentage } : s;
-            });
-            this.subjects.set(enrichedSubjects);
-          }
+
         }
         this.isLoading.set(false);
       },

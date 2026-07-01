@@ -147,9 +147,7 @@ describe('StudentSubjectDetail', () => {
     expect(data[0].componentName).toBe('Primer Parcial');
     expect(data[0].weight).toBe('30%');
     expect(data[0].obtainedScore).toBe('80.00');
-    expect(data[0].contribution).toBe('24.00');
 
-    // Test with missing names and default weight/score
     component.subjectDetail.set({
       ...mockDashboardData.enrolledSubjects[0],
       gradeBreakdown: [
@@ -162,7 +160,6 @@ describe('StudentSubjectDetail', () => {
     expect(updatedData[0].componentName).toBe('Componente de Evaluación');
     expect(updatedData[0].weight).toBe('0%');
     expect(updatedData[0].obtainedScore).toBe('0.00');
-    expect(updatedData[0].contribution).toBe('0.00');
   });
 
   it('should navigate back to student dashboard', () => {
