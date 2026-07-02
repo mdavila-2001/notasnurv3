@@ -60,7 +60,6 @@ export class SubjectListComponent implements OnInit {
     { key: 'statusDisplay', label: 'Estado' },
   ];
 
-  // Opciones para el formulario de crear/editar
   readonly semesterOptions = computed<SelectOption[]>(() =>
     this.semesters().map(s => ({
       label: `Sem. ${s.number} — Gestión ${s.managementYear}`,
@@ -75,7 +74,6 @@ export class SubjectListComponent implements OnInit {
     }))
   );
 
-  // El backend ya devuelve semesterName y teacherName — solo agrega campos de display
   readonly tableRows = computed(() =>
     this.subjects().map(sub => ({
       ...sub,
@@ -155,7 +153,6 @@ export class SubjectListComponent implements OnInit {
     });
   }
 
-  // Delete confirmation modal state
   readonly isDeleteModalOpen = signal(false);
   readonly subjectToDelete = signal<SubjectResponse | null>(null);
 

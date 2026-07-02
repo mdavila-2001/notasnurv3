@@ -17,13 +17,13 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem 0;
-  box-sizing: border-box; /* Previene overflow por el padding */
+  box-sizing: border-box;
 }
 
 .sidebar-header {
   padding: 0 1.5rem;
   margin-bottom: 2.5rem;
-  flex-shrink: 0; /* Previene que el header se encoja */
+  flex-shrink: 0;
 }
 
 .brand-title {
@@ -292,7 +292,6 @@
   box-sizing: border-box;
 }
 
-/* === Mobile hamburger button === */
 .mobile-menu-btn {
   display: none;
   background: none;
@@ -309,7 +308,6 @@
   background-color: rgba(0, 174, 239, 0.1);
 }
 
-/* === Sidebar overlay (mobile) === */
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -320,7 +318,6 @@
   transition: opacity 0.3s ease;
 }
 
-/* === Responsive: tablet & mobile === */
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
@@ -347,7 +344,6 @@
     pointer-events: none;
   }
 
-  /* Sidebar open state */
   .layout-wrapper.sidebar-open .sidebar {
     transform: translateX(0);
   }

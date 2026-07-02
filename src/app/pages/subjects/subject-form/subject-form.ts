@@ -40,7 +40,6 @@ export class SubjectFormComponent {
     }),
     semesterId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teacherId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    // NUEVO CAMPO: Agregado el control para el estado
     recordStatus: new FormControl<SubjectRecordStatus>('DRAFT', {
       nonNullable: true,
       validators: [Validators.required],
@@ -53,7 +52,6 @@ export class SubjectFormComponent {
     { label: 'Virtual', value: 'ONLINE' },
   ];
 
-  // NUEVAS OPCIONES: Arreglo con los estados de la base de datos
   readonly statusOptions: SubjectStatusOption[] = [
     { label: 'Borrador', value: 'DRAFT' },
     { label: 'Publicada', value: 'PUBLISHED' },
@@ -72,10 +70,8 @@ export class SubjectFormComponent {
         capacity: current?.capacity ?? null,
         semesterId: current?.semesterId ? String(current.semesterId) : '',
         teacherId: current?.teacherId ?? '',
-        // NUEVO VALOR INICIAL: Carga el estado que viene de la DB o pone Borrador por defecto
         recordStatus: current?.recordStatus ?? 'DRAFT', 
       });
-      // En modo edición, el código no debe cambiarse
       if (current) {
         this.form.controls.code.disable();
       } else {
@@ -91,7 +87,6 @@ export class SubjectFormComponent {
   get capacityControl() { return this.form.controls.capacity; }
   get semesterIdControl() { return this.form.controls.semesterId; }
   get teacherIdControl() { return this.form.controls.teacherId; }
-  // NUEVO GETTER: Para acceder fácil al control del estado en el HTML
   get recordStatusControl() { return this.form.controls.recordStatus; }
 
   onCodeChange(value: string | number) {
@@ -125,7 +120,6 @@ export class SubjectFormComponent {
     this.teacherIdControl.markAsTouched();
   }
 
-  // NUEVO EVENTO: Se ejecuta cuando cambias el select en la vista
   onRecordStatusValueChange(value: string | number) {
     const normalizedValue = String(value);
 
@@ -157,7 +151,6 @@ export class SubjectFormComponent {
       capacity: value.capacity,
       semesterId: Number(value.semesterId),
       teacherId: value.teacherId,
-      // NUEVO DATO ENVIADO: Se agrega al payload final para mandarlo al backend
       recordStatus: value.recordStatus, 
     });
   }

@@ -223,14 +223,12 @@
     </div>
   </app-modal>
 
-  <!-- Academic Record (Expediente) Modal -->
   <app-modal
     [isOpen]="isDegreesModalOpen()"
     [title]="'Expediente Académico — ' + selectedUserForDegrees()?.fullName"
     (closed)="closeDegreesModal()">
     
     <div style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px; width: 100%;">
-      <!-- List of active/inactive careers -->
       <div>
         <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
           Carreras Registradas
@@ -263,7 +261,6 @@
         }
       </div>
 
-      <!-- Form to assign a new career -->
       <div style="border-top: 1px dashed var(--border-color); padding-top: 1.5rem;">
         <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem;">
           Matricular en Nueva Carrera
@@ -302,7 +299,6 @@
     </div>
   </app-modal>
   
-  <!-- Delete Confirmation Modal -->
   <app-modal
     [isOpen]="isDeleteModalOpen()"
     title="Confirmar Eliminación"

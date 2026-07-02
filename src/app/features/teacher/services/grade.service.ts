@@ -65,7 +65,6 @@ export class GradeService {
 
   private readonly DTO_KEY_DELIMITER = '::';
 
-  // Effect para auto-seleccionar el primer componente si no hay ninguno seleccionado
   constructor() {
     effect(() => {
       const comps = this.components();

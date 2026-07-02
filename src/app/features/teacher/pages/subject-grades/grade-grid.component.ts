@@ -219,7 +219,6 @@ export class GradeGridComponent {
     const currentDate = this.currentDate();
     const currentVal = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
 
-    // Parse YYYY-MM-DD safely in local time
     const parts = deadlineStr.split('-');
     if (parts.length !== 3) {
       return false;

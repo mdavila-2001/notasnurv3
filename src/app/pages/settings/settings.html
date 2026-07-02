@@ -5,7 +5,6 @@
   </div>
 
   <div class="settings-layout">
-    <!-- Sidebar de Pestañas Dinámicas -->
     <div class="settings-sidebar">
       @for (tab of tabs(); track tab.id) {
         <button 
@@ -22,14 +21,11 @@
       }
     </div>
 
-    <!-- Contenido Activo de Ajustes -->
     <div class="settings-content">
-      <!-- PESTAÑA: PERFIL -->
       @if (activeTab() === 'profile') {
         <app-profile-view [profile]="profile()" [isLoading]="isProfileLoading()"></app-profile-view>
       }
 
-      <!-- PESTAÑA: PREFERENCIAS -->
       @if (activeTab() === 'preferences') {
         <div class="tab-panel animated-panel">
           <h2 class="panel-title">Preferencias del Sistema</h2>
@@ -82,17 +78,14 @@
         </div>
       }
 
-      <!-- PESTAÑA: SEGURIDAD (ADMIN ONLY) -->
       @if (activeTab() === 'security' && profile()?.role === 'ADMIN') {
         <app-security-settings></app-security-settings>
       }
 
-      <!-- PESTAÑA: AJUSTES ACADÉMICOS (ADMIN ONLY) -->
       @if (activeTab() === 'system-academic' && profile()?.role === 'ADMIN') {
         <app-academic-settings></app-academic-settings>
       }
 
-      <!-- PESTAÑA: AJUSTES ASISTENCIA (ADMIN ONLY) -->
       @if (activeTab() === 'system-attendance' && profile()?.role === 'ADMIN') {
         <app-attendance-settings></app-attendance-settings>
       }

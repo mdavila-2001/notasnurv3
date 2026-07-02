@@ -62,10 +62,8 @@ describe('GradesGrid Integration', () => {
   });
 
   it('should load settings, students, plan, grades, and successfully recalculate and save grades', async () => {
-    // 1. Initial render -> triggers effect that loads context and setting fetches
     fixture.detectChanges();
 
-    // Mock global settings fetch
     const settingsReq = httpMock.expectOne(`${baseUrl}/settings/global`);
     expect(settingsReq.request.method).toBe('GET');
     settingsReq.flush({
@@ -76,14 +74,13 @@ describe('GradesGrid Integration', () => {
       }
     });
 
-    // Mock subject operational context loads
     const subjectReq = httpMock.expectOne(`${baseUrl}/subjects/12`);
     subjectReq.flush({
       success: true,
       data: {
         id: 12,
         name: 'Álgebra Lineal',
-        modality: 'PRESENCIAL' // Presencial limit: 5 absences
+        modality: 'PRESENCIAL'
       }
     });
 
@@ -108,28 +105,25 @@ describe('GradesGrid Integration', () => {
       }
     });
 
-    // Mock initial grades fetch
     const gradesReq = httpMock.expectOne(`${baseUrl}/grades/subject/12`);
     gradesReq.flush({
       success: true,
       data: [
-        { enrollmentId: 'enroll-1', componentId: 201, score: 30 } // Parcial I = 30, Examen Final = null (pending)
+        { enrollmentId: 'enroll-1', componentId: 201, score: 30 }
       ]
     });
 
-    // Mock absences fetch from AttendanceService
     const absencesReq = httpMock.expectOne(`${baseUrl}/attendance/subject/12/absences`);
     absencesReq.flush({
       success: true,
       data: [
-        { enrollmentId: 'enroll-1', absencesCount: 2 } // 2 absences < 5 limit
+        { enrollmentId: 'enroll-1', absencesCount: 2 }
       ]
     });
 
     await fixture.whenStable();
     fixture.detectChanges();
 
-    // Verify recalculations
     let rows = component.tableData();
     expect(rows.length).toBe(1);
     expect(rows[0].scores[201]).toBe(30);
@@ -137,17 +131,14 @@ describe('GradesGrid Integration', () => {
     expect(rows[0].finalGrade).toBe(30);
     expect(rows[0].academicStatus).toBe('PENDIENTE');
 
-    // 2. Simulate user typing a grade for the second component (Examen Final = 55)
     component.onGradeChange('enroll-1', 202, 55);
     fixture.detectChanges();
 
     rows = component.tableData();
-    // Parcial I (30) + Examen Final (55) = 85
     expect(rows[0].scores[202]).toBe(55);
     expect(rows[0].finalGrade).toBe(85);
     expect(rows[0].academicStatus).toBe('APROBADO');
 
-    // 3. Open save modal and save
     expect(component.canSave()).toBe(true);
     component.openSaveModal();
     fixture.detectChanges();

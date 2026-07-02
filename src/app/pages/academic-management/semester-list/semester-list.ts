@@ -53,7 +53,7 @@ export class SemesterListComponent {
       number: item.number,
       startDate: this.formatDate(item.startDate),
       endDate: this.formatDate(item.endDate),
-      managementYear: item.managementYear, // ya viene directo del backend
+      managementYear: item.managementYear,
       raw: item,
     }));
   });
@@ -133,7 +133,6 @@ export class SemesterListComponent {
           this.toast.success(editing ? 'Semestre actualizado correctamente.' : 'Semestre creado correctamente.');
         },
         error: () => {
-          // El interceptor global ya maneja la visualización del error
         },
       });
   }
@@ -177,7 +176,6 @@ export class SemesterListComponent {
           this.refreshSemesters();
         },
         error: () => {
-          // El interceptor global ya maneja la visualización del error
         },
       });
   }

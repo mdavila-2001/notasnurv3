@@ -29,9 +29,8 @@ export class TeacherGradeClosing implements OnInit {
   readonly isClosingSubject = signal<string | null>(null);
   
   readonly searchFilter = signal('');
-  readonly statusFilter = signal('ALL'); // ALL, ACTIVE, CLOSED
+  readonly statusFilter = signal('ALL');
 
-  // Confirm Modal state
   readonly isCloseModalOpen = signal(false);
   readonly selectedSubject = signal<SubjectResponse | null>(null);
 
@@ -118,7 +117,6 @@ export class TeacherGradeClosing implements OnInit {
       .subscribe({
         next: () => {
           this.toast.success(`La materia "${subject.name}" ha sido cerrada correctamente.`, 'Cierre Completado');
-          // Actualizar el estado en local
           this.subjects.update((list) =>
             list.map((s) => (s.id === subject.id ? { ...s, recordStatus: 'CLOSED' } : s))
           );

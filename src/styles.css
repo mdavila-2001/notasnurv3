@@ -69,7 +69,6 @@
   --hover-overlay: rgba(0, 0, 0, 0.03);
   --font-mono-color: #4f46e5;
 
-  /* Variables para portal de estudiante */
   --background-primary: #f5f5f5;
   --background-secondary: #ffffff;
   --background-hover: #f9fafb;
@@ -133,12 +132,10 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Transiciones globales para cambio de tema suave */
 body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content, .glass-card, input, select, textarea, button, td, th {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
 }
 
-/* Redefinición de variables en modo oscuro */
 :root.dark-theme {
   --neutral-color: #0b0f19;
   --brand-navy: #f8fafc;
@@ -164,7 +161,6 @@ body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content,
   --hover-overlay: rgba(255, 255, 255, 0.02);
   --font-mono-color: #a5b4fc;
 
-  /* Variables para portal de estudiante */
   --background-primary: #0b0f19;
   --background-secondary: #151e33;
   --background-hover: rgba(255, 255, 255, 0.03);
@@ -214,7 +210,6 @@ body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content,
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* ── Shared Table Component ────────────────────────────────── */
 :root.dark-theme .table-container {
   background-color: #151e33 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
@@ -232,26 +227,22 @@ body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content,
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* ── Page containers with hardcoded light backgrounds ──────── */
 :root.dark-theme .page-container,
 :root.dark-theme .users-container,
 :root.dark-theme .student-portal-wrapper {
   background-color: transparent !important;
 }
 
-/* ── Page titles with hardcoded dark text ──────────────────── */
 :root.dark-theme .page-header h1,
 :root.dark-theme .page-title {
   color: var(--text-primary) !important;
 }
 
-/* ── Card panels ────────────────────────────────────────────── */
 :root.dark-theme .card-panel {
   background: #151e33 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ── Users page ─────────────────────────────────────────────── */
 :root.dark-theme .filters-row {
   background: rgba(15, 23, 42, 0.6) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
@@ -361,7 +352,6 @@ body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content,
   color: #cbd5e1 !important;
 }
 
-/* ── Modals ─────────────────────────────────────────────────── */
 :root.dark-theme .modal-box {
   background: #1e293b !important;
 }
@@ -415,7 +405,6 @@ body, .page-content, .topbar, .sidebar, .info-card, .tab-btn, .settings-content,
   color: #64748b !important;
 }
 
-/* Settings page dark mode */
 :root.dark-theme .settings-sidebar {
   background: rgba(15, 23, 42, 0.6) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;

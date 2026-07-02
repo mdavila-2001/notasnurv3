@@ -65,7 +65,6 @@ describe('SubjectListComponent', () => {
   ];
 
   beforeEach(async () => {
-    // Reset mock calls and implementations
     vi.resetAllMocks();
 
     mockAdminSubjectService.getAll.mockReturnValue(of(mockSubjects));
@@ -101,7 +100,6 @@ describe('SubjectListComponent', () => {
     expect(component.semesters()).toEqual(mockSemesters);
     expect(component.teachers()).toEqual(mockTeachers);
 
-    // Verify computed options
     expect(component.semesterOptions()).toEqual([
       { label: 'Sem. 1 — Gestión 2026', value: '1' },
       { label: 'Sem. 2 — Gestión 2026', value: '2' },
@@ -112,7 +110,6 @@ describe('SubjectListComponent', () => {
       { label: 'Docente Dos', value: 't2' },
     ]);
 
-    // Verify computed tableRows
     expect(component.tableRows()).toEqual([
       {
         ...mockSubjects[0],
@@ -172,7 +169,6 @@ describe('SubjectListComponent', () => {
     it('should call create when selectedSubject is null (Create Mode) and reload data', () => {
       component.openFormModal(null);
       mockAdminSubjectService.create.mockReturnValue(of({}));
-      // Spy on loadData
       const loadDataSpy = vi.spyOn(component, 'loadData');
 
       component.onSave(savePayload);

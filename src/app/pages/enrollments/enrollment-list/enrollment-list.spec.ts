@@ -74,7 +74,6 @@ describe('EnrollmentListComponent', () => {
     expect(component.isDegreesLoading()).toBe(false);
     expect(mockEnrollmentApiService.getUserDegreesByUserId).toHaveBeenCalledWith('usr-1');
     
-    // Carlos Gómez only has 1 active degree, so it should auto-select
     expect(component.userDegrees().length).toBe(1);
     expect(component.userDegreeId()).toBe(45);
   });
@@ -184,12 +183,10 @@ describe('EnrollmentListComponent', () => {
     component.selectedSubject.set(mockSubjects[0] as any);
     component.userDegreeId.set(45);
 
-    // 1. Error instance path
     mockEnrollmentApiService.enrollStudent.mockReturnValue(throwError(() => new Error('JS Error')));
     component.confirmEnroll();
     expect(component.toastMessage()).toBe('JS Error');
 
-    // 2. Fallback path (empty object)
     mockEnrollmentApiService.enrollStudent.mockReturnValue(throwError(() => ({})));
     component.confirmEnroll();
     expect(component.toastMessage()).toBe('Error al realizar la matrícula');
@@ -276,7 +273,6 @@ describe('EnrollmentListComponent', () => {
       expect(component.toastMessage()).toBe('Carlos Gómez dado de baja correctamente');
       expect(component.toastType()).toBe('success');
       
-      // Close modal now that isWithdrawing is false
       component.closeWithdrawModal();
       expect(component.isWithdrawModalOpen()).toBe(false);
       expect(loadStudentsSpy).toHaveBeenCalledWith('1');

@@ -107,7 +107,6 @@ export class ManagementListComponent {
           this.toast.success(editing ? 'Gestión actualizada correctamente.' : 'Gestión creada correctamente.');
         },
         error: () => {
-          // El interceptor global ya maneja la visualización del error con toastService
         },
       });
   }

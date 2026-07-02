@@ -23,10 +23,6 @@ export class StudentPortalService {
   private readonly apiUrl = `${environment.apiBaseUrl}/enrollments`;
   private readonly authApiUrl = `${environment.apiBaseUrl}/auth`;
 
-  /**
-   * Retrieves the list of active subjects enrolled by the current student
-   * @returns Observable of MySubjectResponseDTO array
-   */
   getMySubjects(): Observable<MySubjectResponseDTO[]> {
     return this.http
       .get<ApiResponse<MySubjectResponseDTO[]>>(`${this.apiUrl}/my-subjects`)
@@ -35,10 +31,6 @@ export class StudentPortalService {
       );
   }
 
-  /**
-   * Retrieves the academic history (kardex) for the current student
-   * @returns Observable of KardexResponse
-   */
   getMyHistory(): Observable<KardexResponse> {
     return this.http
       .get<ApiResponse<KardexResponse>>(`${this.apiUrl}/my-history`)
@@ -47,10 +39,6 @@ export class StudentPortalService {
       );
   }
 
-  /**
-   * Retrieves the user profile information including CI
-   * @returns Observable of UserProfileResponse
-   */
   getUserProfile(): Observable<UserProfileResponse> {
     return this.http
       .get<ApiResponse<UserProfileResponse>>(`${this.authApiUrl}/me`)
@@ -59,10 +47,6 @@ export class StudentPortalService {
       );
   }
 
-  /**
-   * Retrieves subjects, kardex history, and user profile concurrently using forkJoin
-   * @returns Observable containing mySubjects, kardexHistory, and userProfile
-   */
   getStudentDashboardData(): Observable<{
     mySubjects: MySubjectResponseDTO[];
     kardexHistory: KardexResponse;
@@ -75,11 +59,6 @@ export class StudentPortalService {
     });
   }
 
-  /**
-   * Retrieves the student dashboard data from the backend including active subjects,
-   * grades breakdown, absences, and GPA.
-   * @returns Observable of any (DashboardStudentDTO)
-   */
   getStudentDashboard(): Observable<any> {
     return this.http
       .get<ApiResponse<any>>(`${environment.apiBaseUrl}/dashboard/student`)

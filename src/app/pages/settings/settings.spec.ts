@@ -77,7 +77,6 @@ describe('Settings', () => {
       error: vi.fn()
     };
 
-    // Clean up DOM and localStorage before each test
     document.documentElement.classList.remove('dark-theme');
     localStorage.clear();
   });
@@ -178,14 +177,12 @@ describe('Settings', () => {
     fixture.detectChanges();
     expect(component.isDarkMode()).toBe(false);
 
-    // Toggle ON
     component.toggleDarkMode();
     expect(component.isDarkMode()).toBe(true);
     expect(document.documentElement.classList.contains('dark-theme')).toBe(true);
     expect(localStorage.getItem('theme')).toBe('dark');
     expect(mockToastService.success).toHaveBeenCalledWith('Tema oscuro activado.');
 
-    // Toggle OFF
     component.toggleDarkMode();
     expect(component.isDarkMode()).toBe(false);
     expect(document.documentElement.classList.contains('dark-theme')).toBe(false);
@@ -198,20 +195,16 @@ describe('Settings', () => {
     await createComponent();
     fixture.detectChanges();
 
-    // Tab default is profile
     expect(fixture.nativeElement.querySelector('app-profile-view')).toBeTruthy();
 
-    // Switch to security
     component.setTab('security');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-security-settings')).toBeTruthy();
 
-    // Switch to system-academic
     component.setTab('system-academic');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-academic-settings')).toBeTruthy();
 
-    // Switch to system-attendance
     component.setTab('system-attendance');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-attendance-settings')).toBeTruthy();

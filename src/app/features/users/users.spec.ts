@@ -71,8 +71,8 @@ describe('Users', () => {
   });
 
   it('should load users on init', () => {
-    fixture.detectChanges(); // triggers ngOnInit
-    expect(mockAdminUserService.getByRole).toHaveBeenCalledWith('TEACHER'); // selectedTab default is 'Docente' -> 'TEACHER'
+    fixture.detectChanges();
+    expect(mockAdminUserService.getByRole).toHaveBeenCalledWith('TEACHER');
     expect(component.allUsers()).toEqual(mockUsersList);
   });
 
@@ -156,11 +156,11 @@ describe('Users', () => {
 
   it('should toggle user active status successfully', () => {
     fixture.detectChanges();
-    const user = mockUsersList[0]; // status: ACTIVE
+    const user = mockUsersList[0];
     component.toggleEstado(user);
     expect(mockAdminUserService.updateStatus).toHaveBeenCalledWith(user.id, 'INACTIVE');
 
-    const inactiveUser = mockUsersList[1]; // status: INACTIVE
+    const inactiveUser = mockUsersList[1];
     component.toggleEstado(inactiveUser);
     expect(mockAdminUserService.updateStatus).toHaveBeenCalledWith(inactiveUser.id, 'ACTIVE');
   });
@@ -189,11 +189,11 @@ describe('Users', () => {
     component.newUser.ci = '654321';
     component.newUser.email = 'docente@nur.edu.bo';
     component.onCiChange();
-    expect(component.newUser.email).toBe('docente@nur.edu.bo'); // unchanged
+    expect(component.newUser.email).toBe('docente@nur.edu.bo');
   });
 
   it('should validate password on saveUser if registering a new user without password', () => {
-    component.newUser.id = ''; // register mode
+    component.newUser.id = '';
     component.newUser.password = '';
     component.saveUser();
     expect(mockToastService.warning).toHaveBeenCalledWith('Debes ingresar una contraseña para crear el usuario.');
@@ -202,7 +202,7 @@ describe('Users', () => {
 
   it('should call create when saving a new user with password', () => {
     fixture.detectChanges();
-    component.newUser.id = ''; // register mode
+    component.newUser.id = '';
     component.newUser.name = 'Carlos';
     component.newUser.lastName = 'Sosa';
     component.newUser.ci = '111222';
@@ -216,10 +216,10 @@ describe('Users', () => {
 
   it('should call update when saving an edited user', () => {
     fixture.detectChanges();
-    component.newUser.id = 'user-1'; // edit mode
+    component.newUser.id = 'user-1';
     component.newUser.name = 'Juan Carlos';
     component.newUser.lastName = 'Perez';
-    component.newUser.password = ''; // password optional on edit
+    component.newUser.password = '';
 
     component.saveUser();
     expect(mockAdminUserService.update).toHaveBeenCalledWith('user-1', expect.any(Object));

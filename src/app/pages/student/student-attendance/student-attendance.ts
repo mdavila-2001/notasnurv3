@@ -31,7 +31,6 @@ export class StudentAttendance implements OnInit {
   readonly enrolledSubjects = signal<any[]>([]);
   readonly error = signal<string>('');
 
-  // Table structure
   readonly columns = signal<TableColumn[]>([
     { key: 'subjectCode', label: 'Código' },
     { key: 'subjectName', label: 'Materia' },

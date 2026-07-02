@@ -89,7 +89,7 @@ describe('SubjectOperationalService', () => {
   });
 
   it('should load subject context with alternative response wrapper structure (direct object)', () => {
-    mockAdminSubjectService.getById.mockReturnValue(of(mockSubject)); // no 'data' wrapper
+    mockAdminSubjectService.getById.mockReturnValue(of(mockSubject));
     service.loadSubjectContext('1');
     expect(service.subject()).toEqual(mockSubject);
   });
@@ -146,10 +146,8 @@ describe('SubjectOperationalService', () => {
     it('should prevent concurrent overlapping requests for same subject', () => {
       mockEnrollmentService.getStudentsBySubject.mockReturnValue(of({ success: true, data: mockStudentsList }));
       
-      // Start loading
       service.loadStudents('1');
       
-      // Subsequent call while loading should resolve immediately without re-calling api
       service.loadStudents('1');
       expect(mockEnrollmentService.getStudentsBySubject).toHaveBeenCalledTimes(1);
     });

@@ -104,8 +104,8 @@ describe('GradeGridComponent', () => {
 
     mockAttendanceService = {
       getSubjectAbsences: vi.fn().mockReturnValue(of(new Map([
-        ['enroll-1', 4], // Presencial (limit 5): 4 absences
-        ['enroll-2', 5]  // Presencial (limit 5): 5 absences
+        ['enroll-1', 4],
+        ['enroll-2', 5]
       ])))
     };
 
@@ -320,13 +320,11 @@ describe('GradeGridComponent', () => {
     });
 
     it('should show toast warning and ignore if payload grades are empty', async () => {
-      // Clean components to trigger payload empty warning
       component.onGradeChange('enroll-1', 1, '');
       component.onGradeChange('enroll-1', 2, '');
       component.onGradeChange('enroll-2', 1, '');
       fixture.detectChanges();
 
-      // Override computed canSave property to bypass early exit validation
       Object.defineProperty(component, 'canSave', {
         value: () => true
       });
@@ -342,7 +340,6 @@ describe('GradeGridComponent', () => {
       const mockInvalidStudents = [
         { studentId: '', fullName: 'Ghost Student', ci: '999999', enrollmentId: '', degreeName: '', photoUrl: '' }
       ];
-      // Reset initialization tracker to allow state rebuild
       (component as any).initializedSubjectId.set(null);
       mockOperationalService.students.set(mockInvalidStudents);
       fixture.detectChanges();
@@ -369,7 +366,6 @@ describe('GradeGridComponent', () => {
       expect(component.isCellInvalid('non-existent', 1)).toBe(false);
       expect(component.isCellInvalid('enroll-2', 1)).toBe(false);
 
-      // Directly update draft rows with invalid values (bypassing normalizer)
       (component as any).gradeRowsDraft.update((rows: any[]) => 
         rows.map(r => r.enrollmentId === 'enroll-2' ? { ...r, scores: { ...r.scores, 1: 150 } } : r)
       );
@@ -411,7 +407,6 @@ describe('GradeGridComponent', () => {
 
     it('should do nothing on openSaveModal if cannot save', () => {
       component.isSaveModalOpen.set(false);
-      // Make canSave return false by setting isSaving to true
       component.isSaving.set(true);
       fixture.detectChanges();
       component.openSaveModal();

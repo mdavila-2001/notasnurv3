@@ -109,7 +109,6 @@ describe('StudentsTab', () => {
     expect(compiled.querySelector('.empty-state')).toBeTruthy();
     expect(compiled.textContent).toContain('No hay estudiantes inscritos');
 
-    // Click refresh button in empty state
     const refreshBtn = compiled.querySelector('app-button') as HTMLElement;
     refreshBtn.click();
     expect(mockSubjectOperationalService.loadSubjectContext).toHaveBeenCalled();
@@ -122,7 +121,6 @@ describe('StudentsTab', () => {
     const compiled = fixture.nativeElement;
     expect(compiled.textContent).toContain('Sin resultados');
 
-    // Clear search click
     const clearBtn = compiled.querySelector('app-button') as HTMLElement;
     clearBtn.click();
     fixture.detectChanges();

@@ -57,7 +57,7 @@ describe('GradeService', () => {
 
       expect(service.students().length).toBe(2);
       expect(service.components().length).toBe(3);
-      expect(service.selectedComponentId()).toBe(1); // Auto-selected first component by effect
+      expect(service.selectedComponentId()).toBe(1);
       expect(service.isLoading()).toBe(false);
     });
   });

@@ -22,10 +22,6 @@ interface Tab {
   icon: string;
 }
 
-/**
- * Componente Padre: Orquestador del detalle de la materia.
- * Provee el ecosistema de servicios (Scope local) y delega el estado al SubjectOperationalService.
- */
 @Component({
   selector: 'app-subject-detail',
   standalone: true,
@@ -43,7 +39,6 @@ export class SubjectDetail implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   
-  // Inyectar el servicio operativo
   private readonly operationalService = inject(SubjectOperationalService);
   private readonly toast = inject(ToastService);
 
@@ -57,7 +52,6 @@ export class SubjectDetail implements OnInit, OnDestroy {
 
   readonly activeTab = signal<TabId>('students');
   
-  // Exponemos las signals para el template padre
   readonly subject = this.operationalService.subject;
   readonly isLoading = this.operationalService.isLoading;
 

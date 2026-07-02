@@ -6,7 +6,6 @@
   min-height: 500px;
 }
 
-/* ---- Paneles ---- */
 .subjects-panel,
 .students-panel {
   background: var(--surface, #1e1e2e);
@@ -39,7 +38,6 @@
   margin: 4px 0 0;
 }
 
-/* ---- Lista de Materias ---- */
 .subjects-list {
   list-style: none;
   padding: 0;
@@ -101,7 +99,6 @@
   font-weight: 600;
 }
 
-/* ---- Tabla de alumnos ---- */
 .students-table-wrapper {
   overflow: auto;
   flex: 1;
@@ -162,7 +159,6 @@
   font-size: 0.95rem;
 }
 
-/* ---- Estados vacíos y carga ---- */
 .empty-state,
 .loading-state {
   display: flex;
@@ -196,7 +192,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ---- Formulario modal ---- */
 .enroll-form {
   display: flex;
   flex-direction: column;

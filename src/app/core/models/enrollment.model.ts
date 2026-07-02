@@ -39,29 +39,23 @@ export interface StudentEnrolledResponse {
   imageUrl?: string;
 }
 
-// 1. AQUI AGREGAMOS LOS CREDITOS Y EL SEMESTRE QUE PEDIA TU HTML
 export interface MySubjectResponseDTO {
   subjectCode: string;
   subjectName: string;
   teacherName: string;
   degreeName: string;
   modality?: string;
-  credits?: number;       // <-- Soluciona el error TS2339
-  semesterName?: string;  // <-- Soluciona el error TS2339
+  credits?: number;
+  semesterName?: string;
 }
 
-// 2. AQUI RESTAURAMOS LA INTERFAZ DEL PERFIL QUE PEDIA TU SERVICIO
 export interface UserProfileResponse {
   ci: string;
   firstName?: string;
   lastName?: string;
   email?: string;
-  [key: string]: any; // Por si vienen otros datos dinámicos
+  [key: string]: any;
 }
-
-// ==========================================
-// MODELOS PARA EL PORTAL ESTUDIANTIL (US-12)
-// ==========================================
 
 export interface KardexEntryDTO {
   subjectCode: string;

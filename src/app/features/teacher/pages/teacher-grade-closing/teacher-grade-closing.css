@@ -24,7 +24,6 @@
   margin-bottom: 24px;
 }
 
-/* Filters Card */
 .filters-card {
   display: flex;
   flex-wrap: wrap;
@@ -129,7 +128,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Custom Table */
 .table-container {
   background: var(--surface-card, #151e33);
   border: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
@@ -270,7 +268,6 @@
   font-size: 1.2rem;
 }
 
-/* Modal warning and styles */
 .modal-warning {
   display: flex;
   gap: 16px;
@@ -302,7 +299,6 @@
   padding-top: 16px;
 }
 
-/* Loading & Empty States */
 .loading-state,
 .empty-state {
   display: flex;

@@ -80,20 +80,16 @@ describe('AdminDashboard', () => {
     const cards = component.dashboardCards();
     expect(cards.length).toBe(4);
     
-    // Total Students Card
     expect(cards[0].title).toBe('Total de estudiantes');
-    expect(cards[0].value).toBe('1.500'); // BO Locale formatted
+    expect(cards[0].value).toBe('1.500');
     expect(cards[0].accent).toBe('students');
 
-    // Active Subjects Card
     expect(cards[1].title).toBe('Materias activas');
     expect(cards[1].value).toBe('45');
     
-    // Approved Rate Card
     expect(cards[2].title).toBe('Índice de aprobados');
-    expect(cards[2].value).toBe('88,5%'); // BO Locale formatting for floats
+    expect(cards[2].value).toBe('88,5%');
 
-    // Failed Rate Card
     expect(cards[3].title).toBe('Índice de reprobados');
     expect(cards[3].value).toBe('11,5%');
   });
@@ -114,10 +110,8 @@ describe('AdminDashboard', () => {
     mockDashboardService.getSummary.mockReturnValue(throwError(() => new Error('API Error')));
     fixture.detectChanges();
 
-    // Reset calls to spy
     mockDashboardService.getSummary.mockClear();
     
-    // Switch mock back to success
     mockDashboardService.getSummary.mockReturnValue(of(mockSummary));
     
     component.loadDashboard();

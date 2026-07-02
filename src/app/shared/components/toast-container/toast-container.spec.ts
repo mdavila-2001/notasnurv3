@@ -45,7 +45,6 @@ describe('ToastContainer', () => {
   });
 
   it('should call toastService.dismiss when a toast is closed', () => {
-    // Directly check connection
     expect(component.toastService).toBe(mockToastService);
   });
 });

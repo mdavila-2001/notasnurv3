@@ -45,7 +45,6 @@ export class AcademicSettings implements OnInit {
       next: (settings) => {
         this.currentSettings.set(settings);
         if (settings.academic) {
-          // Format date if needed, usually globalGradesDeadline is a string in YYYY-MM-DD
           let dateStr = settings.academic.globalGradesDeadline || '';
           if (dateStr.includes('T')) {
             dateStr = dateStr.split('T')[0];

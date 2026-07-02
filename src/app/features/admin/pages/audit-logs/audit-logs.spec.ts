@@ -65,7 +65,7 @@ describe('AuditLogs Component', () => {
   });
 
   it('should load logs on init', () => {
-    fixture.detectChanges(); // triggers ngOnInit
+    fixture.detectChanges();
     expect(mockAuditService.getAuditLogs).toHaveBeenCalled();
     expect(component.logs()).toEqual([mockLog]);
     expect(component.totalElements()).toBe(1);
@@ -118,10 +118,10 @@ describe('AuditLogs Component', () => {
     component.setPage(3);
     expect(component.currentPage()).toBe(3);
 
-    component.setPage(5); // Out of bounds
+    component.setPage(5);
     expect(component.currentPage()).toBe(3);
 
-    component.setPage(-1); // Out of bounds
+    component.setPage(-1);
     expect(component.currentPage()).toBe(3);
   });
 
@@ -174,7 +174,7 @@ describe('AuditLogs Component', () => {
       expect(diffs).toContainEqual({
         field: 'Modalidad de Materia',
         oldVal: '-',
-        newVal: 'BLENDED' // Translation is handled by String(val) unless mapped. 'BLENDED' is printed as string.
+        newVal: 'BLENDED'
       });
     });
 

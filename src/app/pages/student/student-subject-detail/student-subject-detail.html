@@ -1,5 +1,4 @@
 <div class="subject-detail-container">
-  <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-wrapper animated-fade-in">
       <app-loader
@@ -10,7 +9,6 @@
       </app-loader>
     </div>
   } @else if (error()) {
-    <!-- Error State -->
     <div class="error-wrapper animated-fade-in">
       <div class="error-card">
         <span class="material-symbols-outlined error-icon">warning</span>
@@ -23,9 +21,7 @@
       </div>
     </div>
   } @else {
-    <!-- Success State / Subject Detail Dashboard -->
     <div class="detail-card glass-panel animated-fade-in">
-      <!-- Header -->
       <div class="detail-header">
         <div class="subject-title-area">
           <span class="subject-code-badge">{{ subjectDetail()?.subjectCode }}</span>
@@ -40,9 +36,7 @@
         </div>
       </div>
 
-      <!-- KPI Metrics Grid -->
       <div class="kpi-grid">
-        <!-- Metric 1: Current Score -->
         <div class="kpi-card" [class.kpi-success]="finalGrade() >= 51" [class.kpi-danger]="finalGrade() < 51 && finalGrade() > 0">
           <div class="kpi-icon">
             <span class="material-symbols-outlined">analytics</span>
@@ -54,7 +48,6 @@
           </div>
         </div>
 
-        <!-- Metric 2: Attendance -->
         <div class="kpi-card" [class.kpi-warning]="isAtAbsenceRisk()" [class.kpi-danger]="absencesCount() >= absenceLimit()">
           <div class="kpi-icon">
             <span class="material-symbols-outlined">assignment_turned_in</span>
@@ -72,7 +65,6 @@
           </div>
         </div>
 
-        <!-- Metric 3: Academic Status -->
         <div class="kpi-card">
           <div class="kpi-icon">
             <span class="material-symbols-outlined">verified</span>
@@ -89,7 +81,6 @@
         </div>
       </div>
 
-      <!-- Grades Breakdown Table Section -->
       <div class="breakdown-section">
         <h2 class="section-title">
           <span class="material-symbols-outlined">list_alt</span>
@@ -121,7 +112,6 @@
         }
       </div>
 
-      <!-- Actions -->
       <div class="detail-actions">
         <app-button variant="secondary" (clicked)="goBack()">
           <span class="material-symbols-outlined btn-icon">arrow_back</span>

@@ -32,7 +32,6 @@ export class AuditLogs implements OnInit {
   private readonly auditService = inject(AdminAuditService);
   private readonly toastService = inject(ToastService);
 
-  // Loading and pagination state
   isLoading = signal<boolean>(false);
   logs = signal<AuditLogResponse[]>([]);
   totalPages = signal<number>(0);
@@ -40,12 +39,10 @@ export class AuditLogs implements OnInit {
   currentPage = signal<number>(0);
   pageSize = signal<number>(20);
 
-  // Filters state
   searchQuery = signal<string>('');
   selectedAction = signal<string>('');
   selectedTable = signal<string>('');
 
-  // Detail Modal state
   isDetailModalOpen = signal<boolean>(false);
   selectedLog = signal<AuditLogResponse | null>(null);
 
@@ -82,7 +79,6 @@ export class AuditLogs implements OnInit {
     });
   }
 
-  // Filter handlers
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.searchQuery.set(value);
@@ -103,7 +99,6 @@ export class AuditLogs implements OnInit {
     this.loadLogs();
   }
 
-  // Pagination handlers
   setPage(page: number) {
     if (page >= 0 && page < this.totalPages()) {
       this.currentPage.set(page);
@@ -111,7 +106,6 @@ export class AuditLogs implements OnInit {
     }
   }
 
-  // Details Modal handlers
   openDetail(log: AuditLogResponse) {
     this.selectedLog.set(log);
     this.isDetailModalOpen.set(true);
@@ -122,7 +116,6 @@ export class AuditLogs implements OnInit {
     this.selectedLog.set(null);
   }
 
-  // Computeds for page numbers list
   pagesList = computed(() => {
     const list: number[] = [];
     const total = this.totalPages();
@@ -142,7 +135,6 @@ export class AuditLogs implements OnInit {
     return list;
   });
 
-  // Diff parser helper
   getParsedDiffs = computed((): DiffItem[] => {
     const log = this.selectedLog();
     if (!log) return [];
@@ -152,7 +144,6 @@ export class AuditLogs implements OnInit {
       const oldObj = log.oldValue ? JSON.parse(log.oldValue) : null;
       const newObj = log.newValue ? JSON.parse(log.newValue) : null;
 
-      // If delete or create, list everything
       if (log.action === 'CREATE' && newObj) {
         Object.entries(newObj).forEach(([key, val]) => {
           diffs.push({
@@ -175,7 +166,6 @@ export class AuditLogs implements OnInit {
         const allKeys = Array.from(new Set([...Object.keys(oldData), ...Object.keys(newData)]));
 
         for (const key of allKeys) {
-          // Ignorar campos de auditoría interna de hibernate si existen
           if (['id', 'createdAt', 'updatedAt', 'deletedAt'].includes(key) && oldData[key] === newData[key]) {
             continue;
           }

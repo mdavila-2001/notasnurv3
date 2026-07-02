@@ -17,7 +17,6 @@ export class Login implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  // UI State using Signals for optimal performance
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string>('');
 
@@ -58,7 +57,6 @@ export class Login implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    // Mapeo de formulario a DTO: 'identifier' (UI) -> 'id' (Backend Contract)
     const loginDto = { id: identifier ?? '', password: password ?? '' };
     
     this.authService.login(loginDto).subscribe({
@@ -69,8 +67,6 @@ export class Login implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
-        // The ErrorInterceptor handles the message translation, 
-        // we just extract it from the thrown error
         this.errorMessage.set(err.message || 'An unexpected error occurred');
       }
     });

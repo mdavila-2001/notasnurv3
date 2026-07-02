@@ -102,8 +102,8 @@ describe('AdminDashboardService', () => {
         expect(summary.activeSubjects).toBe(15);
         expect(summary.approvedStudents).toBe(160);
         expect(summary.failedStudents).toBe(40);
-        expect(summary.approvedRate).toBe(80); // converted from 0.8
-        expect(summary.failedRate).toBe(20); // converted from 0.2
+        expect(summary.approvedRate).toBe(80);
+        expect(summary.failedRate).toBe(20);
         expect(summary.criticalSubjects.length).toBe(1);
         expect(summary.criticalSubjects[0].code).toBe('FIS-101');
         expect(summary.criticalSubjects[0].name).toBe('Fisica');

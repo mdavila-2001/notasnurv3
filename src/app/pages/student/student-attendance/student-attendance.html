@@ -1,5 +1,4 @@
 <div class="page-wrapper">
-  <!-- Page Header -->
   <div class="page-header">
     <h1 class="page-title">Control de Asistencia</h1>
     <p class="page-subtitle">Monitorea tus inasistencias acumuladas y el límite de faltas de tus materias</p>
@@ -29,7 +28,6 @@
         <p style="color: var(--text-secondary);">No estás matriculado en ninguna materia activa en esta gestión.</p>
       </div>
     } @else {
-      <!-- Warning Banner if at risk -->
       @if (tableData().some(row => row.atRisk)) {
         <div class="alert-banner" style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--warning, #f59e0b); padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; gap: 0.75rem; align-items: flex-start;">
           <span class="material-symbols-outlined" style="color: var(--warning, #f59e0b); font-size: 1.5rem;">warning</span>

@@ -114,7 +114,7 @@ describe('Modal', () => {
     const mockEvent = {
       target: {
         classList: {
-          contains: (cls: string) => cls === 'modal-content', // different class name
+          contains: (cls: string) => cls === 'modal-content',
         },
       },
     } as any;
