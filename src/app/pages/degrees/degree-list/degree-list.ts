@@ -26,16 +26,13 @@ export class DegreeListComponent implements OnInit {
   readonly isFormModalOpen = signal(false);
   readonly selectedDegree = signal<DegreeResponse | null>(null);
 
-  // Form fields
   nameField = '';
   codeField = '';
   facultyIdField: number | null = null;
 
-  // Delete modal state
   readonly isDeleteModalOpen = signal(false);
   readonly degreeToDelete = signal<DegreeResponse | null>(null);
 
-  // Toast notifications
   readonly showToast = signal(false);
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');

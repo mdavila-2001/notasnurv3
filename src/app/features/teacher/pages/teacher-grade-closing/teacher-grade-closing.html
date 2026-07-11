@@ -5,7 +5,6 @@
   </div>
 
   <div class="page-content">
-    <!-- Filters Panel -->
     <div class="filters-card">
       <div class="search-input-group">
         <span class="material-symbols-outlined search-icon">search</span>
@@ -38,7 +37,6 @@
       </div>
     </div>
 
-    <!-- Data Display -->
     @if (isLoading()) {
       <div class="loading-state">
         <app-loader size="lg" label="Cargando materias..." />
@@ -78,7 +76,6 @@
                 </td>
                 <td>
                   <div class="actions-cell">
-                    <!-- PDF Download -->
                     <app-button
                       variant="secondary"
                       [disabled]="isDownloading() !== null"
@@ -94,7 +91,6 @@
                       }
                     </app-button>
 
-                    <!-- Close Subject Button -->
                     @if (subject.recordStatus !== 'CLOSED') {
                       <app-button
                         variant="absent"
@@ -122,7 +118,6 @@
     }
   </div>
 
-  <!-- Close Confirmation Modal -->
   <app-modal
     [isOpen]="isCloseModalOpen()"
     title="Confirmación de Cierre Definitivo"

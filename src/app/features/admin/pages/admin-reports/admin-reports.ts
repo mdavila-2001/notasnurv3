@@ -23,14 +23,12 @@ export class AdminReports implements OnInit {
 
   readonly subjects = signal<SubjectResponse[]>([]);
   readonly isLoading = signal(false);
-  readonly isDownloading = signal<string | null>(null); // Guardará 'type-id' por ej. 'pdf-1'
+  readonly isDownloading = signal<string | null>(null);
   readonly isClosingSubject = signal<string | null>(null);
 
-  // Filtros
   readonly searchFilter = signal('');
-  readonly statusFilter = signal('ALL'); // ALL, DRAFT, ACTIVE, CLOSED
+  readonly statusFilter = signal('ALL');
 
-  // Control del modal de cierre
   readonly isCloseModalOpen = signal(false);
   readonly selectedSubject = signal<SubjectResponse | null>(null);
 
@@ -148,7 +146,6 @@ export class AdminReports implements OnInit {
             `La materia "${subject.name}" ha sido cerrada de forma definitiva.`,
             'Materia Cerrada'
           );
-          // Actualizar el estado localmente
           this.subjects.update((list) =>
             list.map((s) =>
               s.id === subject.id ? { ...s, recordStatus: 'CLOSED' } : s

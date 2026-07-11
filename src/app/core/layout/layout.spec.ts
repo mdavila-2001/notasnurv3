@@ -128,7 +128,7 @@ describe('Layout', () => {
     fixture.detectChanges();
 
     expect(consoleSpy).toHaveBeenCalled();
-    expect(component.userName()).toBe('Admin User'); // kept cached name
+    expect(component.userName()).toBe('Admin User');
     consoleSpy.mockRestore();
   });
 

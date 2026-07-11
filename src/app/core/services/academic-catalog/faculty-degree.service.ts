@@ -12,8 +12,6 @@ import {
 export class FacultyDegreeService {
   private readonly api = inject(ApiService);
 
-  // ========== FACULTIES ==========
-
   getFaculties(): Observable<Faculty[]> {
     return this.api.get<Faculty[]>('/faculties').pipe(
       map(r => Array.isArray(r.data) ? r.data : [])
@@ -32,8 +30,6 @@ export class FacultyDegreeService {
     return this.api.delete<void>(`/faculties/${id}`).pipe(map(() => void 0));
   }
 
-  // ========== DEGREES ==========
-
   getDegrees(): Observable<Degree[]> {
     return this.api.get<Degree[]>('/degrees').pipe(
       map(r => Array.isArray(r.data) ? r.data : [])
@@ -51,8 +47,6 @@ export class FacultyDegreeService {
   deleteDegree(id: number): Observable<void> {
     return this.api.delete<void>(`/degrees/${id}`).pipe(map(() => void 0));
   }
-
-  // ========== USER DEGREES (ACADEMIC RECORDS) ==========
 
   getUserDegrees(userId: string): Observable<UserDegree[]> {
     return this.api.get<UserDegree[]>(`/user-degrees/user/${userId}`).pipe(

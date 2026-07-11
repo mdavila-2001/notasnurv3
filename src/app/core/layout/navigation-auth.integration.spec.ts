@@ -98,7 +98,6 @@ describe('Navigation & Authentication Integration', () => {
 
     fixture.detectChanges();
 
-    // Mock API response for profile fetch
     const req = httpMock.expectOne(`${baseUrl}/auth/me`);
     expect(req.request.method).toBe('GET');
     req.flush({
@@ -114,15 +113,13 @@ describe('Navigation & Authentication Integration', () => {
 
     fixture.detectChanges();
 
-    // Check menu items
     const menuLinks = fixture.nativeElement.querySelectorAll('.nav-link');
     const labels = Array.from(menuLinks).map((link: any) => link.textContent.trim());
     expect(labels.some(l => l.includes('Catálogo de Materias'))).toBe(true);
     expect(labels.some(l => l.includes('Matrículas'))).toBe(true);
     expect(labels.some(l => l.includes('Reportes y Actas'))).toBe(true);
-    expect(labels.some(l => l.includes('Mis Materias'))).toBe(false); // Teacher menu item
+    expect(labels.some(l => l.includes('Mis Materias'))).toBe(false);
 
-    // Simulate logout modal trigger
     component.openLogoutModal();
     fixture.detectChanges();
     expect(component.isLogoutModalOpen()).toBe(true);
@@ -158,12 +155,10 @@ describe('Navigation & Authentication Integration', () => {
     const menuLinks = fixture.nativeElement.querySelectorAll('.nav-link');
     const labels = Array.from(menuLinks).map((link: any) => link.textContent.trim());
     expect(labels.some(l => l.includes('Asistencia'))).toBe(true);
-    expect(labels.some(l => l.includes('Matrículas'))).toBe(false); // Admin only
+    expect(labels.some(l => l.includes('Matrículas'))).toBe(false);
 
-    // Test Guard restriction: student attempting to access admin route redirects to student dashboard
     const routerSpy = vi.spyOn(router, 'navigate');
     
-    // Simulate guard check for student accessing admin dashboard
     const routeSnapshotMock = { data: { role: 'ADMIN' } } as any;
     const stateSnapshotMock = { url: '/admin/dashboard' } as any;
     

@@ -24,7 +24,6 @@ export const teacherRoutes: Routes = [
         path: 'subject/:id',
         loadComponent: () => import('./pages/subject-detail/subject-detail').then(m => m.SubjectDetail),
         children: [
-          // Por defecto, la vista de detalle muestra la pestaña de estudiantes
           { path: '', redirectTo: 'students', pathMatch: 'full' },
           {
             path: 'students',

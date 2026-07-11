@@ -39,14 +39,12 @@ export class EnrollmentListComponent implements OnInit {
   readonly pendingWithdrawStudentName = signal('Estudiante');
   readonly userDegreeId = signal<number | null>(null);
 
-  // New signals for dynamic student selection
   readonly studentsList = signal<UserResponse[]>([]);
   readonly userDegrees = signal<any[]>([]);
   readonly selectedUserId = signal<string | null>(null);
   readonly isDegreesLoading = signal<boolean>(false);
   readonly degreesError = signal<string>('');
 
-  // Signals for creating a new academic record (UserDegree)
   readonly isCreateRecordModalOpen = signal(false);
   readonly allDegrees = signal<DegreeResponse[]>([]);
   readonly selectedDegreeIdForRecord = signal<number | null>(null);
@@ -273,7 +271,6 @@ export class EnrollmentListComponent implements OnInit {
         next: (res) => {
           this.closeCreateRecordModal();
           this.displayToast(`Expediente académico creado para la carrera seleccionada.`, 'success');
-          // Reload degrees for the student to unblock enrollment
           this.onStudentSelected(userId);
         },
         error: (error: unknown) => {

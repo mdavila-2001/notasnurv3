@@ -17,7 +17,6 @@ export const routes: Routes = [
         loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes),
       },
 
-      // === Teacher (lazy-loaded, role-protected) ===
       {
         path: 'teacher',
         loadChildren: () => import('./features/teacher/teacher.routes').then(m => m.teacherRoutes),

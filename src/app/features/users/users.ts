@@ -15,11 +15,12 @@ import { AdminDegreeService, DegreeResponse } from '../admin/services/admin-degr
 import { UserDegreeService, UserDegreeResponse } from '../../core/services/user-degree.service';
 import { UserResponse } from '../../core/models/api.models';
 import { ToastService } from '../../shared/services/toast.service';
+import { Input } from '../../shared/components/input/input';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, Button, Modal],
+  imports: [CommonModule, FormsModule, Button, Modal, Input],
   templateUrl: './users.html',
   styleUrl: './users.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -35,11 +36,9 @@ export class Users implements OnInit {
   searchQuery = signal('');
   isRegisterModalOpen = signal(false);
 
-  // Delete confirmation modal state
   isDeleteModalOpen = signal(false);
   userToDelete = signal<UserResponse | null>(null);
 
-  // Academic record (degrees) state signals
   isDegreesModalOpen = signal(false);
   selectedUserForDegrees = signal<UserResponse | null>(null);
   userDegreesList = signal<UserDegreeResponse[]>([]);
@@ -119,7 +118,6 @@ export class Users implements OnInit {
     this.isRegisterModalOpen.set(true);
   }
 
-  // Delete confirmation flow using Modal instead of confirm()
   onDelete(user: UserResponse) {
     this.userToDelete.set(user);
     this.isDeleteModalOpen.set(true);
@@ -199,13 +197,13 @@ export class Users implements OnInit {
       const normalizeStr = (str: string) => {
         return str
           .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '') // Elimina acentos/diacríticos (ej: á -> a, ñ -> n)
+          .replace(/[\u0300-\u036f]/g, '')
           .replace(/ø/g, 'o')
           .replace(/Ø/g, 'o')
           .replace(/æ/g, 'ae')
           .replace(/Æ/g, 'ae')
           .replace(/ß/g, 'ss')
-          .replace(/[^a-zA-Z0-9]/g, ''); // Elimina cualquier otro caracter especial restante
+          .replace(/[^a-zA-Z0-9]/g, '');
       };
 
       const name = this.newUser.name ? normalizeStr(this.newUser.name.trim().toLowerCase()) : '';
@@ -273,7 +271,6 @@ export class Users implements OnInit {
         this.toastService.success('¡Estudiante matriculado en la carrera correctamente!');
         this.isAssigningDegree.set(false);
         this.selectedDegreeIdToAssign.set(null);
-        // Refresh list
         this.userDegreeService.getByUserId(user.id).subscribe(r => this.userDegreesList.set(r.data ?? []));
       },
       error: (err: any) => {

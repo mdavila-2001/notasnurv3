@@ -10,8 +10,7 @@ describe('CURRENT_DATE token', () => {
     const date = getCurrentDate();
     expect(date).toBeInstanceOf(Date);
     
-    // The returned date should be very close to the current time
     const diff = Math.abs(date.getTime() - Date.now());
-    expect(diff).toBeLessThan(1000); // within 1 second
+    expect(diff).toBeLessThan(1000);
   });
 });

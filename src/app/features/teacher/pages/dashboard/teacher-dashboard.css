@@ -57,23 +57,20 @@
     width: 3rem;
     height: 3rem;
     border-radius: 50%;
-    border: 4px solid #82cfff; /* primary-fixed-dim */
-    border-top-color: #00374f; /* primary-container */
+    border: 4px solid #82cfff;
+    border-top-color: #00374f;
     transform: rotate(45deg);
 }
 
 .hero-divider {
     height: 2px;
     width: 6rem;
-    background-color: #00a6e4; /* on-primary-container */
+    background-color: #00a6e4;
     border-radius: 9999px;
     margin-top: 1rem;
 }
 
 
-/* =========================================
-   SUBJECTS GRID SECTION
-   ========================================= */
 .section-header {
     display: flex;
     align-items: center;
@@ -147,10 +144,9 @@
 
 .subject-card:hover {
     box-shadow: 0 30px 60px rgba(0, 33, 49, 0.08);
-    border-color: rgba(195, 198, 209, 0.2); /* outline-variant/20 */
+    border-color: rgba(195, 198, 209, 0.2);
 }
 
-/* Glass Accent (Glow) */
 .glass-accent {
     position: absolute;
     right: -3rem;
@@ -163,17 +159,17 @@
 }
 
 .glass-accent.presencial {
-    background-color: rgba(0, 55, 79, 0.05); /* primary-container/5 */
+    background-color: rgba(0, 55, 79, 0.05);
 }
 .subject-card:hover .glass-accent.presencial {
-    background-color: rgba(0, 166, 228, 0.1); /* on-primary-container/10 */
+    background-color: rgba(0, 166, 228, 0.1);
 }
 
 .glass-accent.semi {
-    background-color: rgba(159, 194, 254, 0.05); /* secondary-container/5 */
+    background-color: rgba(159, 194, 254, 0.05);
 }
 .subject-card:hover .glass-accent.semi {
-    background-color: rgba(159, 194, 254, 0.1); /* secondary-container/10 */
+    background-color: rgba(159, 194, 254, 0.1);
 }
 
 .card-top {
@@ -186,10 +182,10 @@
 }
 
 .glass-badge {
-    background: rgba(198, 231, 255, 0.3); /* primary-fixed/30 */
+    background: rgba(198, 231, 255, 0.3);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(130, 207, 255, 0.2); /* primary-fixed-dim/20 */
-    color: #004c6b; /* on-primary-fixed-variant */
+    border: 1px solid rgba(130, 207, 255, 0.2);
+    color: #004c6b;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.625rem;
@@ -198,16 +194,16 @@
 }
 
 .glass-badge.semi {
-    background: rgba(213, 227, 255, 0.3); /* secondary-fixed/30 */
-    border-color: rgba(167, 200, 255, 0.2); /* secondary-fixed-dim/20 */
-    color: #1f477b; /* on-secondary-fixed-variant */
+    background: rgba(213, 227, 255, 0.3);
+    border-color: rgba(167, 200, 255, 0.2);
+    color: #1f477b;
 }
 
 .subject-code {
     font-size: 0.625rem;
     font-family: monospace;
     font-weight: 700;
-    color: rgba(67, 71, 79, 0.6); /* on-surface-variant/60 */
+    color: rgba(67, 71, 79, 0.6);
 }
 
 .subject-name {
@@ -221,7 +217,7 @@
 }
 
 .subject-card:hover .subject-name {
-    color: #00a6e4; /* on-primary-container */
+    color: #00a6e4;
 }
 
 .subject-meta {
@@ -269,7 +265,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #e7e8e9; /* surface-container-high */
+    border-top: 1px solid #e7e8e9;
     position: relative;
     z-index: 10;
 }
@@ -281,7 +277,7 @@
     gap: 0.5rem;
     padding: 0.625rem 0;
     border-radius: 0.75rem;
-    background-color: #f3f4f5; /* surface-container-low */
+    background-color: #f3f4f5;
     color: var(--primary-color, #002131);
     font-size: 0.75rem;
     font-weight: 700;
@@ -295,7 +291,7 @@
 }
 
 .action-btn:hover {
-    background-color: rgba(159, 194, 254, 0.2); /* secondary-container/20 */
+    background-color: rgba(159, 194, 254, 0.2);
 }
 
 .insights-section {
@@ -312,7 +308,7 @@
 }
 
 .activity-summary-card {
-    background-color: #002131; /* primary */
+    background-color: #002131;
     border-radius: 1.5rem;
     padding: 2rem;
     color: white;
@@ -341,7 +337,7 @@
 }
 
 .stat-item p:first-child {
-    color: #94a3b8; /* slate-400 */
+    color: #94a3b8;
     font-size: 0.75rem;
     margin: 0 0 0.25rem 0;
 }
@@ -357,11 +353,10 @@
     font-weight: 700;
 }
 
-.stat-number span:first-child { color: #00AEEF; } /* First span exception or just inline styling equivalent */
+.stat-number span:first-child { color: #00AEEF; }
 
-/* Fix for specific spans based on template */
 .stat-item:nth-child(2) .stat-number span { color: #00AEEF; }
-.stat-item:nth-child(3) .stat-number span { color: #64748b; } /* slate-500 */
+.stat-item:nth-child(3) .stat-number span { color: #64748b; }
 
 
 .card-bg-decorator {
@@ -370,7 +365,7 @@
     right: 0;
     width: 16rem;
     height: 16rem;
-    background-color: #00374f; /* primary-container */
+    background-color: #00374f;
     opacity: 0.2;
     border-radius: 50%;
     transform: translate(50%, 50%);
@@ -378,7 +373,7 @@
 }
 
 .fast-actions-card {
-    background-color: #e7e8e9; /* surface-container-high */
+    background-color: #e7e8e9;
     border-radius: 1.5rem;
     padding: 2rem;
     display: flex;
@@ -429,7 +424,7 @@
 }
 
 .fast-action-btn:hover {
-    background-color: #00374f; /* primary-container */
+    background-color: #00374f;
     color: white;
 }
 
@@ -442,7 +437,7 @@
     width: 100%;
     padding: 0.75rem;
     background-color: #ffffff;
-    border: 1px solid rgba(195, 198, 209, 0.3); /* outline-variant/30 */
+    border: 1px solid rgba(195, 198, 209, 0.3);
     border-radius: 0.75rem;
     color: var(--primary-color, #002131);
     font-size: 0.75rem;
@@ -452,10 +447,9 @@
 }
 
 .secondary-outline-btn:hover {
-    background-color: #f3f4f5; /* surface-container-low */
+    background-color: #f3f4f5;
 }
 
-/* Utils */
 .loading-state,
 .empty-state {
     display: flex;

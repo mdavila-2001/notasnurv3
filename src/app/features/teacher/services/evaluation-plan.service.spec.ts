@@ -56,12 +56,10 @@ describe('EvaluationPlanService', () => {
     });
 
     it('should use cache on subsequent fetchPlan calls', () => {
-      // First call (hits network)
       service.fetchPlan('10').subscribe();
       const req = httpMock.expectOne('/api/evaluation-plans/subject/10');
       req.flush({ success: true, message: 'Plan obtenido', data: mockPlan });
 
-      // Second call (hits cache)
       service.fetchPlan('10').subscribe(plan => {
         expect(plan).toEqual(mockPlan);
       });
@@ -236,7 +234,7 @@ describe('EvaluationPlanService', () => {
         components: [
           { id: 1, name: 'Parcial 1', weight: 30, description: '' },
           { id: 2, name: 'Parcial 2', weight: 30, description: '' },
-          { id: 3, name: 'Prácticas', weight: 39, description: '' }, // Sum is 99
+          { id: 3, name: 'Prácticas', weight: 39, description: '' },
         ],
       });
       expect(service.componentsTotalWeight()).toBe(99);
@@ -252,7 +250,7 @@ describe('EvaluationPlanService', () => {
         components: [
           { id: 1, name: 'Parcial 1', weight: 30, description: '' },
           { id: 2, name: 'Parcial 2', weight: 30, description: '' },
-          { id: 3, name: 'Prácticas', weight: 41, description: '' }, // Sum is 101
+          { id: 3, name: 'Prácticas', weight: 41, description: '' },
         ],
       });
       expect(service.componentsTotalWeight()).toBe(101);

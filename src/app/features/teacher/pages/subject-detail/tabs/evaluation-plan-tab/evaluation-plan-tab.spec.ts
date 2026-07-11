@@ -88,7 +88,7 @@ describe('EvaluationPlanTab', () => {
       component.setNewWeight('');
       expect(component.newWeight()).toBeNull();
 
-      component.setNewWeight('abc'); // invalid parsed float
+      component.setNewWeight('abc');
       expect(component.newWeight()).toBeNull();
 
       component.setNewWeight('15.5');
@@ -150,7 +150,6 @@ describe('EvaluationPlanTab', () => {
       expect(component.editingComponentId()).toBeNull();
       expect(component.editName()).toBe('');
 
-      // Save edit
       component.startEdit(mockComponent);
       component.setEditName('Updated Examen');
       component.setEditWeight(35);
@@ -174,7 +173,6 @@ describe('EvaluationPlanTab', () => {
       component.cancelDelete();
       expect(component.componentToDelete()).toBeNull();
 
-      // Confirm delete
       component.requestDelete(mockComponent);
       component.confirmDelete();
       expect(mockEvaluationPlanService.deleteComponent).toHaveBeenCalledWith(mockComponent.id);
@@ -184,26 +182,21 @@ describe('EvaluationPlanTab', () => {
 
   describe('Validation conditions and projected weights', () => {
     it('should compute isAddComponentDisabled correctly', () => {
-      // Empty name
       component.setNewName('');
       component.setNewWeight(20);
       expect(component.isAddComponentDisabled()).toBe(true);
 
-      // Weight exceeds limit
       component.setNewName('Valid Name');
       component.setNewWeight(105);
       expect(component.isAddComponentDisabled()).toBe(true);
 
-      // Weight zero or negative
       component.setNewWeight(0);
       expect(component.isAddComponentDisabled()).toBe(true);
 
-      // Projected total exceeds 100
       mockEvaluationPlanService.componentsTotalWeight.set(90);
       component.setNewWeight(15);
       expect(component.isAddComponentDisabled()).toBe(true);
 
-      // Valid case
       component.setNewWeight(5);
       expect(component.isAddComponentDisabled()).toBe(false);
     });

@@ -43,7 +43,6 @@ describe('ReportService', () => {
     httpMock = TestBed.inject(HttpTestingController);
     operationalService = TestBed.inject(SubjectOperationalService);
 
-    // Stub URL.createObjectURL and document.createElement for download tests
     vi.spyOn(window.URL, 'createObjectURL').mockReturnValue('blob:test');
     vi.spyOn(window.URL, 'revokeObjectURL').mockImplementation(() => {});
     vi.spyOn(document.body, 'appendChild').mockImplementation(() => ({} as any));
@@ -138,7 +137,7 @@ describe('ReportService', () => {
     });
 
     it('should return false for invalid or missing subject', () => {
-      operationalService.clearStore(); // Clear subject context
+      operationalService.clearStore();
 
       let result = true;
       service.download('grades-pdf').subscribe((r: boolean) => { result = r; });

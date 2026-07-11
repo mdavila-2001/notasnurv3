@@ -108,7 +108,6 @@ describe('TeacherGradeClosing', () => {
   });
 
   it('should download PDF report correctly and trigger download', () => {
-    // Mock URL.createObjectURL and revokeObjectURL
     const originalCreate = window.URL.createObjectURL;
     const originalRevoke = window.URL.revokeObjectURL;
     window.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
@@ -126,7 +125,6 @@ describe('TeacherGradeClosing', () => {
       'Descarga Exitosa'
     );
 
-    // Restore
     window.URL.createObjectURL = originalCreate;
     window.URL.revokeObjectURL = originalRevoke;
   });
@@ -154,7 +152,7 @@ describe('TeacherGradeClosing', () => {
   });
 
   it('should not open modal if subject is already closed', () => {
-    const subject = mockSubjects[1]; // CLOSED
+    const subject = mockSubjects[1];
     component.openCloseModal(subject);
     expect(component.isCloseModalOpen()).toBe(false);
   });

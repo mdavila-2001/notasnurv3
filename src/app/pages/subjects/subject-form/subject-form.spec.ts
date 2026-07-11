@@ -37,7 +37,6 @@ describe('SubjectFormComponent', () => {
     fixture = TestBed.createComponent(SubjectFormComponent);
     component = fixture.componentInstance;
     
-    // Set inputs
     fixture.componentRef.setInput('semesterOptions', mockSemesterOptions);
     fixture.componentRef.setInput('teacherOptions', mockTeacherOptions);
     fixture.componentRef.setInput('subject', null);
@@ -66,7 +65,6 @@ describe('SubjectFormComponent', () => {
   it('should initialize form with subject details when subject is provided', async () => {
     fixture.componentRef.setInput('subject', mockSubject);
     fixture.detectChanges();
-    // Wait for effect to run
     await fixture.whenStable();
 
     expect(component.form.getRawValue()).toEqual({
@@ -128,7 +126,6 @@ describe('SubjectFormComponent', () => {
     expect(component.recordStatusControl.value).toBe('PUBLISHED');
     expect(component.recordStatusControl.touched).toBe(true);
 
-    // Invalid status should not change recordStatus
     component.onRecordStatusValueChange('INVALID_STATUS');
     expect(component.recordStatusControl.value).toBe('PUBLISHED');
   });
@@ -137,7 +134,6 @@ describe('SubjectFormComponent', () => {
     let emitted: SubjectRequest | null = null;
     component.save.subscribe(val => (emitted = val));
 
-    // Try submitting empty form
     component.onSubmit();
 
     expect(component.form.touched).toBe(true);
@@ -183,7 +179,7 @@ describe('SubjectFormComponent', () => {
       name: 'Test Subject',
       modality: 'ONLINE',
       capacity: 35,
-      semesterId: 1, // Notice that semesterId is emitted as a Number
+      semesterId: 1,
       teacherId: 'docente-1',
       recordStatus: 'ACTIVE',
     });

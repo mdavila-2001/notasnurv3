@@ -12,12 +12,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 1. Primero determinar el mensaje por defecto según status
       let errorMessage: string;
 
       switch (error.status) {
         case 401:
-          // Don't logout on failed login attempts — let the login component handle it
           if (!req.url.includes('/auth/login')) {
             errorMessage = 'Su sesión ha expirado. Por favor, inicie sesión nuevamente.';
             authService.logout();
@@ -40,7 +38,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           break;
       }
 
-      // 2. Si el backend envió un mensaje específico, priorizarlo (excepto 401 por seguridad)
       if (error.status !== 401 && error.error?.message) {
         errorMessage = error.error.message;
       }

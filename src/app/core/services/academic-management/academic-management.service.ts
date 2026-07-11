@@ -14,8 +14,6 @@ import {
 export class AcademicManagementService {
   private readonly api = inject(ApiService);
 
-  // ========== MANAGEMENT ==========
-
   getManagements(): Observable<Management[]> {
     return this.api.get<Management[]>('/managements').pipe(
       map(r => Array.isArray(r.data) ? r.data : [])
@@ -39,8 +37,6 @@ export class AcademicManagementService {
       map(() => void 0)
     );
   }
-
-  // ========== SEMESTER ==========
 
   getSemesters(): Observable<Semester[]> {
     return this.api.get<Semester[]>('/semesters').pipe(

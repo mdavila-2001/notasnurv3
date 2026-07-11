@@ -130,7 +130,6 @@ describe('AttendanceTab', () => {
 
     it('should show toast error if subjectId cannot be resolved', () => {
       mockOperationalService.currentSubjectId.mockReturnValue(null);
-      // Stub snapshot get to return null to check missing ID path
       const route = TestBed.inject(ActivatedRoute);
       vi.spyOn(route.snapshot.paramMap, 'get').mockReturnValue(null);
       if (route.parent) {
