@@ -1,11 +1,9 @@
 <div class="student-portal-wrapper">
-  <!-- Page Header -->
   <div class="page-header">
     <h1 class="page-title">Portal Estudiantil</h1>
     <p class="page-subtitle">Visualiza tus materias activas y tu historial académico (Kardex)</p>
   </div>
 
-  <!-- Loading State -->
   @if (isLoading()) {
     <div class="loading-container">
       <app-loader
@@ -16,7 +14,6 @@
       </app-loader>
     </div>
   } @else if (error()) {
-    <!-- Error State -->
     <div class="error-container">
       <div class="error-message">
         <span class="material-symbols-outlined error-icon">error</span>
@@ -30,7 +27,6 @@
       </app-button>
     </div>
   } @else {
-    <!-- Tabs Navigation -->
     <div class="tabs-navigation">
       <button
         type="button"
@@ -51,9 +47,7 @@
       </button>
     </div>
 
-    <!-- Content Sections -->
     <div class="portal-content">
-      <!-- SUBJECTS TAB -->
       @if (activeTab() === 'subjects') {
         <div class="tab-content animated-fade-in">
           <div class="section-header">
@@ -126,7 +120,6 @@
         </div>
       }
 
-      <!-- KARDEX TAB -->
       @if (activeTab() === 'kardex') {
         <div class="tab-content animated-fade-in">
           <div class="section-header">
@@ -137,7 +130,6 @@
           </div>
 
           @if (kardexHistory()) {
-            <!-- Student Info Card -->
             <div class="kardex-info-card">
               <div class="info-row">
                 <div class="info-item">
@@ -163,7 +155,6 @@
               </div>
             </div>
 
-            <!-- Statistics Cards -->
             <div class="stats-grid">
               <div class="stat-card">
                 <div class="stat-icon gpa">
@@ -191,7 +182,6 @@
               </div>
             </div>
 
-            <!-- Kardex Table (using app-table custom component) -->
             @if (filteredKardexEntries().length === 0) {
               <div class="empty-state">
                 <span class="material-symbols-outlined empty-icon">history</span>
@@ -232,7 +222,6 @@
       }
     </div>
 
-    <!-- Refresh Button -->
     <div class="portal-footer">
       <app-button variant="secondary" type="button" (clicked)="refreshData()">
         <span class="material-symbols-outlined">refresh</span>

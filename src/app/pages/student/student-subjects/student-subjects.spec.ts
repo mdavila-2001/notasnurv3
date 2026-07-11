@@ -72,7 +72,6 @@ describe('StudentSubjectsComponent', () => {
     expect(compiled.querySelector('.loading-state')).toBeTruthy();
     expect(compiled.textContent).toContain('Cargando tus materias...');
 
-    // Emit and resolve loading
     subjects$.next(mockSubjectsResponse);
     subjects$.complete();
     fixture.detectChanges();
@@ -110,7 +109,6 @@ describe('StudentSubjectsComponent', () => {
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.error-state')).toBeTruthy();
 
-    // Mock successful retry response
     mockEnrollmentApiService.getMySubjects.mockReturnValue(of(mockSubjectsResponse));
 
     const retryBtn = compiled.querySelector('.btn-retry') as HTMLButtonElement;

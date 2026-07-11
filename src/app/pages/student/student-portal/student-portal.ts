@@ -36,16 +36,13 @@ export class StudentPortal implements OnInit {
     this.router.navigate(['/student/subject', subjectCode]);
   }
 
-  // ===== STATE SIGNALS =====
   readonly isLoading = signal<boolean>(true);
   readonly activeTab = signal<'subjects' | 'kardex'>('subjects');
 
-  // ===== DATA SIGNALS =====
   readonly mySubjects = signal<MySubjectResponseDTO[]>([]);
   readonly kardexHistory = signal<KardexResponse | null>(null);
   readonly error = signal<string>('');
 
-  // ===== COMPUTED SIGNALS =====
   readonly subjectsCount = computed(() => this.mySubjects().length);
 
   readonly kardexStats = computed(() => {
@@ -84,7 +81,6 @@ export class StudentPortal implements OnInit {
     );
   });
 
-  // ===== KARDEX TABLE SIGNALS =====
   readonly kardexTableColumns = signal<TableColumn[]>([
     { key: 'subjectCode', label: 'Código' },
     { key: 'subjectName', label: 'Materia' },
@@ -109,24 +105,20 @@ export class StudentPortal implements OnInit {
     this.loadStudentData();
   }
 
-  /**
-   * Load both active subjects and kardex history
-   */
   private loadStudentData(): void {
     this.isLoading.set(true);
     this.error.set('');
 
     this.studentPortalService.getStudentDashboardData().subscribe({
-      next: (data: any) => { // <-- CORRECCIÓN: Agregado el tipo explícito ': any'
+      next: (data: any) => {
         this.mySubjects.set(data.mySubjects);
         
-        // Transform backend Kardex payload to KardexResponse format with profile CI
         const transformedKardex = this.transformKardexData(data.kardexHistory, data.userProfile.ci);
         this.kardexHistory.set(transformedKardex);
         
         this.isLoading.set(false);
       },
-      error: (err: any) => { // <-- CORRECCIÓN: Agregado el tipo explícito ': any'
+      error: (err: any) => {
         this.error.set(
           err?.message ||
             'Error al cargar los datos del estudiante. Intenta nuevamente.'
@@ -136,21 +128,12 @@ export class StudentPortal implements OnInit {
     });
   }
 
-  /**
-   * Transform backend JSON response into KardexResponse format
-   * Maps studentName -> fullName, flattens historyBySemester into entries array,
-   * calculates GPA, handles null scores, and dynamically sets academicStatus
-   * @param rawData The raw kardex data from backend
-   * @param profileCi The student's CI from the user profile
-   */
   private transformKardexData(rawData: any, profileCi: string): KardexResponse {
-    // Default fallback values
     const studentName = rawData?.studentName || '-';
     const degreeName = rawData?.degreeName || '-';
     const studentId = rawData?.studentId || '-';
-    const ci = profileCi || '-';  // Use profile CI instead of default
+    const ci = profileCi || '-';
 
-    // Flatten historyBySemester object into entries array
     const entries: KardexEntryDTO[] = [];
     const historyBySemester = rawData?.historyBySemester || {};
     let totalScore = 0;
@@ -159,10 +142,8 @@ export class StudentPortal implements OnInit {
     Object.entries(historyBySemester).forEach(([semesterKey, subjects]: [string, any]) => {
       if (Array.isArray(subjects)) {
         subjects.forEach((subject: any) => {
-          // Map finalScore to grade; use '-' if null
           const grade = subject.finalScore !== null ? subject.finalScore : '-';
           
-          // Count non-null scores for GPA calculation
           if (subject.finalScore !== null) {
             totalScore += subject.finalScore;
             scoreCount++;
@@ -182,15 +163,12 @@ export class StudentPortal implements OnInit {
       }
     });
 
-    // LÓGICA INTELIGENTE: Si el alumno tiene materias "ACTIVE", está cursando. Si no, es Regular.
     const academicStatus = entries.some(e => e.status === 'ACTIVE') 
       ? 'Regular (Cursando)' 
       : 'Regular';
 
-    // Calculate GPA: average of non-null finalScores
     const gpa = scoreCount > 0 ? totalScore / scoreCount : 0;
 
-    // Calculate totals
     const passedEntries = entries.filter(e => e.status === 'PASSED');
     const totalCredits = entries.reduce((sum, e) => sum + (e.credits || 0), 0);
     const earnedCredits = passedEntries.reduce((sum, e) => sum + (e.credits || 0), 0);
@@ -202,37 +180,23 @@ export class StudentPortal implements OnInit {
       degreeName,
       totalCredits,
       earnedCredits,
-      gpa: Math.round(gpa * 100) / 100, // Round to 2 decimals
+      gpa: Math.round(gpa * 100) / 100,
       academicStatus,
       entries
     };
   }
 
-  /**
-   * Refresh the student data
-   */
   refreshData(): void {
     this.loadStudentData();
   }
 
-  /**
-   * Switch between tabs
-   */
   setTab(tab: 'subjects' | 'kardex'): void {
     this.activeTab.set(tab);
   }
 
-  /**
-   * Handle kardex row click to navigate to subject detail
-   */
   onKardexRowClick(row: KardexTableRow): void {
-    // This would be used if you add row click navigation
-    // For now, the subject detail link is embedded in the template
   }
 
-  /**
-   * Get CSS class for grade status (PASSED, FAILED, ACTIVE, etc.)
-   */
   getGradeStatusClass(status: string): string {
     const statusMap: Record<string, string> = {
       PASSED: 'status-passed',
@@ -240,14 +204,11 @@ export class StudentPortal implements OnInit {
       INCOMPLETE: 'status-incomplete',
       PENDING: 'status-pending',
       DROPPED: 'status-dropped',
-      ACTIVE: 'status-pending' // <-- Modificado para que use el color amarillo de tu CSS existente
+      ACTIVE: 'status-pending'
     };
     return statusMap[status] || 'status-default';
   }
 
-  /**
-   * Get display label for grade status
-   */
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       PASSED: 'Aprobado',
@@ -260,9 +221,6 @@ export class StudentPortal implements OnInit {
     return labels[status] || status;
   }
 
-  /**
-   * Get display label for modality
-   */
   getModalityLabel(modality?: string): string {
     const labels: Record<string, string> = {
       FACE_TO_FACE: 'Presencial',
@@ -272,9 +230,6 @@ export class StudentPortal implements OnInit {
     return labels[modality || 'ONLINE'] || modality || 'Virtual';
   }
 
-  /**
-   * Format grade for display
-   */
   formatGrade(grade: number | string): string {
     if (typeof grade === 'string') {
       const num = parseFloat(grade);

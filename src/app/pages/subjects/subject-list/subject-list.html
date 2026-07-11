@@ -34,7 +34,6 @@
   </app-subject-form>
 </app-modal>
 
-<!-- Delete Confirmation Modal -->
 <app-modal
   [isOpen]="isDeleteModalOpen()"
   title="Confirmar Eliminación"
@@ -50,11 +49,3 @@
     <app-button variant="primary" (clicked)="confirmDelete()">Sí, eliminar</app-button>
   </div>
 </app-modal>
-
-@if (showToast()) {
-  <app-toast
-    [type]="toastType()"
-    [message]="toastMessage()"
-    (closed)="onToastClosed()">
-  </app-toast>
-}

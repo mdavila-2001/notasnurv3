@@ -101,7 +101,6 @@ describe('AcademicSettings', () => {
     };
     mockSettingsService.getGlobalSettings.mockReturnValue(of(settingsWithIsoDate));
     
-    // Trigger loadSettings again by calling ngOnInit
     component.ngOnInit();
     expect(component.globalGradesDeadlineControl?.value).toBe('2026-07-15');
   });
@@ -115,7 +114,7 @@ describe('AcademicSettings', () => {
   });
 
   it('should mark form as touched and not submit if form is invalid', () => {
-    component.minPassingGradeControl?.setValue(-10); // invalid
+    component.minPassingGradeControl?.setValue(-10);
     const markAllAsTouchedSpy = vi.spyOn(component.academicForm, 'markAllAsTouched');
     
     component.onSubmit();

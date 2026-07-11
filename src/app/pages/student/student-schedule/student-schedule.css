@@ -107,7 +107,6 @@
   color: var(--primary-color, #00AEEF);
 }
 
-/* Modo oscuro */
 :root.dark-theme .schedule-table th,
 :root.dark-theme .time-cell {
   background: #151e33;

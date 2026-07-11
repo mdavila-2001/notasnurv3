@@ -21,7 +21,6 @@ describe('ActasClosing Integration', () => {
   ];
 
   beforeEach(async () => {
-    // Spy on window APIs to prevent errors during download mockings
     vi.stubGlobal('URL', {
       createObjectURL: vi.fn().mockReturnValue('blob:mock-url'),
       revokeObjectURL: vi.fn()
@@ -58,7 +57,6 @@ describe('ActasClosing Integration', () => {
   });
 
   it('should list subjects, close an open subject, update local status, and trigger PDF report download', () => {
-    // 1. Initial render -> fetches subjects from API
     fixture.detectChanges();
 
     const getReq = httpMock.expectOne(`${baseUrl}/subjects/my-subjects`);
@@ -70,14 +68,12 @@ describe('ActasClosing Integration', () => {
     expect(component.subjects().length).toBe(2);
     expect(component.filteredSubjects().length).toBe(2);
 
-    // 2. Open confirmation modal for Álgebra Lineal (id: 10, recordStatus: 'OPEN')
     component.openCloseModal(mockSubjects[0] as any);
     fixture.detectChanges();
 
     expect(component.isCloseModalOpen()).toBe(true);
     expect(component.selectedSubject()).toEqual(mockSubjects[0]);
 
-    // 3. Confirm closing subject -> triggers PUT /subjects/10/close
     component.confirmCloseSubject();
     
     const closeReq = httpMock.expectOne(`${baseUrl}/subjects/10/close`);
@@ -89,7 +85,6 @@ describe('ActasClosing Integration', () => {
 
     fixture.detectChanges();
 
-    // Verify modal is closed, status is updated, and success toast is shown
     expect(component.isCloseModalOpen()).toBe(false);
     expect(component.subjects()[0].recordStatus).toBe('CLOSED');
     expect(toast.success).toHaveBeenCalledWith(
@@ -97,13 +92,11 @@ describe('ActasClosing Integration', () => {
       'Cierre Completado'
     );
 
-    // 4. Download PDF for closed subject (id: 10)
     component.downloadPdf(component.subjects()[0] as any);
 
     const pdfReq = httpMock.expectOne(`${baseUrl}/reports/subjects/10/grades-report/pdf`);
     expect(pdfReq.request.method).toBe('GET');
     
-    // Flush a mock blob response
     const mockBlob = new Blob(['pdf-data'], { type: 'application/pdf' });
     pdfReq.flush(mockBlob);
 

@@ -86,11 +86,9 @@ describe('ToastService', () => {
     service.show('Timed message', 'info', '', 3000);
     expect(service.toasts().length).toBe(1);
 
-    // Advance time by 2999ms
     vi.advanceTimersByTime(2999);
     expect(service.toasts().length).toBe(1);
 
-    // Advance to 3000ms
     vi.advanceTimersByTime(1);
     expect(service.toasts().length).toBe(0);
 

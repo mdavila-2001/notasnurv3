@@ -4,7 +4,6 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { UserProfileResponse } from '../../core/models/api.models';
 
-// Import standalone sub-components
 import { ProfileView } from './components/profile-view/profile-view';
 import { SecuritySettings } from './components/security-settings/security-settings';
 import { AcademicSettings } from './components/academic-settings/academic-settings';

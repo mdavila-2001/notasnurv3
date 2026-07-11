@@ -1,6 +1,6 @@
 import { CommonModule, Location } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, concat, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -35,7 +35,7 @@ type GradeGridRow = GradeRowUI & {
 @Component({
   selector: 'app-grade-grid',
   standalone: true,
-  imports: [CommonModule, Button, Badge, Input, Loader, Modal, Table],
+  imports: [CommonModule, Button, Badge, Input, Loader, Modal, Table, RouterModule],
   templateUrl: './grade-grid.component.html',
   styleUrl: './grade-grid.component.css',
   providers: [AttendanceService, GradeApiService],
@@ -219,7 +219,6 @@ export class GradeGridComponent {
     const currentDate = this.currentDate();
     const currentVal = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
 
-    // Parse YYYY-MM-DD safely in local time
     const parts = deadlineStr.split('-');
     if (parts.length !== 3) {
       return false;
@@ -567,7 +566,7 @@ export class GradeGridComponent {
     absencesMap: Map<string, number>,
     absenceLimit: number,
   ): GradeAcademicStatus {
-    const absences = this.getAbsenceCount(row, absencesMap);
+    const absences = this.getAbsenceCount(row);
 
     if (absences >= absenceLimit) {
       return 'REPROBADO_POR_FALTAS';
@@ -596,14 +595,14 @@ export class GradeGridComponent {
     return true;
   }
 
-  private getAbsenceCount(row: GradeRowUI, absencesMap: Map<string, number>): number {
+  getAbsenceCount(row: GradeRowUI): number {
     const enrollmentKey = row.enrollmentId?.trim();
 
     if (!enrollmentKey) {
       return 0;
     }
 
-    return absencesMap.get(enrollmentKey) ?? 0;
+    return this.absencesMap().get(enrollmentKey) ?? 0;
   }
 
   private getAbsenceLimit(modality: SubjectModality | null): number {

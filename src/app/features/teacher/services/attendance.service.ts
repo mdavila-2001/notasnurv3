@@ -24,7 +24,6 @@ export class AttendanceService {
   private readonly _error = signal<string | null>(null);
   private readonly _successMessage = signal<string | null>(null);
 
-  // --- Selectores Públicos (Read-only) ---
   readonly attendanceDraft = computed(() => this._attendanceDraft());
   readonly date = computed(() => this._date());
   readonly isSaving = computed(() => this._isSaving());
@@ -32,11 +31,12 @@ export class AttendanceService {
   readonly error = computed(() => this._error());
   readonly successMessage = computed(() => this._successMessage());
 
-  getSubjectAbsences(subjectId: string): Observable<Map<string, number>> {
-    const cachedAbsences = this._absencesCache().get(subjectId);
-
-    if (cachedAbsences) {
-      return of(cachedAbsences);
+  getSubjectAbsences(subjectId: string, forceRefresh = false): Observable<Map<string, number>> {
+    if (!forceRefresh) {
+      const cachedAbsences = this._absencesCache().get(subjectId);
+      if (cachedAbsences) {
+        return of(cachedAbsences);
+      }
     }
 
     return this.api.get<AttendanceAbsenceRecord[]>(`/attendance/subject/${subjectId}/absences`).pipe(
@@ -51,7 +51,6 @@ export class AttendanceService {
     );
   }
 
-  // Selector derivado para las estadísticas del Header de la UI
   readonly recordCounts = computed(() => {
     const records = this._attendanceDraft();
     return {
@@ -125,12 +124,27 @@ export class AttendanceService {
     this._date.set(date);
     this.clearFeedback();
     
-    // Al cambiar la fecha, intentar cargar las asistencias registradas para ese día
     const subjectId = this.operationalService.currentSubjectId();
     const students = this.operationalService.students();
     
     if (subjectId && students.length > 0) {
-      this.loadAttendanceForDate(subjectId, date, students);
+      this._isDraftHydrating.set(true);
+      
+      this.getSubjectAbsences(subjectId, true).subscribe({
+        next: (absencesMap) => {
+          this._attendanceDraft.update(currentDraft =>
+            currentDraft.map((row) => ({
+              ...row,
+              totalAbsences: absencesMap.get(row.enrollmentId) ?? 0,
+              absencesCount: absencesMap.get(row.enrollmentId) ?? 0,
+            })),
+          );
+          this.loadAttendanceForDate(subjectId, date, students);
+        },
+        error: () => {
+          this.loadAttendanceForDate(subjectId, date, students);
+        }
+      });
     }
   }
 
@@ -144,13 +158,10 @@ export class AttendanceService {
         return of(null);
       })
     ).subscribe((response) => {
-      // El backend devuelve ApiResponse<List<AttendanceRecordResponse>>
-      // Cada AttendanceRecordResponse tiene: enrollmentId (UUID), studentId (UUID), fullName, status, date
       const records: any[] = Array.isArray(response?.data) ? response.data : [];
       
       this._attendanceDraft.update(currentDraft => {
         return currentDraft.map(row => {
-          // Comparar por enrollmentId o studentId del backend
           const existingRecord = records.find(r => {
             const backendEnrollmentId = String(r.enrollmentId ?? '').trim();
             const backendStudentId = String(r.studentId ?? '').trim();
@@ -240,8 +251,6 @@ export class AttendanceService {
   private normalizeAbsenceRecords(records: any): Map<string, number> {
     const absencesMap = new Map<string, number>();
     
-    // El backend devuelve AttendanceAbsencesResponse: { students: [...], absenceLimit: N }
-    // Cada StudentAbsence tiene: enrollmentId, studentId, fullName, absencesCount
     const actualRecords: any[] = Array.isArray(records)
       ? records
       : (records?.students ?? records?.records ?? []);
@@ -255,7 +264,6 @@ export class AttendanceService {
         continue;
       }
 
-      // El campo en StudentAbsence es 'absencesCount'
       const absences = record.absencesCount ?? record.absences ?? record.totalAbsences ?? 0;
       absencesMap.set(enrollmentKey, Math.max(0, absences));
     }

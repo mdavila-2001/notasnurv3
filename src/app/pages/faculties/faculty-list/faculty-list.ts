@@ -22,15 +22,12 @@ export class FacultyListComponent implements OnInit {
   readonly isFormModalOpen = signal(false);
   readonly selectedFaculty = signal<FacultyResponse | null>(null);
 
-  // Form fields
   nameField = '';
   codeField = '';
 
-  // Delete modal state
   readonly isDeleteModalOpen = signal(false);
   readonly facultyToDelete = signal<FacultyResponse | null>(null);
 
-  // Toast notifications
   readonly showToast = signal(false);
   readonly toastMessage = signal('');
   readonly toastType = signal<'success' | 'error'>('success');

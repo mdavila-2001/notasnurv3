@@ -35,7 +35,6 @@ export class StudentSchedule implements OnInit {
     const subjects = this.mySubjects();
     if (subjects.length === 0) return [];
 
-    // Deterministically assign active subjects to time slots
     const slots: ScheduleSlot[] = [
       { time: '07:30 - 09:00' },
       { time: '09:15 - 10:45' },
@@ -44,7 +43,6 @@ export class StudentSchedule implements OnInit {
       { time: '20:15 - 21:45' }
     ];
 
-    // Map each subject to a deterministic spot (Monday/Wednesday/Friday or Tuesday/Thursday)
     subjects.forEach((sub, index) => {
       const slotIndex = index % slots.length;
       const isMonWedFri = index % 2 === 0;

@@ -73,7 +73,6 @@ export class AttendanceTab implements OnInit {
   constructor() {
     effect(() => {
       const students = this.operationalService.students();
-      // Solo inicializamos si hay estudiantes y aún no hemos hidratado el borrador en este ciclo de vida
       if (students.length > 0) {
         untracked(() => {
           if (!this.hasInitializedDraft && this.attendanceService.attendanceDraft().length === 0) {
@@ -87,17 +86,11 @@ export class AttendanceTab implements OnInit {
   }
 
   ngOnInit(): void {
-    // La carga del contexto de la materia (loadSubjectContext) ahora es
-    // responsabilidad exclusiva del componente padre (SubjectDetail).
-    // Si la hacemos aquí y falla o se recarga, el flag 'isLoading' del padre
-    // destruirá y volverá a montar este componente, creando un bucle infinito.
   }
 
   private getSubjectId(): string | null {
-    // Intentar sacar el ID desde la ruta o su padre
     let id = this.route.snapshot.paramMap.get('id') || this.route.parent?.snapshot.paramMap.get('id');
     
-    // Fallback: parsear la URL
     if (!id) {
       const parts = window.location.pathname.split('/');
       const idx = parts.findIndex(p => p === 'subject' || p === 'subjects');
@@ -130,7 +123,6 @@ export class AttendanceTab implements OnInit {
     this.attendanceService.submit(subjectId).subscribe({
       next: (_success) => {
         this.toast.success('La asistencia se guardó correctamente.', '¡Asistencia guardada!');
-        // Recargar para confirmar la persistencia
         this.attendanceService.setDate(this.attendanceService.date());
       },
       error: (err: Error) => {
@@ -141,7 +133,6 @@ export class AttendanceTab implements OnInit {
   }
 
 
-  // ... resto de métodos igual que antes (absenceBadgeColor, statusVariant, etc.)
   absenceBadgeColor(absences: number): 'success' | 'warning' | 'danger' | 'neutral' {
     if (absences <= 0) return 'success';
     if (absences >= 5) return 'danger';

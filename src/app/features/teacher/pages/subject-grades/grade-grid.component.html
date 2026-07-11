@@ -92,6 +92,15 @@
                         @if (row.degreeName) {
                           <span class="student-meta">{{ row.degreeName }}</span>
                         }
+                        <span class="student-meta" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                          Faltas: {{ getAbsenceCount(row) }}
+                          <a [routerLink]="['/teacher/subject', currentSubjectId()]" 
+                             [queryParams]="{ tab: 'attendance' }"
+                             class="edit-attendance-link"
+                             style="color: var(--primary, #0284c7); text-decoration: underline; font-weight: 500;">
+                            (Modificar)
+                          </a>
+                        </span>
                       </div>
                     </td>
                   } @else if (isComponentColumn(column.key)) {
@@ -117,10 +126,16 @@
                     </td>
                   } @else if (isAcademicStatusColumn(column.key)) {
                     <td class="grid-cell status-cell">
-                      <div class="cell-content status-content">
+                      <div class="cell-content status-content" style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
                         <span class="status-label">Estado académico</span>
                         @if (row.academicStatus === 'REPROBADO_POR_FALTAS') {
                           <app-badge color="danger">Reprobado por Faltas</app-badge>
+                          <a [routerLink]="['/teacher/subject', currentSubjectId()]" 
+                             [queryParams]="{ tab: 'attendance' }"
+                             class="edit-attendance-link"
+                             style="font-size: 0.75rem; color: var(--primary, #0284c7); text-decoration: underline; font-weight: 500; text-align: center; cursor: pointer;">
+                            Corregir Asistencia
+                          </a>
                         } @else if (row.academicStatus === 'APROBADO') {
                           <app-badge color="success">Aprobado</app-badge>
                         } @else if (row.academicStatus === 'REPROBADO') {

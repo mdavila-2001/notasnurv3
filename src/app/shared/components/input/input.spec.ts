@@ -75,15 +75,12 @@ describe('Input', () => {
     fixture.componentRef.setInput('value', '');
     fixture.detectChanges();
 
-    // Not touched yet, shouldn't display error
     expect(component.displayErrorMessage()).toBe('');
 
-    // Set touched
     component.onBlur();
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('Este campo es obligatorio.');
 
-    // Reset touched and test showErrors = true
     component.touched.set(false);
     fixture.componentRef.setInput('showErrors', true);
     fixture.detectChanges();
@@ -104,22 +101,18 @@ describe('Input', () => {
     fixture.componentRef.setInput('max', 100);
     fixture.componentRef.setInput('showErrors', true);
 
-    // Value within limits
     fixture.componentRef.setInput('value', 50);
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('');
 
-    // Below min
     fixture.componentRef.setInput('value', 5);
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('El valor mínimo es 10.');
 
-    // Above max
     fixture.componentRef.setInput('value', 150);
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('El valor máximo es 100.');
 
-    // NaN check
     fixture.componentRef.setInput('value', 'invalid-number');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('Ingresa un número válido.');
@@ -131,17 +124,14 @@ describe('Input', () => {
     fixture.componentRef.setInput('maxLength', 8);
     fixture.componentRef.setInput('showErrors', true);
 
-    // Within limit
     fixture.componentRef.setInput('value', 'hello');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('');
 
-    // Too short
     fixture.componentRef.setInput('value', 'hi');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('Debe tener al menos 3 caracteres.');
 
-    // Too long
     fixture.componentRef.setInput('value', 'hello world');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('Debe tener máximo 8 caracteres.');
@@ -152,17 +142,14 @@ describe('Input', () => {
     fixture.componentRef.setInput('pattern', '^[0-9]+$');
     fixture.componentRef.setInput('showErrors', true);
 
-    // Valid pattern
     fixture.componentRef.setInput('value', '12345');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('');
 
-    // Invalid pattern
     fixture.componentRef.setInput('value', 'abc');
     fixture.detectChanges();
     expect(component.displayErrorMessage()).toBe('El formato ingresado no es válido.');
 
-    // Broken regex pattern
     fixture.componentRef.setInput('pattern', '[');
     fixture.componentRef.setInput('value', 'abc');
     fixture.detectChanges();
@@ -175,8 +162,6 @@ describe('Input', () => {
 
     const changeEvent = { target: { value: '123' } } as any;
     component.onChange(changeEvent);
-    // Number type should emit a numeric value
-    // (checking internal normalizeOutputValue behavior)
     expect((component as any).normalizeOutputValue('123')).toBe(123);
     expect((component as any).normalizeOutputValue(' ')).toBe('');
 
@@ -196,7 +181,7 @@ describe('Input', () => {
     const selectEl = fixture.nativeElement.querySelector('select');
     expect(selectEl).toBeTruthy();
     const options = selectEl.querySelectorAll('option');
-    expect(options.length).toBe(3); // First option is usually the empty placeholder
+    expect(options.length).toBe(3);
     expect(options[1].text).toBe('Option A');
     expect(options[2].value).toBe('b');
   });

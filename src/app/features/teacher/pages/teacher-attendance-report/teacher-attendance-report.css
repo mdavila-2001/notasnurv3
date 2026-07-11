@@ -94,7 +94,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Card Grid */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -209,7 +208,6 @@
   opacity: 0.85;
 }
 
-/* Loading & Empty States */
 .loading-state,
 .empty-state {
   display: flex;

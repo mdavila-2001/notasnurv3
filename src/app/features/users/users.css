@@ -1,15 +1,10 @@
-/* ===========================================
-   GESTIÓN DE USUARIOS
-   =========================================== */
 
-/* ── CONTENEDOR ──────────────────────────── */
 .users-container {
   padding: 2.25rem 2.5rem 3rem;
   background-color: #f1f5f9;
   min-height: 100vh;
 }
 
-/* ── HEADER ──────────────────────────────── */
 .page-header { margin-bottom: 1.75rem; }
 
 .header-title-row {
@@ -72,7 +67,6 @@
 .btn-registrar .btn-icon-left { font-size: 18px; }
 .btn-registrar:hover { background: #0284c7; }
 
-/* ── TABS ────────────────────────────────── */
 .tabs-row { display: flex; align-items: center; }
 
 .tab-btn {
@@ -93,7 +87,6 @@
   font-weight: 600;
 }
 
-/* ── STATS ───────────────────────────────── */
 .stats-grid {
   display: grid;
   grid-template-columns: 210px 210px 1fr;
@@ -173,7 +166,6 @@
 }
 .stat-chevron .material-symbols-outlined { font-size: 20px; color: #ffffff; }
 
-/* ── CARD PANEL ──────────────────────────── */
 .card-panel {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -181,7 +173,6 @@
   overflow: hidden;
 }
 
-/* ── FILTROS ─────────────────────────────── */
 .filters-row {
   display: flex;
   align-items: flex-end;
@@ -258,7 +249,6 @@
 .filter-icon-btn.filter-icon-active { background: #f1f5f9; color: #0ea5e9; border-color: #bae6fd; }
 .filter-icon-btn .material-symbols-outlined { font-size: 20px; }
 
-/* ── TABLA ───────────────────────────────── */
 .docentes-table-wrap { width: 100%; overflow-x: auto; }
 
 .docentes-table {
@@ -412,7 +402,6 @@
 .pill-activo   { background: #dcfce7; color: #15803d; }
 .pill-inactivo { background: #fee2e2; color: #b91c1c; }
 
-/* ── PAGINACIÓN ──────────────────────────── */
 .pagination-row {
   display: flex;
   align-items: center;
@@ -447,7 +436,6 @@
 .pag-btn.pag-nav { color: #94a3b8; font-size: 1.1rem; }
 .pag-ellipsis { color: #94a3b8; font-size: 0.9rem; padding: 0 0.25rem; }
 
-/* ── MODALES ─────────────────────────────── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -505,7 +493,6 @@
 
 .modal-body { padding: 1.25rem 1.5rem; }
 
-/* Historial */
 .historial-item {
   display: flex;
   gap: 1rem;
@@ -527,7 +514,6 @@
 .historial-detalle { font-size: 0.8rem; color: #64748b; }
 .historial-fecha   { font-size: 0.75rem; color: #94a3b8; }
 
-/* Editar */
 .edit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -594,7 +580,6 @@
 }
 .btn-modal-save:hover { background: #0284c7; }
 
-/* ── FORM GRID / LAYOUT FIX ── */
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

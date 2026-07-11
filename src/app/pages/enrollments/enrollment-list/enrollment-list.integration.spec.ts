@@ -39,9 +39,9 @@ describe('EnrollmentList Integration', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        EnrollmentApiService, // Real service
-        AdminSubjectService,  // Real service
-        AdminUserService,     // Real service
+        EnrollmentApiService,
+        AdminSubjectService,
+        AdminUserService,
         { provide: Router, useValue: mockRouter }
       ]
     }).compileComponents();
@@ -57,10 +57,8 @@ describe('EnrollmentList Integration', () => {
   });
 
   it('should initialize component, fetch subjects and students, and perform a full enrollment flow', () => {
-    // 1. Trigger initial data load on init
     fixture.detectChanges();
 
-    // 2. Expect and mock the HTTP calls triggered by AdminSubjectService.getAll and AdminUserService.getByRole
     const subjectsReq = httpMock.expectOne(`${baseUrl}/subjects`);
     expect(subjectsReq.request.method).toBe('GET');
     subjectsReq.flush({ success: true, message: '', data: mockSubjects });
@@ -83,11 +81,9 @@ describe('EnrollmentList Integration', () => {
     fixture.detectChanges();
     expect(component.enrolledStudents().length).toBe(0);
 
-    // 4. Open the enroll modal
     component.openEnrollModal();
     expect(component.isEnrollModalOpen()).toBe(true);
 
-    // 5. Select a student and expect the HTTP request for the student's active degrees
     component.onStudentSelected('usr-student-1');
     expect(component.selectedUserId()).toBe('usr-student-1');
 
@@ -96,10 +92,8 @@ describe('EnrollmentList Integration', () => {
     degreesReq.flush({ success: true, message: '', data: mockDegrees });
 
     fixture.detectChanges();
-    // Verify auto-selection of the single active degree
     expect(component.userDegreeId()).toBe(45);
 
-    // 6. Confirm enrollment and expect the HTTP POST request to enroll
     component.confirmEnroll();
 
     const postEnrollReq = httpMock.expectOne(`${baseUrl}/enrollments`);
@@ -122,7 +116,6 @@ describe('EnrollmentList Integration', () => {
       }
     });
 
-    // 7. Flow triggers reloads: one for enrolled students list and one for catalog (subjects)
     const reloadEnrolledReq = httpMock.expectOne(`${baseUrl}/enrollments/subjects/10/students`);
     reloadEnrolledReq.flush({
       success: true,

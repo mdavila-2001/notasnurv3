@@ -1,11 +1,9 @@
 <div class="page-wrapper">
-  <!-- Page Header -->
   <div class="page-header">
     <h1 class="page-title">Historial de Auditoría y Logs</h1>
     <p class="page-subtitle">Registro y monitoreo detallado de todas las acciones de creación, edición y eliminación de calificaciones y asistencias en el sistema.</p>
   </div>
 
-  <!-- Stats Grid -->
   <div class="stats-grid">
     <div class="stat-card stat-white">
       <div class="stat-body">
@@ -17,10 +15,8 @@
     </div>
   </div>
 
-  <!-- Filters & Table Panel -->
   <div class="card-panel">
     <div class="filters-row">
-      <!-- Search -->
       <div class="filter-col search-col">
         <label class="filter-label-text">BUSCAR POR DOCENTE O CORREO</label>
         <div class="select-wrap">
@@ -33,7 +29,6 @@
         </div>
       </div>
 
-      <!-- Action Filter -->
       <div class="filter-col">
         <label class="filter-label-text">TIPO DE ACCIÓN</label>
         <div class="select-wrap">
@@ -47,7 +42,6 @@
         </div>
       </div>
 
-      <!-- Table Filter -->
       <div class="filter-col">
         <label class="filter-label-text">TABLA AFECTADA</label>
         <div class="select-wrap">
@@ -60,7 +54,6 @@
         </div>
       </div>
 
-      <!-- Clear Filters -->
       <div class="filter-col action-col">
         <button class="filter-icon-btn reset-btn" (click)="clearFilters()" title="Limpiar Filtros">
           <span class="material-symbols-outlined">filter_alt_off</span>
@@ -69,7 +62,6 @@
       </div>
     </div>
 
-    <!-- Table Container -->
     <div class="table-container">
       @if (isLoading()) {
         <div class="loading-overlay">
@@ -141,7 +133,6 @@
       </table>
     </div>
 
-    <!-- Pagination Row -->
     @if (totalPages() > 0) {
       <div class="pagination-row">
         <span class="pagination-info">
@@ -168,11 +159,9 @@
     }
   </div>
 
-  <!-- Detail Modal -->
   <app-modal [isOpen]="isDetailModalOpen()" title="Detalles del Registro de Auditoría" (closed)="closeDetail()">
     @if (selectedLog(); as log) {
       <div class="modal-body-content">
-        <!-- Log Info Overview -->
         <div class="overview-grid">
           <div class="overview-item">
             <span class="overview-label">Operador:</span>
@@ -197,7 +186,6 @@
 
         <h4 class="changes-title">Cambios en el Registro</h4>
         
-        <!-- Changes comparison Table -->
         <div class="changes-table-container">
           <table class="changes-table">
             <thead>
@@ -225,7 +213,6 @@
           </table>
         </div>
 
-        <!-- Raw JSON collapsible option -->
         <details class="raw-json-details">
           <summary>Ver Datos JSON Crudos</summary>
           <div class="raw-json-flex">

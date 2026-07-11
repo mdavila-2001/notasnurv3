@@ -51,7 +51,6 @@
   box-shadow: 0 2px 8px rgba(0, 33, 49, 0.04);
 }
 
-/* Modo oscuro */
 :root.dark-theme .badge-approved {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;

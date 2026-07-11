@@ -6,7 +6,6 @@
 
   <div class="enrollments-layout">
 
-    <!-- Panel izquierdo: Materias activas -->
     <div class="subjects-panel">
       <div class="panel-header">
         <h2 class="panel-title">Materias Publicadas</h2>
@@ -43,7 +42,6 @@
       }
     </div>
 
-    <!-- Panel derecho: Alumnos matriculados -->
     <div class="students-panel">
       @if (!selectedSubject()) {
         <div class="empty-state centered">
@@ -112,7 +110,6 @@
   </div>
 </div>
 
-<!-- Modal: Matricular Alumno -->
 <app-modal
   [isOpen]="isEnrollModalOpen()"
   title="Matricular Alumno"
@@ -139,7 +136,6 @@
       </div>
     </div>
 
-    <!-- Active academic records (carreras) dynamic list -->
     @if (selectedUserId()) {
       <div class="form-group" style="margin-top: 1.5rem;">
         @if (isDegreesLoading()) {
@@ -206,7 +202,6 @@
   </div>
 </app-modal>
 
-<!-- Modal: Confirmar baja -->
 <app-modal
   [isOpen]="isWithdrawModalOpen()"
   title="Confirmar baja"
@@ -229,7 +224,6 @@
   </div>
 </app-modal>
 
-<!-- Modal: Crear Expediente Académico -->
 <app-modal
   [isOpen]="isCreateRecordModalOpen()"
   title="Crear Expediente Académico"
@@ -274,7 +268,6 @@
   </div>
 </app-modal>
 
-<!-- Toast de notificación -->
 @if (showToast()) {
   <app-toast
     [message]="toastMessage()"

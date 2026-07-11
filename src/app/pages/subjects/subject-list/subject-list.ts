@@ -12,7 +12,7 @@ import { Modal } from '../../../shared/components/modal/modal';
 import { Button } from '../../../shared/components/button/button';
 import { SelectOption } from '../../../shared/components/input/input';
 import { Table, TableColumn } from '../../../shared/components/table/table';
-import { Toast } from '../../../shared/components/toast/toast';
+import { ToastService } from '../../../shared/services/toast.service';
 
 const MODALITY_LABELS: Record<SubjectModality, string> = {
   FACE_TO_FACE: 'Presencial',
@@ -31,7 +31,7 @@ const STATUS_LABELS: Record<SubjectRecordStatus, string> = {
 @Component({
   selector: 'app-subject-list',
   standalone: true,
-  imports: [SubjectFormComponent, Modal, Button, Table, Toast],
+  imports: [SubjectFormComponent, Modal, Button, Table],
   templateUrl: './subject-list.html',
   styleUrl: './subject-list.css',
 })
@@ -39,6 +39,7 @@ export class SubjectListComponent implements OnInit {
   private readonly adminSubjectService = inject(AdminSubjectService);
   private readonly adminUserService = inject(AdminUserService);
   private readonly academicService = inject(AcademicManagementService);
+  private readonly toastService = inject(ToastService);
 
   readonly subjects = signal<SubjectResponse[]>([]);
   readonly semesters = signal<Semester[]>([]);
@@ -47,10 +48,6 @@ export class SubjectListComponent implements OnInit {
   readonly isLoading = signal(false);
   readonly isFormModalOpen = signal(false);
   readonly selectedSubject = signal<SubjectResponse | null>(null);
-
-  readonly showToast = signal(false);
-  readonly toastMessage = signal('');
-  readonly toastType = signal<'success' | 'error'>('success');
 
   readonly columns: TableColumn[] = [
     { key: 'code', label: 'Código' },
@@ -63,7 +60,6 @@ export class SubjectListComponent implements OnInit {
     { key: 'statusDisplay', label: 'Estado' },
   ];
 
-  // Opciones para el formulario de crear/editar
   readonly semesterOptions = computed<SelectOption[]>(() =>
     this.semesters().map(s => ({
       label: `Sem. ${s.number} — Gestión ${s.managementYear}`,
@@ -78,7 +74,6 @@ export class SubjectListComponent implements OnInit {
     }))
   );
 
-  // El backend ya devuelve semesterName y teacherName — solo agrega campos de display
   readonly tableRows = computed(() =>
     this.subjects().map(sub => ({
       ...sub,
@@ -158,7 +153,6 @@ export class SubjectListComponent implements OnInit {
     });
   }
 
-  // Delete confirmation modal state
   readonly isDeleteModalOpen = signal(false);
   readonly subjectToDelete = signal<SubjectResponse | null>(null);
 
@@ -190,12 +184,10 @@ export class SubjectListComponent implements OnInit {
   }
 
   displayToast(message: string, type: 'success' | 'error') {
-    this.toastMessage.set(message);
-    this.toastType.set(type);
-    this.showToast.set(true);
-  }
-
-  onToastClosed() {
-    this.showToast.set(false);
+    if (type === 'success') {
+      this.toastService.success(message);
+    } else {
+      this.toastService.error(message);
+    }
   }
 }

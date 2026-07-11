@@ -75,7 +75,6 @@ describe('StudentAttendance', () => {
     });
 
     it('should compute status as "En Riesgo" for Presencial (limit 5) when absences = 4 (limit - 1)', () => {
-      // absences = 4, limit = 5
       const data = component.tableData();
       const secondSubject = data.find(s => s.subjectCode === 'SIS-101');
       expect(secondSubject?.status).toBe('En Riesgo');
@@ -83,7 +82,6 @@ describe('StudentAttendance', () => {
     });
 
     it('should compute status as "Reprobado por Faltas" for Presencial (limit 5) when absences = 5 (limit reached)', () => {
-      // Set absences to 5 (limit 5)
       component.enrolledSubjects.set([
         {
           subjectId: 12,
@@ -104,7 +102,6 @@ describe('StudentAttendance', () => {
     });
 
     it('should compute status as "En Riesgo" for Semi-presencial (limit 3) when absences = 2 (limit - 1)', () => {
-      // Semi-presencial: limit = 3, absences = 2
       component.enrolledSubjects.set([
         {
           subjectId: 13,
@@ -125,7 +122,6 @@ describe('StudentAttendance', () => {
     });
 
     it('should compute status as "Reprobado por Faltas" for Semi-presencial (limit 3) when absences = 3 (limit reached)', () => {
-      // Semi-presencial: limit = 3, absences = 3
       component.enrolledSubjects.set([
         {
           subjectId: 13,

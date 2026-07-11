@@ -43,7 +43,6 @@ describe('EvaluationPlan Integration', () => {
     toast = TestBed.inject(ToastService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    // Load active subject context in the store
     operationalService.setSubjectDirectly({
       id: 12,
       name: 'Estructuras de Datos I',
@@ -54,7 +53,6 @@ describe('EvaluationPlan Integration', () => {
       semesterName: 'Semestre 1 - 2026'
     } as any);
 
-    // Initial reset of service state
     service.reset();
   });
 
@@ -65,13 +63,10 @@ describe('EvaluationPlan Integration', () => {
   });
 
   it('should flow through fetching empty plan, creating it, adding components, and activating it', () => {
-    // Trigger initial fetch manually since it's now handled by parent page context load
     service.fetchPlan('12').subscribe();
 
-    // 1. Initial render -> service fetches plan from API
     fixture.detectChanges();
 
-    // Mock initial fetch response: no plan configured yet (returns 404/null payload)
     const fetchReq = httpMock.expectOne(`${baseUrl}/evaluation-plans/subject/12`);
     expect(fetchReq.request.method).toBe('GET');
     fetchReq.flush({ success: false, data: null });
@@ -79,7 +74,6 @@ describe('EvaluationPlan Integration', () => {
     fixture.detectChanges();
     expect(component.hasPlan()).toBe(false);
 
-    // 2. Click "Crear Plan de Evaluación"
     component.handleCreate();
     
     const createReq = httpMock.expectOne(`${baseUrl}/evaluation-plans/subject/12`);
@@ -97,7 +91,6 @@ describe('EvaluationPlan Integration', () => {
     expect(component.hasPlan()).toBe(true);
     expect(component.componentsTotalWeight()).toBe(0);
 
-    // 3. Add first component (weight 60)
     component.setNewName('Exámenes Parciales');
     component.setNewWeight(60);
     component.setNewDescription('Dos parciales de 30% cada uno');
@@ -130,15 +123,12 @@ describe('EvaluationPlan Integration', () => {
     expect(component.componentsTotalWeight()).toBe(60);
     expect(toast.success).toHaveBeenCalledWith('Componente agregado correctamente.', 'Componente creado');
 
-    // 4. Try adding second component that exceeds 100 limit (e.g. 50 weight)
     component.setNewName('Proyecto Final');
     component.setNewWeight(50);
     fixture.detectChanges();
 
-    // Weight sum would be 110, so it must disable add button
     expect(component.isAddComponentDisabled()).toBe(true);
 
-    // Set correct weight of 40 to complete exactly 100
     component.setNewWeight(40);
     fixture.detectChanges();
     expect(component.isAddComponentDisabled()).toBe(false);
@@ -160,7 +150,6 @@ describe('EvaluationPlan Integration', () => {
     expect(component.componentsTotalWeight()).toBe(100);
     expect(component.isComponentsWeightValid()).toBe(true);
 
-    // 5. Finalize / Activate Plan Configuration
     component.handleFinalizeConfiguration();
 
     const activateReq = httpMock.expectOne(`${baseUrl}/evaluation-plans/subject/12/activate`);

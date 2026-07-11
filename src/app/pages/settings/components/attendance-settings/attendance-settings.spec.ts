@@ -96,7 +96,7 @@ describe('AttendanceSettings', () => {
   });
 
   it('should mark form as touched and not submit if form is invalid', () => {
-    component.maxAbsencesPresencialControl?.setValue(-5); // invalid
+    component.maxAbsencesPresencialControl?.setValue(-5);
     const markAllAsTouchedSpy = vi.spyOn(component.attendanceForm, 'markAllAsTouched');
     
     component.onSubmit();

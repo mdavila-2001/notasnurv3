@@ -1,11 +1,9 @@
-/* ===== PORTAL WRAPPER ===== */
 .student-portal-wrapper {
   min-height: 100vh;
   background: var(--background-primary, #f5f5f5);
   padding: 2rem;
 }
 
-/* ===== PAGE HEADER ===== */
 .page-header {
   margin-bottom: 2rem;
 }
@@ -23,7 +21,6 @@
   line-height: 1.5;
 }
 
-/* ===== LOADING STATE ===== */
 .loading-container {
   display: flex;
   justify-content: center;
@@ -34,7 +31,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== ERROR STATE ===== */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -69,7 +65,6 @@
   margin: 0;
 }
 
-/* ===== TABS NAVIGATION ===== */
 .tabs-navigation {
   display: flex;
   gap: 1rem;
@@ -120,7 +115,6 @@
   font-weight: 700;
 }
 
-/* ===== PORTAL CONTENT ===== */
 .portal-content {
   margin-bottom: 2rem;
 }
@@ -144,7 +138,6 @@
   animation: fadeInUp 0.3s ease-out;
 }
 
-/* ===== SECTION HEADER ===== */
 .section-header {
   margin-bottom: 2rem;
 }
@@ -161,7 +154,6 @@
   color: var(--text-secondary);
 }
 
-/* ===== EMPTY STATE ===== */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -194,14 +186,12 @@
   max-width: 400px;
 }
 
-/* ===== SUBJECTS GRID ===== */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
-/* ===== SUBJECT CARD ===== */
 .subject-card {
   background: var(--background-secondary, #fff);
   border: 1px solid var(--border-color, #e5e7eb);
@@ -294,7 +284,6 @@
   font-weight: 600;
 }
 
-/* ===== KARDEX INFO CARD ===== */
 .kardex-info-card {
   background: var(--background-secondary, #fff);
   border: 1px solid var(--border-color, #e5e7eb);
@@ -346,7 +335,6 @@
   width: fit-content;
 }
 
-/* ===== STATS GRID ===== */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -416,7 +404,6 @@
   color: var(--text-primary);
 }
 
-/* ===== KARDEX TABLE ===== */
 .kardex-table-wrapper {
   overflow-x: auto;
   background: var(--background-secondary, #fff);
@@ -509,7 +496,6 @@
   text-transform: uppercase;
 }
 
-/* ===== PORTAL FOOTER ===== */
 .portal-footer {
   display: flex;
   justify-content: center;
@@ -518,7 +504,6 @@
   margin-top: 2rem;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .student-portal-wrapper {
     padding: 1rem;

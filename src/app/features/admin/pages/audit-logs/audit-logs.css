@@ -1,4 +1,3 @@
-/* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -56,7 +55,6 @@
   color: var(--brand-navy);
 }
 
-/* Filters Row */
 .filters-row {
   display: flex;
   flex-wrap: wrap;
@@ -157,7 +155,6 @@
   border-color: var(--text-secondary);
 }
 
-/* Table Container & Layout */
 .table-container {
   position: relative;
   overflow-x: auto;
@@ -221,7 +218,6 @@
   background-color: rgba(0, 174, 239, 0.02);
 }
 
-/* User cell */
 .user-cell {
   display: flex;
   align-items: center;
@@ -257,7 +253,6 @@
   color: var(--text-secondary);
 }
 
-/* Badges & Tags */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -346,7 +341,6 @@
   opacity: 0.5;
 }
 
-/* Pagination Row */
 .pagination-row {
   display: flex;
   align-items: center;
@@ -398,7 +392,6 @@
   color: white;
 }
 
-/* Detail Modal Content */
 .modal-body-content {
   display: flex;
   flex-direction: column;
@@ -501,7 +494,6 @@
   color: var(--text-secondary);
 }
 
-/* Raw JSON section */
 .raw-json-details {
   border: 1px solid var(--border-light);
   border-radius: var(--border-radius);
@@ -551,7 +543,6 @@
   max-height: 200px;
 }
 
-/* Dark theme style overrides */
 :root.dark-theme .stat-white {
   background: #151e33;
 }

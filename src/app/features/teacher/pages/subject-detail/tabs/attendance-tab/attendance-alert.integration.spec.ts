@@ -59,7 +59,6 @@ describe('AttendanceAlert Integration', () => {
     toast = TestBed.inject(ToastService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    // Seed students in core operational store
     operationalService.setStudentsDirectly(mockStudents as any);
     operationalService.setSubjectDirectly({ id: 12, name: 'Álgebra Lineal' } as any);
     
@@ -74,12 +73,10 @@ describe('AttendanceAlert Integration', () => {
   });
 
   it('should load initial absences, trigger absence alerts at 5, and submit bulk attendance', () => {
-    // 1. Initial render -> effect triggers initializeDraft, fetching absences and attendance for date
     fixture.detectChanges();
 
     const absencesReq = httpMock.expectOne(`${baseUrl}/attendance/subject/12/absences`);
     expect(absencesReq.request.method).toBe('GET');
-    // Flush initial absences payload: Carlos has 4 absences
     absencesReq.flush({
       success: true,
       data: [
@@ -93,7 +90,6 @@ describe('AttendanceAlert Integration', () => {
 
     fixture.detectChanges();
 
-    // Verify initial values and tone styles (4 absences is warning/yellow tone)
     let rows = component.attendanceRows();
     expect(rows.length).toBe(1);
     expect(rows[0].absencesCount).toBe(4);
@@ -101,15 +97,12 @@ describe('AttendanceAlert Integration', () => {
     expect(component.absenceBadgeColor(rows[0].absencesCount)).toBe('warning');
     expect(component.rowTone(rows[0].absencesCount)).toBe('attendance-row--warning');
 
-    // 2. Change status to ABSENT (triggers updateStudentStatus)
     component.handleStatusChange('enroll-1', 'ABSENT');
     fixture.detectChanges();
 
-    // Verify recordCounts updates
     expect(component.recordCounts().absent).toBe(1);
     expect(component.recordCounts().present).toBe(0);
 
-    // Simulate saving daily attendance
     expect(component.isReady()).toBe(true);
     component.handleSubmit();
 
@@ -125,7 +118,6 @@ describe('AttendanceAlert Integration', () => {
 
     submitReq.flush({ success: true });
     
-    // After success, it reloads daily attendance
     const reloadReq = httpMock.expectOne(`${baseUrl}/attendance/subject/12?date=${service.date()}`);
     reloadReq.flush({
       success: true,
@@ -136,7 +128,6 @@ describe('AttendanceAlert Integration', () => {
 
     fixture.detectChanges();
 
-    // Row has updated status
     expect(component.attendanceRows()[0].status).toBe('ABSENT');
     expect(toast.success).toHaveBeenCalledWith('La asistencia se guardó correctamente.', '¡Asistencia guardada!');
   });

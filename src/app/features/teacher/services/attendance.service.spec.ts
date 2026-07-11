@@ -31,7 +31,6 @@ describe('AttendanceService', () => {
     httpMock = TestBed.inject(HttpTestingController);
     operationalService = TestBed.inject(SubjectOperationalService);
     
-    // Mock getSubjectAbsences and loadAttendanceForDate to prevent side-effect requests
     vi.spyOn(service, 'getSubjectAbsences').mockReturnValue(of(new Map()));
     vi.spyOn(service as any, 'loadAttendanceForDate').mockImplementation(() => {
       (service as any)._isDraftHydrating.set(false);
@@ -51,7 +50,7 @@ describe('AttendanceService', () => {
       service.initializeDraft();
 
       expect(service.attendanceDraft().length).toBe(3);
-      expect(service.isReadyToSubmit()).toBe(false); // Subject context not loaded yet
+      expect(service.isReadyToSubmit()).toBe(false);
 
       const records = service.attendanceDraft();
       expect(records[0].status).toBe('PRESENT');

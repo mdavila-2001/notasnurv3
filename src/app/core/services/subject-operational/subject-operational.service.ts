@@ -84,7 +84,6 @@ export class SubjectOperationalService {
       .subscribe({
         next: (res) => {
           if (res.subject) {
-            // El backend puede devolver ApiResponse con 'data' o directamente el objeto SubjectResponse
             if ('data' in res.subject && res.subject.data) {
               this._subject.set(res.subject.data as any);
             } else if ('id' in res.subject) {
